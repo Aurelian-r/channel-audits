@@ -1,0 +1,13 @@
+# This public repo hosts published audit reports ONLY.
+# Tool code and local files stay out - config.json holds API keys and the deploy salt.
+config.json
+__pycache__/
+*.pdf
+*.bat
+*.log
+requirements.txt
+app.py
+audit.py
+
+# Local dated reports - the deploy step publishes tokenized copies instead
+*_Audit_*.html
