@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empire Production — Channel Audit — Corbin Sylk</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#080808; color:#e8e8e8; font-family:'Space Grotesk',Arial,sans-serif; line-height:1.65; font-size:15px; }
+.wrap { max-width:980px; margin:0 auto; padding:0 28px; }
+h1,h2,h3,.bebas { font-family:'Bebas Neue',Impact,sans-serif; font-weight:400; letter-spacing:1.5px; }
+a { color:#c8202c; text-decoration:none; }
+.muted { color:#888888; }
+
+header { background:#0d0d0d; border-bottom:2px solid #c8202c; padding:52px 0 44px; }
+.kicker { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:4px; color:#c8202c; font-size:16px; margin-bottom:10px; }
+header h1 { font-size:52px; line-height:1.05; margin-bottom:6px; }
+.header-meta { color:#888888; font-size:14px; margin-bottom:26px; }
+.health { display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
+.health-score { font-family:'Bebas Neue',Impact,sans-serif; font-size:96px; color:#c8202c; line-height:1; }
+.health-score span { font-size:34px; color:#888888; }
+.diagnosis { max-width:600px; font-size:16px; border-left:3px solid #c8202c; padding-left:18px; }
+
+section { padding:44px 0 8px; }
+section > .wrap > h2 { font-size:32px; margin-bottom:22px; border-bottom:1px solid #1a1a1a; padding-bottom:10px; }
+
+.panel { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:26px; margin-bottom:22px; }
+.funnel-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.funnel-label { width:52px; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:18px; }
+.funnel-track { flex:1; background:#141414; border-radius:4px; height:22px; overflow:hidden; }
+.funnel-bar { height:100%; border-radius:4px; min-width:2px; }
+.funnel-count { width:90px; color:#888888; font-size:13px; }
+.avg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; margin-top:8px; }
+.avg-cell { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:16px; text-align:center; }
+.avg-cell .num { font-family:'Bebas Neue',Impact,sans-serif; font-size:40px; line-height:1; }
+.avg-cell .lbl { color:#888888; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+.badge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:1px; font-size:20px; padding:2px 12px; border-radius:6px; background:#141414; border:1px solid #1a1a1a; }
+.s-low  { color:#c8202c; border-color:#c8202c; }
+.s-mid  { color:#e8a520; }
+.s-high { color:#4caf7d; }
+
+.fbadge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:14px; padding:2px 12px; border-radius:4px; }
+.f-tof { background:#c8202c; color:#fff; }
+.f-mof { background:#3a3a3a; color:#e8e8e8; }
+.f-bof { background:#141414; color:#888888; border:1px solid #333; }
+
+.card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; margin-bottom:26px; overflow:hidden; }
+.card.flag { border-left:3px solid #c8202c; }
+.card-head { padding:22px 24px 16px; }
+.thumb-link { display:block; position:relative; margin:-22px -24px 18px; }
+.thumb-link img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#141414; }
+.thumb-link .thumb-play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:52px; height:52px;
+        border-radius:50%; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;
+        opacity:0; transition:opacity .15s; }
+.thumb-link .thumb-play i { font-size:22px; color:#fff; margin:0 0 0 3px; }
+.thumb-link:hover .thumb-play { opacity:1; }
+.card-title-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.card-title-row h3 { font-size:26px; line-height:1.15; }
+.card-meta { color:#888888; font-size:13px; margin-top:8px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.card-note { padding:0 24px 22px; color:#888888; font-style:italic; }
+.skip-thumb { width:120px; aspect-ratio:16/9; object-fit:cover; border-radius:6px; background:#141414; flex-shrink:0; }
+.skip-row { display:flex; gap:16px; align-items:flex-start; padding:22px 24px; }
+
+details { border-top:1px solid #1a1a1a; }
+details summary { cursor:pointer; padding:14px 24px; display:flex; align-items:center; gap:12px; list-style:none; user-select:none; font-weight:500; }
+details summary::-webkit-details-marker { display:none; }
+details summary .chev { margin-left:auto; color:#888888; transition:transform .2s; font-size:12px; }
+details[open] summary .chev { transform:rotate(90deg); }
+details summary:hover { background:#111; }
+.acc-body { padding:6px 24px 24px; }
+.acc-body h4 { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:16px; color:#888888; margin:18px 0 6px; }
+.kv { margin-bottom:8px; }
+.kv b { color:#e8e8e8; }
+.check-row { display:flex; gap:10px; margin-bottom:6px; align-items:baseline; }
+.check-pass { color:#4caf7d; font-weight:700; white-space:nowrap; }
+.check-fail { color:#c8202c; font-weight:700; white-space:nowrap; }
+.check-weak { color:#e8a520; font-weight:700; white-space:nowrap; }
+
+.fix { border-left:3px solid #c8202c; background:#120d0d; border-radius:0 8px 8px 0; padding:16px 20px; margin-top:16px; }
+.fix-label { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; color:#c8202c; font-size:16px; margin-bottom:8px; }
+.fix .fix-text { white-space:pre-wrap; }
+.fix .fix-notes { color:#888888; font-size:13.5px; margin-top:10px; border-top:1px solid #2a1a1a; padding-top:10px; }
+
+.quote-block { border:1px solid #1a1a1a; border-radius:8px; padding:14px 16px; margin:10px 0; background:#0a0a0a; }
+.quote-block .q { color:#888888; font-style:italic; }
+.quote-block .why { margin:6px 0; }
+.quote-block .better { color:#e8e8e8; border-left:2px solid #4caf7d; padding-left:10px; }
+
+.gap-card { background:#0d0d0d; border:1px solid #1a1a1a; border-left:3px solid #c8202c; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.gap-card h3 { font-size:24px; margin-bottom:4px; }
+.gap-freq { color:#c8202c; font-size:13px; letter-spacing:1px; margin-bottom:10px; font-weight:700; }
+.gap-sop { color:#888888; font-size:13px; margin-top:10px; border-top:1px solid #1a1a1a; padding-top:10px; }
+
+.idea-card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.idea-card h3 { font-size:24px; margin-bottom:8px; }
+.idea-card .kv { font-size:14px; }
+
+.cta { background:#0d0d0d; border-top:2px solid #c8202c; margin-top:50px; padding:64px 0; text-align:center; }
+.cta h2 { font-size:44px; color:#e8e8e8; }
+.cta .book { font-size:19px; margin:10px 0 2px; }
+.cta .site { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; font-size:22px; color:#c8202c; margin-bottom:26px; }
+.cta .qualify { color:#888888; max-width:560px; margin:0 auto; font-size:14px; }
+footer { padding:26px 0 40px; text-align:center; color:#888888; font-size:12px; letter-spacing:1px; }
+
+@media print {
+  .card, .gap-card, .idea-card, .quote-block { break-inside: avoid; }
+  details summary .chev { display:none; }
+  .cta { break-before: page; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">EMPIRE PRODUCTION — CHANNEL AUDIT REPORT</div>
+    <h1>Corbin Sylk</h1>
+    <div class="header-meta"> &nbsp;&middot;&nbsp; https://www.youtube.com/watch?v=vxZt76Z-6zA &nbsp;&middot;&nbsp; Generated 10 July 2026</div>
+    <div class="health">
+      <div class="health-score">0.8<span>/10</span></div>
+      <div class="diagnosis">Your channel is missing the absolute basics for getting viewers to click and stay. Right now, your videos don&#x27;t tell people who they&#x27;re for, what value they offer, or why anyone should trust you, so potential clients scroll right past without ever hearing your message.</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Channel Overview</h2>
+    <div class="panel">
+      <h3 style="font-size:22px;margin-bottom:14px">Funnel Distribution (1 videos analysed)</h3>
+      
+        <div class="funnel-row">
+          <div class="funnel-label">TOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:100%;background:#c8202c"></div></div>
+          <div class="funnel-count">1 video (100%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">MOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:0%;background:#555555"></div></div>
+          <div class="funnel-count">0 videos (0%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">BOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:0%;background:#2a2a2a"></div></div>
+          <div class="funnel-count">0 videos (0%)</div>
+        </div>
+      <p class="muted" style="margin-top:14px">You&#x27;ve got one TOF video (a video for people who&#x27;ve never heard of you), which is exactly where a new channel should start (SOP_Ideation.md STEP 4, New channel guidance). But because that video fails to grab attention or convert, it&#x27;s not bringing in any new leads. This means you&#x27;re missing out on the crucial discovery phase where new clients find you and learn about what you do.</p>
+    </div>
+    <div class="avg-grid">
+        <div class="avg-cell">
+          <div class="num s-low">3.0</div>
+          <div class="lbl">Title</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">0.0</div>
+          <div class="lbl">Hook</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">0.0</div>
+          <div class="lbl">Body</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">0.0</div>
+          <div class="lbl">Outro</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">0.8</div>
+          <div class="lbl">Overall</div>
+        </div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Video-by-Video Audit</h2>
+    
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=vxZt76Z-6zA" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/vxZt76Z-6zA/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/vxZt76Z-6zA/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Give me 7 mins and I&#x27;ll make you emotionally bulletproof</h3>
+          <span class="badge s-low">0.8/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>52 views</span>
+          <span>Published 09 May 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets a broad problem (emotional vulnerability) for viewers who likely haven&#x27;t heard of the creator, aiming to interrupt their scroll and introduce them to a solution (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 60 characters long, which is too long for mobile feeds (SOP_Ideation.md Step 3, Filter 1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title uses a general &#x27;you&#x27; instead of speaking directly to a specific niche or type of person, which dilutes its impact (SOP_Ideation.md Step 3, Filter 2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to make you &#x27;emotionally bulletproof,&#x27; so the viewer knows what they&#x27;ll get.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Searchable / matches real demand</b> — While &#x27;emotionally bulletproof&#x27; might be searched, the &#x27;Give me 7 mins&#x27; framing makes it less directly searchable than a &#x27;How to...&#x27; or &#x27;Why...&#x27; title (SOP_Ideation.md Step 3, Filter 4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The word &#x27;emotionally&#x27; is within the first 40 characters, which helps with YouTube&#x27;s indexing (SOP_Ideation.md Step 3, Filter 5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> It leads with the desire (&#x27;emotionally bulletproof&#x27;) but frames it as a direct offer from the creator (&#x27;Give me 7 mins and I&#x27;ll make you...&#x27;) rather than directly reflecting the ICP&#x27;s language of pain or desire (SOP_Ideation.md Step 6, Title Method 1).</div>
+      <div class="kv"><b>Title Case:</b> No — &#x27;mins&#x27; and &#x27;I&#x27;ll&#x27; are not capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile feeds and viewers might miss the full promise (SOP_Ideation.md Step 3, Filter 1). It also uses a general &#x27;you&#x27; instead of speaking directly to a specific audience, making it less impactful for niche viewers (SOP_Ideation.md Step 3, Filter 2).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Become Emotionally Bulletproof (In 7 Mins)</div>
+        <div class="fix-notes">This new title is 40 characters, making it fully visible on mobile (SOP_Ideation.md Step 3, Filter 1). It uses a variation of the &#x27;How to (result) Without (common sacrifice they hate)&#x27; template by implying a quick, simple path to a desired outcome (SOP_Ideation.md Method 3). It also puts the core desire &#x27;Emotionally Bulletproof&#x27; first, making it highly searchable and clear (SOP_Ideation.md Step 6, Title Method 1).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">0/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHO</b> — The transcript doesn&#x27;t specify who the video is for, so viewers won&#x27;t know if it&#x27;s relevant to them (SOP_Scripting.md Part 5, Non-Negotiable 1).</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHAT</b> — The transcript doesn&#x27;t state what specific value or solution the video will deliver (SOP_Scripting.md Part 5, Non-Negotiable 2).</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — There&#x27;s no credibility statement, like your own results or client wins, to build trust with the viewer (SOP_Scripting.md Part 5, Non-Negotiable 3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> The generic transcript lines don&#x27;t connect to or validate the title&#x27;s promise.</div>
+      <div class="kv"><b>Opening line:</b> This is a real integration test transcript line one.</div>
+      <h4>Verdict</h4>
+      <p>Your hook completely misses the three non-negotiable elements: who it&#x27;s for, what value it delivers, and why the viewer should trust you (SOP_Scripting.md Part 5). Without these, viewers will scroll past immediately, never understanding the video&#x27;s purpose or your authority.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">If you&#x27;re tired of feeling overwhelmed by every little setback and want to build a mind that handles anything life throws at it, this video is for you. In the next seven minutes, I&#x27;m going to show you the exact 3-step mental framework I&#x27;ve used with clients to help them go from emotional burnout to feeling calm and in control, often in just a few weeks. I&#x27;ve personally applied this system to navigate launching three businesses while raising a family, and it&#x27;s allowed me to stay focused and resilient no matter what. Let&#x27;s get into it.</div>
+        <div class="fix-notes">This rewrite uses an Identity Appeal hook (SOP_Scripting.md Part 5, Hook Type 6) by directly addressing the viewer&#x27;s pain. It clearly states WHO it&#x27;s for, WHAT value it delivers (a 3-step mental framework), and WHY the creator is credible (personal application and client results).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-low">0/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Cannot assess. The provided transcript is too short to determine if the video stays on one problem with one promise or drifts.</div>
+      <div class="kv"><b>Body type:</b> Cannot assess. The provided transcript is too short and generic to determine the body type.</div>
+      <div class="kv"><b>Story structure:</b> None — given the title, a Transformation Path (SOP_Scripting.md Part 6, Structure 1) would fit best.</div>
+      <div class="kv"><b>Transitions:</b> Cannot assess. The provided transcript is too short to evaluate transitions between sections.</div>
+      <div class="kv"><b>Specificity:</b> Cannot assess. The provided transcript is too short to evaluate if claims are backed by real numbers or client results.</div>
+      <div class="kv"><b>Tone:</b> Cannot assess. The provided transcript is too short and generic to evaluate the tone.</div>
+      <div class="kv"><b>Awareness level:</b> Cannot assess. The provided transcript is too short to determine the target awareness level.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> Cannot assess. The provided transcript is too short to determine which core emotions are pushed or missing.</div>
+      <h4>Line-Level Improvements</h4>
+      <p class="muted">No line-level improvements returned.</p>
+      <h4>Verdict</h4>
+      <p>The provided transcript is too short and generic to perform a meaningful body analysis. It doesn&#x27;t contain enough content to evaluate adherence to SOP_Scripting.md Part 6 rules regarding structure, specificity, or tone.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Given the title &#x27;Give me 7 mins and I&#x27;ll make you emotionally bulletproof,&#x27; a Transformation Path structure (SOP_Scripting.md Part 6, Structure 1) would serve this video best. It would guide the viewer from their current pain of emotional vulnerability through the principles of becoming &#x27;bulletproof&#x27; to a clear, practical next step.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">0/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The transcript is too short to reiterate the video&#x27;s promise (SOP_Scripting.md Part 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — The transcript is too short to validate the viewer&#x27;s potential or plant a seed for future action (SOP_Scripting.md Part 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — The transcript is too short to introduce the difficulty of implementing the solution alone (SOP_Scripting.md Part 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 4 — The Offer</b> — The transcript is too short to present a specific call to action or offer (SOP_Scripting.md Part 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is missing, which means you&#x27;re not filtering out unqualified leads before they even reach your sales process (SOP_Scripting.md Part 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> Cannot assess. The transcript is too short to determine if the outro continues after a call to action.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> Cannot assess. The transcript is too short to determine if the offer is framed as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> Cannot assess. The transcript is too short to determine if a call to action is specific.</div>
+      <h4>Verdict</h4>
+      <p>The provided transcript is too short to evaluate the outro. It completely misses the critical 5-step Power Offer Outro structure, especially the non-negotiable qualify and disqualify step, which means you&#x27;re missing a key opportunity to convert viewers effectively (SOP_Scripting.md Part 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So you&#x27;ve got the blueprint to start building emotional bulletproof-ness right now. If you apply these principles consistently, you&#x27;ll absolutely start to feel more resilient and in control. However, I know from working with hundreds of clients that applying these concepts alone, especially when you&#x27;re already stressed, is incredibly tough. It takes discipline, accountability, and often, a fresh perspective to truly integrate these changes and make them stick. If you&#x27;re ready to stop just learning about resilience and actually *become* emotionally bulletproof, with a proven system and personalized guidance to cut through the trial and error, then click the first link in the description to book a call with my team. This isn&#x27;t for people looking for a quick fix or who aren&#x27;t ready to commit to real change. We work with coaches and leaders who are serious about mastering their emotional state to perform at their highest level. If that&#x27;s you, click the link, and let&#x27;s talk.</div>
+        <div class="fix-notes">This rewrite infers that Corbin Sylk offers high-ticket coaching/consulting for emotional resilience. It applies the Power Offer Outro (SOP_Scripting.md Part 7) by reiterating the promise, validating the viewer&#x27;s potential, pivoting to the difficulty of DIY, presenting the offer as the easier path, and including a clear qualify/disqualify statement.</div>
+      </div></div>
+            </details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Top 3 Recurring Gaps</h2>
+    
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 1 — Hooks don&#x27;t tell viewers who, what, or why</h3>
+          <div class="gap-freq">FOUND IN 1 OF 1 VIDEOS</div>
+          <p>Nobody watching your video knows in the first 10 seconds if it&#x27;s for them, what they&#x27;ll get from it, or why they should trust you. They&#x27;ll just scroll past immediately, so you lose any chance to get them as a client. You&#x27;re not even getting a chance to make your case. (SOP_Scripting.md Part 5)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md Part 5</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 2 — Titles are too long and vague</h3>
+          <div class="gap-freq">FOUND IN 1 OF 1 VIDEOS</div>
+          <p>Your titles get cut off on mobile, so people can&#x27;t even read your full promise. Plus, they&#x27;re too general, so specific clients don&#x27;t feel like you&#x27;re talking directly to them, and they just keep scrolling because it doesn&#x27;t feel relevant. (SOP_Ideation.md Step 3, Filter 1 &amp; 2)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Ideation.md Step 3, Filter 1 &amp; 2</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 3 — Outros miss key conversion steps</h3>
+          <div class="gap-freq">FOUND IN 1 OF 1 VIDEOS</div>
+          <p>Your outro doesn&#x27;t guide warm viewers to the next step or filter out unqualified leads. This means you&#x27;re missing a huge chance to turn interested viewers into actual clients, and you might even get calls from people who aren&#x27;t a good fit, wasting your time. (SOP_Scripting.md Part 7)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md Part 7</div>
+        </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5 Recommended Videos</h2>
+    
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 1</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Why 90% of Coaches Burn Out (And How to Fix It)</h3>
+          <div class="kv"><b>Why now:</b> This targets a common, deep pain point for coaches who haven&#x27;t heard of you, drawing them in with a clear promise of a solution that directly addresses emotional strain.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Alex Hormozi (high contrast, bold text). Face: Yes. Text overlay: 3 words (&#x27;Burnout Fix&#x27;). Dominant colour: Red/Black. Expression: Serious/Concerned</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 2</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>What Every Coach Gets Wrong About &#x27;Emotional Strength&#x27;</h3>
+          <div class="kv"><b>Why now:</b> This challenges a common misconception in your niche, creating curiosity and positioning you as an authority with a fresh perspective on emotional resilience.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Mel Robbins (direct gaze, simple text). Face: Yes. Text overlay: 2 words (&#x27;Wrong Strength&#x27;). Dominant colour: Blue/White. Expression: Confident/Challenging</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-mof">MOF</span><span class="muted">RECOMMENDED VIDEO 3</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>How to Handle Client Drama Without Draining Your Energy</h3>
+          <div class="kv"><b>Why now:</b> This offers a specific, actionable solution to a day-to-day problem for coaches, building trust and showing your expertise after they&#x27;ve discovered you.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Brendon Burchard (energetic, clear action). Face: Yes. Text overlay: 4 words (&#x27;Stop Client Drama Drain&#x27;). Dominant colour: Green/Yellow. Expression: Calm/Empathetic</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 4</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>You Don&#x27;t Need to Be &#x27;Tough&#x27; to Be a Successful Coach</h3>
+          <div class="kv"><b>Why now:</b> This directly addresses an internal false belief many coaches hold, validating their feelings and showing a new path to success, which helps attract them to your unique approach.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Jay Shetty (calm, thoughtful pose). Face: Yes. Text overlay: 2 words (&#x27;Not Tough&#x27;). Dominant colour: Earth tones. Expression: Understanding/Gentle</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 5</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>If I Were Building Emotional Mastery Again, I&#x27;d Do THIS</h3>
+          <div class="kv"><b>Why now:</b> This offers a powerful, personal insight into achieving a core desire, drawing in viewers who are actively seeking a better way to master their emotions for business success.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Tony Robbins (dynamic, pointing). Face: Yes. Text overlay: 2 words (&#x27;Do THIS&#x27;). Dominant colour: Orange/Black. Expression: Focused/Determined</div>
+        </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <h2>READY TO FIX ALL OF THIS?</h2>
+    <p class="book"><i class="ti ti-calendar-event" style="margin-right:8px;vertical-align:-3px"></i>Book a free 30-minute strategy call.</p>
+    <div class="site">EMPIREPRODUCTION.NET</div>
+    <p class="qualify">This is not for anyone just starting out with no budget.
+    If you're already generating revenue and serious about making YouTube your primary
+    client acquisition channel — the link is above.</p>
+  </div>
+</div>
+
+<footer>EMPIRE PRODUCTION &middot; CHANNEL AUDIT ENGINE &middot; 10 July 2026</footer>
+
+</body>
+</html>
