@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empire Production — Channel Audit — Ziad Haitham</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#080808; color:#e8e8e8; font-family:'Space Grotesk',Arial,sans-serif; line-height:1.65; font-size:15px; }
+.wrap { max-width:980px; margin:0 auto; padding:0 28px; }
+h1,h2,h3,.bebas { font-family:'Bebas Neue',Impact,sans-serif; font-weight:400; letter-spacing:1.5px; }
+a { color:#c8202c; text-decoration:none; }
+.muted { color:#888888; }
+
+header { background:#0d0d0d; border-bottom:2px solid #c8202c; padding:52px 0 44px; }
+.kicker { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:4px; color:#c8202c; font-size:16px; margin-bottom:10px; }
+header h1 { font-size:52px; line-height:1.05; margin-bottom:6px; }
+.header-meta { color:#888888; font-size:14px; margin-bottom:26px; }
+.health { display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
+.health-score { font-family:'Bebas Neue',Impact,sans-serif; font-size:96px; color:#c8202c; line-height:1; }
+.health-score span { font-size:34px; color:#888888; }
+.diagnosis { max-width:600px; font-size:16px; border-left:3px solid #c8202c; padding-left:18px; }
+
+section { padding:44px 0 8px; }
+section > .wrap > h2 { font-size:32px; margin-bottom:22px; border-bottom:1px solid #1a1a1a; padding-bottom:10px; }
+
+.panel { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:26px; margin-bottom:22px; }
+.funnel-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.funnel-label { width:52px; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:18px; }
+.funnel-track { flex:1; background:#141414; border-radius:4px; height:22px; overflow:hidden; }
+.funnel-bar { height:100%; border-radius:4px; min-width:2px; }
+.funnel-count { width:90px; color:#888888; font-size:13px; }
+.avg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; margin-top:8px; }
+.avg-cell { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:16px; text-align:center; }
+.avg-cell .num { font-family:'Bebas Neue',Impact,sans-serif; font-size:40px; line-height:1; }
+.avg-cell .lbl { color:#888888; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+.badge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:1px; font-size:20px; padding:2px 12px; border-radius:6px; background:#141414; border:1px solid #1a1a1a; }
+.s-low  { color:#c8202c; border-color:#c8202c; }
+.s-mid  { color:#e8a520; }
+.s-high { color:#4caf7d; }
+
+.fbadge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:14px; padding:2px 12px; border-radius:4px; }
+.f-tof { background:#c8202c; color:#fff; }
+.f-mof { background:#3a3a3a; color:#e8e8e8; }
+.f-bof { background:#141414; color:#888888; border:1px solid #333; }
+
+.card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; margin-bottom:26px; overflow:hidden; }
+.card.flag { border-left:3px solid #c8202c; }
+.card-head { padding:22px 24px 16px; }
+.thumb-link { display:block; position:relative; margin:-22px -24px 18px; }
+.thumb-link img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#141414; }
+.thumb-link .thumb-play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:52px; height:52px;
+        border-radius:50%; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;
+        opacity:0; transition:opacity .15s; }
+.thumb-link .thumb-play i { font-size:22px; color:#fff; margin:0 0 0 3px; }
+.thumb-link:hover .thumb-play { opacity:1; }
+.card-title-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.card-title-row h3 { font-size:26px; line-height:1.15; }
+.card-meta { color:#888888; font-size:13px; margin-top:8px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.card-note { padding:0 24px 22px; color:#888888; font-style:italic; }
+.skip-thumb { width:120px; aspect-ratio:16/9; object-fit:cover; border-radius:6px; background:#141414; flex-shrink:0; }
+.skip-row { display:flex; gap:16px; align-items:flex-start; padding:22px 24px; }
+
+details { border-top:1px solid #1a1a1a; }
+details summary { cursor:pointer; padding:14px 24px; display:flex; align-items:center; gap:12px; list-style:none; user-select:none; font-weight:500; }
+details summary::-webkit-details-marker { display:none; }
+details summary .chev { margin-left:auto; color:#888888; transition:transform .2s; font-size:12px; }
+details[open] summary .chev { transform:rotate(90deg); }
+details summary:hover { background:#111; }
+.acc-body { padding:6px 24px 24px; }
+.acc-body h4 { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:16px; color:#888888; margin:18px 0 6px; }
+.kv { margin-bottom:8px; }
+.kv b { color:#e8e8e8; }
+.check-row { display:flex; gap:10px; margin-bottom:6px; align-items:baseline; }
+.check-pass { color:#4caf7d; font-weight:700; white-space:nowrap; }
+.check-fail { color:#c8202c; font-weight:700; white-space:nowrap; }
+.check-weak { color:#e8a520; font-weight:700; white-space:nowrap; }
+
+.fix { border-left:3px solid #c8202c; background:#120d0d; border-radius:0 8px 8px 0; padding:16px 20px; margin-top:16px; }
+.fix-label { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; color:#c8202c; font-size:16px; margin-bottom:8px; }
+.fix .fix-text { white-space:pre-wrap; }
+.fix .fix-notes { color:#888888; font-size:13.5px; margin-top:10px; border-top:1px solid #2a1a1a; padding-top:10px; }
+
+.quote-block { border:1px solid #1a1a1a; border-radius:8px; padding:14px 16px; margin:10px 0; background:#0a0a0a; }
+.quote-block .q { color:#888888; font-style:italic; }
+.quote-block .why { margin:6px 0; }
+.quote-block .better { color:#e8e8e8; border-left:2px solid #4caf7d; padding-left:10px; }
+
+.gap-card { background:#0d0d0d; border:1px solid #1a1a1a; border-left:3px solid #c8202c; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.gap-card h3 { font-size:24px; margin-bottom:4px; }
+.gap-freq { color:#c8202c; font-size:13px; letter-spacing:1px; margin-bottom:10px; font-weight:700; }
+.gap-sop { color:#888888; font-size:13px; margin-top:10px; border-top:1px solid #1a1a1a; padding-top:10px; }
+
+.idea-card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.idea-card h3 { font-size:24px; margin-bottom:8px; }
+.idea-card .kv { font-size:14px; }
+
+.cta { background:#0d0d0d; border-top:2px solid #c8202c; margin-top:50px; padding:64px 0; text-align:center; }
+.cta h2 { font-size:44px; color:#e8e8e8; }
+.cta .book { font-size:19px; margin:10px 0 2px; }
+.cta .site { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; font-size:22px; color:#c8202c; margin-bottom:26px; }
+.cta .qualify { color:#888888; max-width:560px; margin:0 auto; font-size:14px; }
+footer { padding:26px 0 40px; text-align:center; color:#888888; font-size:12px; letter-spacing:1px; }
+
+@media print {
+  .card, .gap-card, .idea-card, .quote-block { break-inside: avoid; }
+  details summary .chev { display:none; }
+  .cta { break-before: page; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">EMPIRE PRODUCTION — CHANNEL AUDIT REPORT</div>
+    <h1>Ziad Haitham</h1>
+    <div class="header-meta">@ziadhaitham0 &nbsp;&middot;&nbsp; https://www.youtube.com/@ziadhaitham0 &nbsp;&middot;&nbsp; Generated 12 July 2026</div>
+    <div class="health">
+      <div class="health-score">5.5<span>/10</span></div>
+      <div class="diagnosis">Your channel&#x27;s biggest problem is that it&#x27;s losing potential clients at the finish line. Even when viewers watch your videos, you&#x27;re not telling them clearly enough what to do next or who you can help. This means you&#x27;re leaving money on the table with every video you publish.</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Channel Overview</h2>
+    <div class="panel">
+      <h3 style="font-size:22px;margin-bottom:14px">Funnel Distribution (8 videos analysed)</h3>
+      
+        <div class="funnel-row">
+          <div class="funnel-label">TOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:12%;background:#c8202c"></div></div>
+          <div class="funnel-count">1 video (12%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">MOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:62%;background:#555555"></div></div>
+          <div class="funnel-count">5 videos (62%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">BOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:25%;background:#2a2a2a"></div></div>
+          <div class="funnel-count">2 videos (25%)</div>
+        </div>
+      <p class="muted" style="margin-top:14px">Your channel is acting like it&#x27;s already established, with 5 MOF (authority) and 2 BOF (conversion) videos, but only 1 TOF (discovery) video. For a new channel like yours, you should be making 80% TOF content to get new eyes on your brand. Right now, you&#x27;re trying to convert people who don&#x27;t even know you exist, which costs you thousands of potential clients who never find your content. (SOP_Ideation.md STEP 4)</p>
+    </div>
+    <div class="avg-grid">
+        <div class="avg-cell">
+          <div class="num s-low">5.0</div>
+          <div class="lbl">Title</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">6.0</div>
+          <div class="lbl">Thumbnail</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">6.4</div>
+          <div class="lbl">Hook</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">7.5</div>
+          <div class="lbl">Body</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">2.9</div>
+          <div class="lbl">Outro</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">5.5</div>
+          <div class="lbl">Overall</div>
+        </div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Video-by-Video Audit</h2>
+    
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=suUFzjITWnc" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/suUFzjITWnc/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/suUFzjITWnc/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>How Charlie Morgan Made $40M With YouTube Organic</h3>
+          <span class="badge s-mid">6.2/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>135 views</span>
+          <span>Published 02 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">The video breaks down a specific system and framework used by a known figure, establishing your expertise and deepening trust for viewers who are already aware of the problem of client acquisition and are evaluating solutions (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 48 characters long.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title focuses on Charlie Morgan&#x27;s achievement, not directly on the viewer&#x27;s personal struggle or desire to replicate it.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to show how Charlie Morgan made $40M using YouTube Organic.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — People interested in Charlie Morgan&#x27;s methods or YouTube organic growth would likely search for these terms.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The keywords &#x27;Charlie Morgan&#x27; and &#x27;YouTube Organic&#x27; are present within the first 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> The title leads with a result and a mechanism, not directly with the ICP&#x27;s pain or desire to achieve that result themselves.</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>Your title is short and clear about the topic, but it focuses on Charlie Morgan&#x27;s achievement rather than directly addressing your viewer&#x27;s pain or desire to achieve a similar result themselves. This makes it less immediately relevant to their personal struggle (SOP_Ideation.md STEP 3, &#x27;Specific person, not everyone&#x27; and &#x27;Pain or desire first&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Steal Charlie Morgan&#x27;s $40M YouTube Organic System</div>
+        <div class="fix-notes">This title is under 50 characters and uses a variant of the &#x27;If I Were Starting (niche) Again, This Is What I&#x27;d Do&#x27; template. It offers a direct, actionable &#x27;steal this&#x27; approach, appealing to your viewer&#x27;s desire to replicate success (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The white text on a dark background, and the red underline/YouTube logo, create good contrast and stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;$40M USING YOUTUBE ORGANIC&#x27; is large and bold enough to be readable at mobile size, and faces are clear.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Your face is neutral, looking at your laptop. Charlie Morgan&#x27;s face is also neutral. A stronger emotion would help grab attention for content promising big results.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;$40M USING YOUTUBE ORGANIC&#x27; is 5 words, which is slightly over the 4-word maximum (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The split screen creates two competing focal points (the text/Charlie on the left, you on the right), which can divide attention.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses a similar split-screen layout, text style (bold, white, red underline), and your presence, showing consistency with other thumbnails in this batch.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> $40M USING YOUTUBE ORGANIC</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;$40M USING YOUTUBE ORGANIC&#x27; largely repeats the title, rather than adding new curiosity or emotion.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is Authority/How-To. The thumbnail uses a &#x27;data on screen + creator&#x27;s confident face&#x27; concept (SOP_Thumbnail.md STEP 3), but your face is neutral and the composition is cluttered.</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is consistent with your channel&#x27;s branding and has good contrast, but the text overlay is slightly too long, and your neutral expression doesn&#x27;t convey the authority or excitement needed for a video promising $40M results. The split screen, while common for your channel, can divide attention instead of creating one clear focal point, which might cost clicks (SOP_Thumbnail.md STEP 2.4, 2.3, 2.5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, you with a confident, slightly knowing expression. Text overlay: &#x27;40M SECRET&#x27; or &#x27;STEAL THE SYSTEM&#x27;. Colors: Bright yellow text on a dark, contrasting background. Focal point: Your face and the bold text. Composition: Your face on the right, looking toward the text on the left, which is overlaid on a simplified, abstract graphic representing a system or funnel.</div>
+        <div class="fix-notes">This concept uses a confident face and a short, curiosity-driven text overlay to create a single, strong focal point, aligning with the Authority/How-To content type. The text &#x27;STEAL THE SYSTEM&#x27; directly supports the rewritten title and creates intellectual tension, drawing the viewer in (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly states it&#x27;s for &#x27;your agency, coaching, or consulting business&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;break down exactly how Charlie Morgan made over $40 million from YouTube organic so you can literally replicate the system&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — You establish credibility by stating you&#x27;ve &#x27;generated over $400,000 from my client George Clements in the past 6 months using YouTube and Instagram organic&#x27;, with specific results and a timeframe.</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Completion Compulsion</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise of breaking down Charlie Morgan&#x27;s system.</div>
+      <div class="kv"><b>Opening line:</b> So, in this video, I&#x27;m going to break down exactly how Charlie Morgan made over $40 million from YouTube organic so you can literally replicate the system for your agency, coaching, or consulting business and start signing high-ticket clients in 2026.</div>
+      <h4>Verdict</h4>
+      <p>Your hook clearly tells viewers who it&#x27;s for, what value it delivers, and why they should trust you with specific results. This sets up a clear breakdown, which is good. However, the opening could be more direct and less conversational to immediately grab attention (SOP_Scripting.md PART 5, &#x27;Concise&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">You&#x27;re about to see the exact system Charlie Morgan used to make over $40 million from YouTube organic. I&#x27;m going to break it down so your agency, coaching, or consulting business can replicate it and start signing high-ticket clients in 2026. Why listen to me? I&#x27;ve already generated over $400,000 for my client George Clements in the past 6 months using a system almost identical to Charlie&#x27;s. Anyone can replicate this. Let&#x27;s get into it.</div>
+        <div class="fix-notes">This uses a Completion Compulsion hook, immediately stating the value and who it&#x27;s for, then quickly establishing credibility with specific results and a timeframe (SOP_Scripting.md PART 5). It cuts out the &#x27;So, in this video, I&#x27;m going to break down&#x27; for a more direct opening.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video focuses on Charlie Morgan&#x27;s system for organic YouTube growth and how to replicate it for client acquisition, staying on this core problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Transitions are present and help guide the viewer, often using phrases like &#x27;Now, you cannot optimize for both&#x27; and &#x27;So, what is the replicable funnel for you?&#x27;.</div>
+      <div class="kv"><b>Specificity:</b> The video uses specific numbers like &#x27;$40 million&#x27; and &#x27;$400,000&#x27;, and names specific offers and a client (George Clements), making its claims concrete.</div>
+      <div class="kv"><b>Tone:</b> The tone is human and direct, using contractions and addressing the viewer as &#x27;you&#x27;. You avoid most AI-tone patterns.</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets Stage 3 (Solution Aware) viewers, who know solutions exist (YouTube organic) and are comparing options for implementation.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how to replicate the system, &#x27;SAFE&#x27; by referencing a proven approach, and &#x27;BIG/FOMO&#x27; by highlighting the large financial results. It could use more explicit &#x27;NEW&#x27; framing for the replicable system itself (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[00:29] So, Charlie Morgan has been on YouTube for over 5 years. He uploaded over, I think, 550 videos and he was optimizing for one KPI, which is calls, right?&rdquo;</div>
+          <div class="why">&#x27;KPI&#x27; is a corporate term that could be replaced with plain language, making the script more human and and less like a corporate email (SOP_Scripting.md PART 3, &#x27;AI Tone ❌&#x27;).</div>
+          <div class="better">Charlie Morgan&#x27;s been on YouTube for over 5 years. He uploaded, I think, 550 videos, and he was only focused on one thing: getting calls.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;[01:38] And soon you will realize that the mega courses that are literally the best conversion mechanism, right?&rdquo;</div>
+          <div class="why">&#x27;Conversion mechanism&#x27; is abstract and sounds like AI jargon. It could be stated more directly (SOP_Scripting.md PART 3, &#x27;Nominalization Trap&#x27;).</div>
+          <div class="better">Soon you&#x27;ll realize that big courses are actually the best way to get people to buy.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively breaks down a complex system, uses specific examples, and maintains a human tone. It correctly targets a solution-aware audience by explaining a proven method. However, a few instances of corporate jargon could be simplified to make it even more accessible and conversational (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction. This structure fits perfectly as the video aims to break down a complex, successful system into understandable, actionable parts (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — The outro starts with &#x27;So, if you&#x27;d rather save yourself this entire headache...&#x27; which implies the promise but doesn&#x27;t explicitly state it.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You don&#x27;t explicitly state that the viewer could achieve the result if they follow the advice.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — The phrase &#x27;if you&#x27;d rather save yourself this entire headache...&#x27; effectively pivots to the difficulty of doing it alone.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is specific: &#x27;click the first link in the description and book a call with me. We will build our entire YouTube and Instagram ecosystem completely done for you&#x27;.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This is a non-negotiable step for high-ticket offers and is completely missing (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues after the main CTA, redirecting to another video, which dilutes the primary call to action.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is framed as saving the viewer from the &#x27;headache&#x27; and &#x27;6, 7 hours every week&#x27; of doing it themselves, positioning it as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;click the first link in the description and book a call with me&#x27; is specific and actionable.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses crucial elements of the Power Offer Outro, specifically reiterating the promise and, most importantly, qualifying and disqualifying the prospect. Continuing after the main CTA also dilutes its impact, making the call to action less urgent and clear (SOP_Scripting.md PART 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, you&#x27;ve got the full blueprint for how Charlie Morgan made $40 million with YouTube organic. If you follow everything I&#x27;ve given you, there&#x27;s no doubt you&#x27;ll start seeing results. However, building this system on your own takes months. Between the ideation, scripting, thumbnails, SEO, and consistency — it&#x27;s a full-time job on top of running your coaching business. If you want to skip all that and have my team build and run the whole system for you — just record 30-45 minutes per week — click the first link in the description right now. This isn&#x27;t for people just starting with no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is a done-for-you YouTube/Instagram system for agencies/coaches. Step 1 reiterates the promise of the video. Step 2 validates the viewer&#x27;s potential. Step 3 clearly outlines the difficulty of DIY. Step 4 presents the done-for-you offer as the easy path with a specific CTA. Step 5 qualifies for existing businesses with revenue and disqualifies beginners, as required by SOP_Scripting.md PART 7.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=i-FxAs3LZhU" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/i-FxAs3LZhU/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/i-FxAs3LZhU/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>This $400K Carousel Strategy is BORING, But Signs High Tickets in 2026</h3>
+          <span class="badge s-low">5.6/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>122 views</span>
+          <span>Published 24 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">The video breaks down a specific, proven strategy for Instagram carousels, establishing your expertise and providing a framework for viewers who are already aware of client acquisition challenges and are evaluating different content solutions (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 68 characters long, which is too long for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title refers to &#x27;This... Strategy&#x27; and &#x27;Signs High Tickets&#x27; but doesn&#x27;t immediately call out the specific type of person it&#x27;s for.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises a $400K carousel strategy that signs high-ticket clients, with the &#x27;BORING&#x27; part adding curiosity.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — &#x27;Carousel Strategy&#x27; is searchable, and the promise of &#x27;Signs High Tickets&#x27; aligns with real demand.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The keywords &#x27;Carousel Strategy&#x27; are present within the first 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> How to (result) Without (common sacrifice they hate)</div>
+      <div class="kv"><b>Pain/desire first:</b> The title leads with a result and a mechanism, with a curiosity hook. It doesn&#x27;t directly start with the ICP&#x27;s pain, but &#x27;Signs High Tickets&#x27; hints at their desire.</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile feeds and loses impact (SOP_Ideation.md STEP 3, &#x27;Under 50 characters&#x27;). While it creates curiosity with &#x27;BORING,&#x27; it doesn&#x27;t immediately call out the specific person it&#x27;s for, making it less targeted (SOP_Ideation.md STEP 3, &#x27;Specific person, not everyone&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Boring $400K Carousel Strategy for High-Ticket Clients</div>
+        <div class="fix-notes">This title shortens it to under 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses a variant of &#x27;How to (result) Without (common sacrifice they hate)&#x27; by highlighting the &#x27;boring&#x27; aspect as a counter-intuitive benefit, directly appealing to the desire for high-ticket clients (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The white text on a dark background, and the red underline/Instagram logo, create good contrast and stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;$400K CAROUSEL STRATEGY&#x27; is large and bold enough to be readable at mobile size, and your face is clear.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Your face is neutral, looking at your laptop. A stronger emotion (e.g., focused, curious, or slightly surprised) would help grab attention for content promising big results.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;$400K CAROUSEL STRATEGY&#x27; is 3 words, which is good (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The split screen creates two competing focal points (the text/carousels on the right, you on the left), which can divide attention.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses a similar split-screen layout, text style (bold, white, red underline), and your presence, showing consistency with other thumbnails in this batch.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> $400K CAROUSEL STRATEGY</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;$400K CAROUSEL STRATEGY&#x27; largely repeats the title, rather than adding new curiosity or emotion.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is Authority/How-To. The thumbnail uses a &#x27;data on screen (blurred carousels) + creator&#x27;s confident face&#x27; concept (SOP_Thumbnail.md STEP 3), but your face is neutral.</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is consistent with your channel&#x27;s branding and has good contrast, and the text overlay length is good. However, your neutral expression doesn&#x27;t convey the excitement or authority for a strategy promising $400K. The split screen, while consistent, can dilute the single focal point, potentially reducing click-through rate (SOP_Thumbnail.md STEP 2.3, 2.5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, you with a focused, slightly intrigued expression, looking at the screen. Text overlay: &#x27;BORING $400K&#x27; or &#x27;CAROUSEL HACK&#x27;. Colors: Bright green text on a dark, contrasting background. Focal point: Your face and the bold text. Composition: Your face on the left, looking right towards the text and a clear, unblurred example of a simple, effective carousel slide.</div>
+        <div class="fix-notes">This concept uses a focused face and a short, curiosity-driven text overlay that highlights the &#x27;boring&#x27; aspect from the title, creating intellectual tension. It provides a clearer focal point and directly supports the video&#x27;s promise, aligning with the Authority/How-To content type (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHO</b> — The hook implicitly targets B2B clients interested in high-ticket sales, but doesn&#x27;t explicitly state who the video is for at the beginning.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises &#x27;the carousel, the boring carousel strategy that prints for my clients&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — You establish credibility by stating you &#x27;just closed our first client from a carousel&#x27; and saw &#x27;$20,000 in a day from Instagram&#x27;, but the $20K lacks a timeframe.</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Curiosity Gap</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise of a &#x27;boring carousel strategy&#x27; that works.</div>
+      <div class="kv"><b>Opening line:</b> This is the carousel, the boring carousel strategy that prints for my clients and give you some credentials here as you can see just close our first client from a carousel.</div>
+      <h4>Verdict</h4>
+      <p>Your hook provides strong social proof with specific results, but it doesn&#x27;t explicitly state who the video is for at the very beginning, which might cause some viewers to scroll past. While it creates curiosity, it could be more direct in its value proposition for the viewer (SOP_Scripting.md PART 5, &#x27;WHO&#x27; and &#x27;Concise&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">You&#x27;re about to see the boring carousel strategy that&#x27;s printing $400,000 for my clients and signing high-ticket deals in 2026. Why listen to me? We just closed our first client from a carousel a day after posting it, and I&#x27;ve seen $20,000 days from Instagram using this. This strategy absolutely works. The secret? It&#x27;s the new carousel algorithm. It pushes your carousel three times before it dies, giving you way more potential than Reels. Every carousel gets three chances to grab attention. Here&#x27;s how it works.</div>
+        <div class="fix-notes">This uses a Curiosity Gap hook, immediately stating the counter-intuitive claim and then providing specific proof. It explicitly states the value and then transitions into *why* it works (the algorithm), building curiosity (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video focuses entirely on the Instagram carousel strategy, its algorithm, structure, and monetization, staying on this core problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Transitions are clear, often using questions like &#x27;How does this make any difference?&#x27; and &#x27;How do I choose which CTA I use in each carousel?&#x27; to move between points.</div>
+      <div class="kv"><b>Specificity:</b> The video is highly specific, mentioning &#x27;three connected hooks,&#x27; &#x27;ManyChat,&#x27; &#x27;URL Genie,&#x27; and specific client results like &#x27;Matt gain 1,300 followers and close five to six new clients within 30 days&#x27;.</div>
+      <div class="kv"><b>Tone:</b> The tone is human, direct, and uses contractions. You avoid most AI-tone patterns.</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets Stage 3 (Solution Aware) viewers, who know about Instagram and carousels but need a specific, effective strategy to get high-ticket clients.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by describing simple designs and automation, &#x27;SAFE&#x27; by showing client results, &#x27;NEW&#x27; by explaining the new algorithm, and &#x27;BIG/FOMO&#x27; by highlighting the large potential and results (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[00:27] So what&#x27;s new about the carousel algo? Why is this goated? Why is this the matter right now?&rdquo;</div>
+          <div class="why">&#x27;Algo&#x27; and &#x27;goated&#x27; are slang. While &#x27;goated&#x27; might fit a casual tone, &#x27;algo&#x27; is jargon. The phrasing &#x27;why is this the matter right now?&#x27; is also a bit clunky (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27; vs &#x27;AI Tone ❌&#x27;).</div>
+          <div class="better">So, what&#x27;s new with the carousel algorithm? Why is it so good? Why does it matter right now?</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;[03:47] As you can see, this design is goated for B2B and serious business owners because is a simple style.&rdquo;</div>
+          <div class="why">Again, &#x27;goated&#x27; is slang. Also, the sentence structure &#x27;because is a simple style&#x27; is incorrect (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27; vs &#x27;AI Tone ❌&#x27;).</div>
+          <div class="better">This design is amazing for B2B and serious business owners because it&#x27;s a simple style.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body is highly specific, provides clear instructions, and uses strong social proof to build confidence. It effectively breaks down a new strategy, making it actionable for the viewer. The tone is mostly human, though a few slang terms could be refined for broader professional appeal (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction. This structure is ideal for breaking down a complex system (the carousel algorithm and strategy) into understandable, actionable steps for the audience (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro starts with a general statement about content building connection, not reiterating the carousel strategy&#x27;s promise.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You don&#x27;t explicitly state that the viewer could achieve results with the carousel strategy.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You jump straight to the offer after a general statement, missing the pivot to the difficulty of DIY.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is specific: &#x27;Or if you want our entire YouTube and Instagram system built completely done for you... click the first link in the description and book a call with me&#x27;.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This is a non-negotiable step for high-ticket offers and is completely missing (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends with &#x27;and I&#x27;ll catch you in the next one&#x27; after the main CTA, which dilutes its impact.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is framed as a &#x27;completely done for you&#x27; system, implying ease and saving time, positioning it as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;click the first link in the description and book a call with me&#x27; is specific and actionable.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely misses the first three steps of the Power Offer Outro, failing to reiterate the video&#x27;s value or pivot to the difficulty of DIY. Most critically, it omits the non-negotiable qualify/disqualify step, which is essential for high-ticket offers and pre-qualifying leads (SOP_Scripting.md PART 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the boring carousel strategy that&#x27;s printing $400K for my clients. If you follow everything I&#x27;ve given you here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead. However, building this entire YouTube and Instagram system on your own takes months. Between the ideation, scripting, editing, SEO, and thumbnails — it&#x27;s a full-time job on top of running your coaching business. If you want to skip all that and have my team build and run the whole system for you — just record 4 to 6 hours every month — click the first link in the description right now. This isn&#x27;t for coaches just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube and Instagram your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is a done-for-you YouTube/Instagram system. Step 1 reiterates the carousel strategy&#x27;s promise. Step 2 validates the viewer&#x27;s potential. Step 3 clearly outlines the difficulty of DIY. Step 4 presents the done-for-you offer as the easy path with a specific CTA. Step 5 qualifies for existing businesses with revenue and disqualifies beginners, as required by SOP_Scripting.md PART 7.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=Q5oFBQdnoFM" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/Q5oFBQdnoFM/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Q5oFBQdnoFM/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>How We Helped George Clements Generate $400K+ Using YouTube &amp; Instagram Organic</h3>
+          <span class="badge s-low">4.0/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-bof">BOF</span>
+          <span>150 views</span>
+          <span>Published 15 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video is a client interview featuring specific results and testimonials, designed to provide proof and push warm viewers closer to booking a call (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 75 characters long, which is too long for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title focuses on &#x27;George Clements,&#x27; not directly on the viewer. While it shows what&#x27;s possible, it doesn&#x27;t immediately speak to the viewer&#x27;s situation.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to show how George Clements generated $400K+ using YouTube &amp; Instagram Organic.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — &#x27;George Clements YouTube Instagram Organic&#x27; is searchable for those who know him or are looking for case studies.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The keywords &#x27;George Clements&#x27; and &#x27;YouTube&#x27; are present within the first 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> How I Helped a (client type) Go From (A) to (B) in (timeframe)</div>
+      <div class="kv"><b>Pain/desire first:</b> The title leads with a result and a mechanism, which appeals to desire, but not directly with the ICP&#x27;s pain.</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile feeds and loses impact (SOP_Ideation.md STEP 3, &#x27;Under 50 characters&#x27;). While it&#x27;s a strong results-based title, it focuses on the client&#x27;s achievement rather than immediately framing it as a solution for the viewer (SOP_Ideation.md STEP 3, &#x27;Specific person, not everyone&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Client Case Study: $400K+ From YouTube &amp; IG Organic</div>
+        <div class="fix-notes">This title shortens it to under 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses a direct, results-based approach, clearly labeling it as a &#x27;Client Case Study&#x27; which is a strong BOF content type (SOP_Ideation.md Method 3, &#x27;How I Helped a (client type) Go From (A) to (B) in (timeframe)&#x27; in spirit, but more direct).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The blue and white text on the dark background, and the red &#x27;LIVE&#x27; tag, create good contrast and stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;$400K FROM IG &amp; YOUTUBE&#x27; is large and bold enough to be readable at mobile size, and both faces are clearly visible.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Both faces are relatively neutral, though George has a slight smile. For a case study, a more triumphant or confident expression could be stronger (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;$400K FROM IG &amp; YOUTUBE&#x27; is 5 words, slightly over the 4-word maximum (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The split screen with two faces and central text creates multiple competing focal points, which can divide attention.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses a similar split-screen layout, text style (bold, white/blue, red elements), and your presence, showing consistency with other thumbnails in this batch.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> $400K FROM IG &amp; YOUTUBE</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;$400K FROM IG &amp; YOUTUBE&#x27; largely repeats the title&#x27;s core message, rather than adding new curiosity or emotion.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is a Story/Case Study. The thumbnail uses a &#x27;Client photo + big result number in bold&#x27; concept (SOP_Thumbnail.md STEP 3), but the split screen and neutral faces could be more impactful.</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail clearly communicates the video&#x27;s content and is consistent with your channel&#x27;s branding. However, the text overlay is slightly too long, and the neutral expressions on both faces don&#x27;t fully capitalize on the strong &#x27;case study&#x27; content. A single, more powerful focal point could increase click-through (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, you with a confident, slightly smiling expression, and George with a triumphant, happy expression. Text overlay: &#x27;GEORGE: $400K+&#x27; or &#x27;CLIENT WINS&#x27;. Colors: Bright blue/white text on a contrasting dark background. Focal point: The two faces and the bold result number. Composition: A &#x27;before/after&#x27; or &#x27;client + creator&#x27; split, with the $400K+ prominently displayed, perhaps with a subtle &#x27;growth&#x27; graphic.</div>
+        <div class="fix-notes">This concept directly uses the &#x27;Client photo + big result number in bold&#x27; pattern, enhancing the Story/Case Study video type. It incorporates stronger positive emotions from both you and George, and a concise text overlay to create a powerful, single focal point that screams &#x27;success&#x27; (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHO</b> — The hook is a conversational introduction to an interview, not explicitly stating who the video is for.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHAT</b> — The hook vaguely mentions &#x27;a client interview with my guy George Clemens&#x27; and &#x27;ripping YouTube and Instagram for him&#x27; but doesn&#x27;t clearly state the value the *viewer* will get.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook lacks specific results and a timeframe from you at the start, making your initial credibility weak (SOP_Scripting.md PART 5, &#x27;WHY&#x27;).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> The hook introduces George Clements and mentions YouTube and Instagram, validating the title.</div>
+      <div class="kv"><b>Opening line:</b> Well, ladies and gents, here we are with a client interview with my guy George Clemens.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is a casual introduction to an interview, failing to immediately tell the viewer who it&#x27;s for, what specific value they&#x27;ll get, or why they should trust your expertise with specific results. This lack of a clear hook means many viewers will scroll past before understanding the video&#x27;s purpose (SOP_Scripting.md PART 5, &#x27;WHO,&#x27; &#x27;WHAT,&#x27; &#x27;WHY&#x27; non-negotiables).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">You&#x27;re about to hear how George Clements generated over $400,000 using YouTube and Instagram organic in just 5 months. If you&#x27;re an agency owner or coach struggling to get consistent high-ticket clients, this interview is for you. George will break down his exact &#x27;before and after&#x27; numbers and why he chose to work with us to scale his business. Let&#x27;s dive into his story.</div>
+        <div class="fix-notes">This uses an Identity Appeal hook, clearly stating who it&#x27;s for and what specific value they&#x27;ll get (George&#x27;s story, numbers, and why he hired you). It immediately establishes the &#x27;WHAT&#x27; and &#x27;WHO&#x27; and implicitly the &#x27;WHY&#x27; by featuring a successful client (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video is a client interview focused on George Clements&#x27; journey and results with your help, staying on this core purpose of showcasing a successful case study.</div>
+      <div class="kv"><b>Body type:</b> Word-for-Word</div>
+      <div class="kv"><b>Story structure:</b> Transformation Path</div>
+      <div class="kv"><b>Transitions:</b> The transitions are natural for an interview, with you asking questions to guide George through his journey.</div>
+      <div class="kv"><b>Specificity:</b> The video is highly specific with numbers like &#x27;$500k cash collected&#x27; and &#x27;low hundreds of subscribers&#x27;, and mentions George&#x27;s agencies, making the proof concrete.</div>
+      <div class="kv"><b>Tone:</b> The tone is human, conversational, and authentic, as expected from an interview. Both you and George use natural language and contractions.</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets Stage 4 (Product Aware) viewers, who know you exist and are looking for proof of your service&#x27;s effectiveness before buying.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by highlighting the hands-off nature of the system, &#x27;SAFE&#x27; through George&#x27;s specific results and endorsement, &#x27;NEW&#x27; by framing organic content as a superior method, and &#x27;BIG/FOMO&#x27; by showcasing large revenue numbers (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[02:49] With these results in mind, where do you think your company and your YouTube channel, Instagram profile will be within six to 12 months from now based on the growth we have had so far?&rdquo;</div>
+          <div class="why">&#x27;Instagram profile&#x27; is a bit clunky, and &#x27;Based on the growth we have had so far&#x27; is slightly formal (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27;).</div>
+          <div class="better">With these results, where do you see your company and your Instagram profile in the next 6 to 12 months, given the growth we&#x27;ve seen?</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;[03:49] I honestly like I think anyone who just doesn&#x27;t do organic content is like extremely extremely stupid and like basically handicapped in business because it kind of is like playing business on easy mode and um you know like yeah you know you kind of like hedge your risk as well with ads because&rdquo;</div>
+          <div class="why">While it&#x27;s George&#x27;s natural speech, the repetition of &#x27;extremely&#x27; and &#x27;like&#x27; can be tightened for a script, and &#x27;handicapped in business&#x27; could be rephrased to be less harsh while retaining the strong point (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27;).</div>
+          <div class="better">Honestly, anyone not doing organic content is just missing out. It&#x27;s like playing business on easy mode. It helps you hedge your risk with ads because...</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body of the interview is highly effective, using specific results and the client&#x27;s own words to build strong social proof and trust. It clearly demonstrates the value of your service. The conversational tone is appropriate for an interview, making it relatable and persuasive (SOP_Scripting.md PART 2, 6).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Transformation Path. This structure effectively showcases the client&#x27;s journey from a problem state to a desired outcome, which is perfect for a case study (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">1/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro doesn&#x27;t reiterate the promise of how George achieved $400K+.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You don&#x27;t validate the viewer&#x27;s potential to achieve similar results.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no pivot to the difficulty of implementing the system alone.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 4 — The Offer</b> — There is no offer or call to action for your service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This is a non-negotiable step for high-ticket offers and is completely missing (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends after the general social media CTAs, with no business call to action.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> N/A, no offer is made.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;Go follow him and follow me as well&#x27; is specific for social media, but there&#x27;s no business CTA.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely fails to utilize the Power Offer Outro structure. It lacks any call to action for your service, missing a critical opportunity to convert warm leads from a strong case study. It also omits the non-negotiable qualify/disqualify step (SOP_Scripting.md PART 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s George&#x27;s story of generating over $400,000 with YouTube and Instagram organic. If you&#x27;ve been watching this and thinking, &#x27;I want those results,&#x27; then you know this system works. However, getting from where George was to $400K+ isn&#x27;t easy to do alone. It takes a proven system for ideation, scripting, editing, and distribution. If you want my team to build and run this entire YouTube and Instagram ecosystem for you — so you only record 4 to 6 hours a month — click the first link in the description right now. This is for established agency owners and coaches already generating revenue, not beginners. If you&#x27;re serious about making organic content your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is a done-for-you YouTube/Instagram system. Step 1 reiterates George&#x27;s results. Step 2 validates the viewer&#x27;s desire for similar results. Step 3 clearly outlines the difficulty of DIY. Step 4 presents the done-for-you offer as the easy path with a specific CTA. Step 5 qualifies for established businesses and disqualifies beginners, as required by SOP_Scripting.md PART 7.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=fMHZqdR7iHk" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/fMHZqdR7iHk/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/fMHZqdR7iHk/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>This Organic Instagram Funnel Made My Clients $200K+</h3>
+          <span class="badge s-mid">6.0/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>452 views</span>
+          <span>Published 11 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">The video breaks down a specific system and framework for Instagram organic content, establishing your expertise and providing a clear solution for viewers who are already aware of client acquisition problems (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 60 characters long, which is too long for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title refers to &#x27;My Clients&#x27; and implies a result for *them*, not directly calling out the viewer&#x27;s desire to achieve similar results.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises an Instagram funnel that made clients $200K+.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — &#x27;Organic Instagram Funnel&#x27; is searchable for people looking for this type of strategy.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The keywords &#x27;Organic Instagram Funnel&#x27; are present within the first 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> How I Helped a (client type) Go From (A) to (B) in (timeframe)</div>
+      <div class="kv"><b>Pain/desire first:</b> The title leads with a result and a mechanism, appealing to desire, but not directly with the ICP&#x27;s pain.</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile feeds and loses impact (SOP_Ideation.md STEP 3, &#x27;Under 50 characters&#x27;). While it&#x27;s results-driven, it focuses on your clients rather than directly addressing the viewer&#x27;s desire to achieve similar results (SOP_Ideation.md STEP 3, &#x27;Specific person, not everyone&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Steal My $200K+ Organic Instagram Funnel</div>
+        <div class="fix-notes">This title shortens it to under 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses a variant of &#x27;If I Were Starting (niche) Again, This Is What I&#x27;d Do&#x27; by offering a direct, actionable &#x27;steal this&#x27; approach, appealing to the viewer&#x27;s desire for a proven system (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The white text on a dark background, and the red underline/logos, create good contrast and stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;$200K INSTAGRAM FUNNEL&#x27; is large and bold enough to be readable at mobile size, and your face is clear.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Your face is neutral, looking at your laptop. A stronger emotion (e.g., focused, curious, or slightly surprised) would help grab attention for content promising big results.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;$200K INSTAGRAM FUNNEL&#x27; is 3 words, which is good (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The split screen creates two competing focal points (the text/diagram on the left, you on the right), which can divide attention.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses a similar split-screen layout, text style (bold, white, red underline), and your presence, showing consistency with other thumbnails in this batch.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> $200K INSTAGRAM FUNNEL</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;$200K INSTAGRAM FUNNEL&#x27; largely repeats the title, rather than adding new curiosity or emotion.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is Authority/How-To. The thumbnail uses a &#x27;data on screen (diagram) + creator&#x27;s confident face&#x27; concept (SOP_Thumbnail.md STEP 3), but your face is neutral.</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail clearly communicates the video&#x27;s content and is consistent with your channel&#x27;s branding. However, your neutral expression doesn&#x27;t convey the excitement or authority for a funnel promising $200K. The split screen, while consistent, can dilute the single focal point, potentially reducing click-through rate (SOP_Thumbnail.md STEP 2.3, 2.5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, you with a confident, slightly intrigued expression, looking at the screen. Text overlay: &#x27;INSTAGRAM FUNNEL&#x27; or &#x27;MADE $200K&#x27;. Colors: Bright yellow text on a dark, contrasting background. Focal point: Your face and the bold text. Composition: Your face on the right, looking left towards the text, which is overlaid on a simplified, clear graphic of a funnel (e.g., arrows pointing down).</div>
+        <div class="fix-notes">This concept uses a confident face and a concise, results-oriented text overlay to create a single, strong focal point. It directly supports the video&#x27;s promise and aligns with the Authority/How-To content type, drawing the viewer in with a clear visual of the funnel (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly states it&#x27;s for &#x27;Most of these agency owners and coaches&#x27; and &#x27;your business&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;break down the entire Instagram organic content funnel that generated over $200,000 for my clients... so you can literally replicate it for your business&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — You establish credibility by stating the funnel &#x27;generated over $200,000 for my clients in the past 100 days&#x27;, with specific results and a timeframe.</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Completion Compulsion</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise of breaking down the Instagram organic funnel.</div>
+      <div class="kv"><b>Opening line:</b> In this video, I&#x27;m going to break down the entire Instagram organic content funnel that generated over $200,000 for my clients in the past 100 days.</div>
+      <h4>Verdict</h4>
+      <p>Your hook clearly states who it&#x27;s for, what value it delivers, and why you should trust you with specific results and a timeframe. It effectively sets up a clear breakdown of a valuable system (SOP_Scripting.md PART 5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">You&#x27;re about to see the entire Instagram organic content funnel that generated over $200,000 for my clients in the past 100 days. No paid ads, no cold outreach. If you&#x27;re an agency owner or coach spending too much on ads, you&#x27;re missing a channel that brings clients for way less. I&#x27;m breaking down this whole system so you can replicate it for your business and start signing clients today. Let&#x27;s get into it.</div>
+        <div class="fix-notes">This uses a Completion Compulsion hook, immediately stating the value and who it&#x27;s for, then quickly establishing credibility with specific results and a timeframe (SOP_Scripting.md PART 5). It removes the &#x27;In this video, I&#x27;m going to break down&#x27; for a more direct opening.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video focuses entirely on the Instagram organic content funnel, from bio setup to content creation, monetization, and tracking, consistently delivering on the promise of breaking down this system.</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Transitions are clear, using phrases like &#x27;Now, the second part of the foundations,&#x27; &#x27;Now, we can go into content creation,&#x27; and &#x27;Now, we go into compounding and acceleration&#x27;.</div>
+      <div class="kv"><b>Specificity:</b> The video is highly specific, mentioning &#x27;DM CTAs,&#x27; &#x27;ManyChat,&#x27; &#x27;URL Genie,&#x27; &#x27;Hemingway app,&#x27; and specific client results like &#x27;$20,000 from Instagram in a day&#x27;.</div>
+      <div class="kv"><b>Tone:</b> The tone is human, direct, and uses contractions. You generally avoid AI-tone patterns, though there are a few instances of nominalization.</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets Stage 3 (Solution Aware) viewers, who know Instagram exists for marketing but need a specific, proven funnel to acquire high-ticket clients.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how to replicate the system, &#x27;SAFE&#x27; by referencing client results, &#x27;NEW&#x27; by explaining the new algorithm, and &#x27;BIG/FOMO&#x27; by highlighting large potential and results (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[03:55] It&#x27;s not the hooks, it&#x27;s not the editing, it&#x27;s not the CTAs. It&#x27;s really just ideation, right? If you get ideation right, you&#x27;re going to be good, right?&rdquo;</div>
+          <div class="why">The repetition of &#x27;right?&#x27; is a verbal tic that can be tightened for a script (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27;).</div>
+          <div class="better">It&#x27;s not the hooks, the editing, or the CTAs. It&#x27;s really just ideation. Get ideation right, and you&#x27;ll be good.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;[09:09] Shorten and simple. Always try to shorten your videos, okay? Do not add filler fillers methodology or bonus context the viewers don&#x27;t care about. Cut everything non-essential.&rdquo;</div>
+          <div class="why">&#x27;Filler fillers methodology&#x27; is clunky and contains nominalized nouns (&#x27;methodology&#x27;). &#x27;Non-essential&#x27; can be simplified (SOP_Scripting.md PART 3, &#x27;Nominalization Trap,&#x27; &#x27;AI Tone ❌&#x27;).</div>
+          <div class="better">Keep it short and simple. Don&#x27;t add filler, extra methods, or bonus stuff viewers don&#x27;t care about. Cut everything you don&#x27;t need.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body is highly detailed and specific, providing actionable advice for building an Instagram funnel. It effectively uses social proof and maintains a direct, human tone. A few instances of verbal tics and nominalized language could be refined for even sharper communication (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction. This structure is ideal for breaking down a complex, multi-step funnel into clear, actionable components (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — The phrase &#x27;And that&#x27;s it for this system, guys&#x27; is a weak reiteration of the video&#x27;s promise.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 2 — Validate and Plant the Seed</b> — The statement &#x27;Most of you are burning a lot of money on paid ads... when you can just implement a system like this and start booking calls for completely free&#x27; implies validation but isn&#x27;t a direct statement of what *they* can achieve.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t explicitly state the difficulty of implementing the system alone.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is specific: &#x27;If you want this entire system built completely done for you... click the first link in the description and book a call with me&#x27;.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This is a non-negotiable step for high-ticket offers and is completely missing (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues after the main CTA, redirecting to another video, which dilutes the primary call to action.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is framed as a &#x27;completely done for you&#x27; system, implying ease and saving time and money compared to paid ads, positioning it as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;click the first link in the description and book a call with me&#x27; is specific and actionable.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses critical steps of the Power Offer Outro, failing to properly reiterate the promise or pivot to the difficulty of DIY. Most importantly, it omits the non-negotiable qualify/disqualify step, which is essential for high-ticket offers and pre-qualifying leads (SOP_Scripting.md PART 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the entire Instagram organic content funnel that&#x27;s made my clients $200K+. If you follow everything I&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start getting consistent calls without ads or cold outreach. However, building this whole system on your own takes serious time and effort. You&#x27;d spend months figuring out ideation, scripting, content formats, and tracking. If you want to skip all that and have my team build and run this entire YouTube and Instagram ecosystem for you — just record 4 to 6 hours every month — click the first link in the description right now. This isn&#x27;t for coaches just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making organic content your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is a done-for-you YouTube/Instagram system. Step 1 reiterates the funnel&#x27;s promise. Step 2 validates the viewer&#x27;s potential. Step 3 clearly outlines the difficulty of DIY. Step 4 presents the done-for-you offer as the easy path with a specific CTA. Step 5 qualifies for established businesses with revenue and disqualifies beginners, as required by SOP_Scripting.md PART 7.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=iGDEOfg9By4" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/iGDEOfg9By4/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/iGDEOfg9By4/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>The New Way To Script YouTube Videos That Sign Clients In 2026 (Live Breakdown)</h3>
+          <span class="badge s-low">5.8/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>76 views</span>
+          <span>Published 06 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">The video breaks down a specific system and framework for YouTube scripting, establishing your expertise and providing a clear solution for viewers who are already aware of content creation challenges (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 79 characters long, which is too long for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title refers to &#x27;The New Way&#x27; and &#x27;Sign Clients&#x27; but doesn&#x27;t immediately call out the specific type of person it&#x27;s for.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises a new way to script YouTube videos to sign clients, with a live breakdown.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — &#x27;Script YouTube Videos&#x27; and &#x27;Sign Clients&#x27; are searchable, and &#x27;New Way&#x27; adds curiosity.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The keywords &#x27;Script YouTube Videos&#x27; and &#x27;Sign Clients&#x27; are present within the first 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> What Every (niche) Gets Wrong About (topic)</div>
+      <div class="kv"><b>Pain/desire first:</b> The title leads with a mechanism and a desire, rather than directly with the ICP&#x27;s pain.</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile feeds and loses impact (SOP_Ideation.md STEP 3, &#x27;Under 50 characters&#x27;). While it promises a &#x27;new way,&#x27; it doesn&#x27;t immediately call out the specific person it&#x27;s for, making it less targeted (SOP_Ideation.md STEP 3, &#x27;Specific person, not everyone&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">New YouTube Scripting: Sign Clients in 2026</div>
+        <div class="fix-notes">This title shortens it to under 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses a variant of &#x27;How to (result) Without (common sacrifice they hate)&#x27; by implying an easier, more effective method (&#x27;New Way&#x27;) to achieve the desired outcome of signing clients (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The white text on a dark background, and the red underline/YouTube logo, create good contrast and stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;$200K+ SCRIPTING FORMULA&#x27; is large and bold enough to be readable at mobile size, and your face is clear.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Your face is neutral, looking at your laptop. A stronger emotion (e.g., focused, curious, or slightly surprised) would help grab attention for content promising big results.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;$200K+ SCRIPTING FORMULA&#x27; is 3 words, which is good (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The split screen creates two competing focal points (the text/diagram on the left, you on the right), which can divide attention.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses a similar split-screen layout, text style (bold, white, red underline), and your presence, showing consistency with other thumbnails in this batch.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> $200K+ SCRIPTING FORMULA</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;$200K+ SCRIPTING FORMULA&#x27; largely repeats the title&#x27;s core message, rather than adding new curiosity or emotion.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is Authority/How-To. The thumbnail uses a &#x27;data on screen (diagram) + creator&#x27;s confident face&#x27; concept (SOP_Thumbnail.md STEP 3), but your face is neutral.</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail clearly communicates the video&#x27;s content and is consistent with your channel&#x27;s branding. However, your neutral expression doesn&#x27;t convey the excitement or authority for a &#x27;new way&#x27; or a &#x27;formula&#x27; promising $200K+. The split screen, while consistent, can dilute the single focal point, potentially reducing click-through rate (SOP_Thumbnail.md STEP 2.3, 2.5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, you with a confident, slightly intrigued expression, looking at the screen. Text overlay: &#x27;NEW SCRIPTING FORMULA&#x27; or &#x27;YOUTUBE CLIENTS&#x27;. Colors: Bright green text on a dark, contrasting background. Focal point: Your face and the bold text. Composition: Your face on the right, looking left towards the text, which is overlaid on a simplified, clear graphic of a script or a funnel leading to a client.</div>
+        <div class="fix-notes">This concept uses a confident face and a concise, benefit-driven text overlay to create a single, strong focal point. It directly supports the video&#x27;s promise of a &#x27;new way&#x27; to sign clients and aligns with the Authority/How-To content type, drawing the viewer in with a clear visual of the outcome (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly states it&#x27;s for &#x27;your channel&#x27; and &#x27;your business&#x27; (implicitly coaches/agencies).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;break down my entire YouTube scripting system from A to Z so you can literally just replicate it for your channel and start signing clients from YouTube&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — You establish credibility by stating you&#x27;ve &#x27;generated over $200,000 for my clients&#x27; and &#x27;generated him over $200,000 in less than 100 days&#x27; for George Clements, with specific results and a timeframe.</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Completion Compulsion</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise of breaking down a YouTube scripting system for signing clients.</div>
+      <div class="kv"><b>Opening line:</b> I&#x27;ve generated over $200,000 for my clients through YouTube and Instagram organic.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is strong, immediately establishing credibility with specific results and clearly stating what the viewer will learn and who it&#x27;s for. It effectively sets up the video as a comprehensive breakdown of a valuable system (SOP_Scripting.md PART 5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">I&#x27;ve generated over $200,000 for my clients through YouTube and Instagram organic. You&#x27;re about to get my entire YouTube scripting system, from A to Z, so you can replicate it for your channel and start signing clients. This is the exact system top creators use to generate millions. I used it for my client George Clements, and it generated him over $200,000 in less than 100 days. By the end of this, you&#x27;ll understand it all and be able to copy it for your business today. Let&#x27;s get into it.</div>
+        <div class="fix-notes">This uses a Completion Compulsion hook, immediately stating the value and who it&#x27;s for, then quickly establishing credibility with specific results and a timeframe (SOP_Scripting.md PART 5). It removes the &#x27;In this video, I&#x27;m going to break down&#x27; for a more direct opening.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video focuses on the YouTube scripting system, breaking it down into hook, body, and outro, maintaining this focus throughout.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Transitions are clear, using phrases like &#x27;So let&#x27;s begin by the hook,&#x27; &#x27;Now, this is the hook, right? Once you be able to master the hook, you&#x27;re going to be all right. Now, you go into the second thing you want to script which is the outro,&#x27; and &#x27;Now, for the body of the video, the body is completely different game from these two&#x27;.</div>
+      <div class="kv"><b>Specificity:</b> The video is highly specific, mentioning &#x27;$200,000,&#x27; &#x27;100 days,&#x27; &#x27;George Clements,&#x27; &#x27;first 30 to 60 seconds,&#x27; and &#x27;4 main objectives&#x27;, making its claims concrete.</div>
+      <div class="kv"><b>Tone:</b> The tone is human, direct, and uses contractions. You avoid most AI-tone patterns, though there are a few instances of nominalization and slightly clunky phrasing.</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets Stage 3 (Solution Aware) viewers, who know YouTube exists for marketing but need a specific, proven scripting system to acquire high-ticket clients.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how to replicate the system, &#x27;SAFE&#x27; by referencing client results, &#x27;NEW&#x27; by explaining the new approach, and &#x27;BIG/FOMO&#x27; by highlighting large financial results (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[01:24] And the reason you want to confirm their click YouTube has been around for years and years, right? And people have been clickbaited, right?&rdquo;</div>
+          <div class="why">The repetition of &#x27;right?&#x27; is a verbal tic. &#x27;Clickbaited&#x27; is a bit informal for a professional explanation (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27;).</div>
+          <div class="better">You want to confirm their click because YouTube has been around for years, and people have been tricked by clickbait.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;[02:46] And the reason you want to do this right away is because after they are scanning for clickbait, and they Okay, now they&#x27;re sure the video&#x27;s not clickbait, they really need proof. Like, why should I give you my time, right?&rdquo;</div>
+          <div class="why">The sentence structure is a bit rambling and informal for a teaching segment. The flow is off (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27;).</div>
+          <div class="better">You need to do this right away because after they check for clickbait, and they&#x27;re sure the video isn&#x27;t fake, they need proof. Why should they give you their time?</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body provides a detailed, structured breakdown of YouTube scripting, using specific examples and a direct tone. It effectively teaches a complex skill. While mostly human, some conversational tics and slightly clunky phrasing could be tightened for clarity (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction. This structure is perfect for breaking down a complex skill (scripting) into its fundamental components and rules (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 1 — Reiterate the Promise</b> — You reiterate the promise: &#x27;And now you understand the entire scripting system I have used to generate over $200,000...&#x27;</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You don&#x27;t explicitly state that the viewer could achieve results if they follow the advice.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You jump straight to the offer after reiterating the promise, missing the pivot to the difficulty of DIY.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is specific: &#x27;If you want this entire system completely done for you... click the first link in the description and book a call&#x27;.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This is a non-negotiable step for high-ticket offers and is completely missing (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues after the main CTA, redirecting to another video, which dilutes the primary call to action.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is framed as a &#x27;completely done for you&#x27; system, implying ease and saving time, positioning it as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;click the first link in the description and book a call&#x27; is specific and actionable.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses critical steps of the Power Offer Outro, specifically validating the viewer&#x27;s potential and pivoting to the difficulty of DIY. Most importantly, it omits the non-negotiable qualify/disqualify step, which is essential for high-ticket offers and pre-qualifying leads (SOP_Scripting.md PART 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, you now understand the entire scripting system I&#x27;ve used to generate over $200,000 for my clients using YouTube and Instagram. If you follow everything I&#x27;ve broken down here, you&#x27;ll be able to script videos that sign clients. However, building this entire system on your own — from ideation, strategy, scripting, editing, SEO, and thumbnails — is a full-time job. If you want to skip all that and have my team build and run the whole system for you — so you only record content — click the first link in the description right now. This isn&#x27;t for people just starting with no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is a done-for-you YouTube/Instagram system. Step 1 reiterates the scripting system&#x27;s promise. Step 2 validates the viewer&#x27;s potential. Step 3 clearly outlines the difficulty of DIY. Step 4 presents the done-for-you offer as the easy path with a specific CTA. Step 5 qualifies for established businesses with revenue and disqualifies beginners, as required by SOP_Scripting.md PART 7.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=68hmTggPz2U" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/68hmTggPz2U/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/68hmTggPz2U/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>How To Script Instagram Reels That ACTUALLY Sign Clients ($200K+ Generated)</h3>
+          <span class="badge s-low">5.2/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>141 views</span>
+          <span>Published 30 May 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">The video breaks down a specific system and framework for Instagram Reels scripting, establishing your expertise and providing a clear solution for viewers who are already aware of content creation challenges (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 76 characters long, which is too long for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title refers to &#x27;How To Script&#x27; and &#x27;Sign Clients&#x27; but doesn&#x27;t immediately call out the specific type of person it&#x27;s for.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises how to script Instagram Reels that actually sign clients, with a $200K+ result.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — &#x27;Script Instagram Reels&#x27; and &#x27;Sign Clients&#x27; are searchable, and &#x27;ACTUALLY&#x27; adds curiosity.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The keywords &#x27;Script Instagram Reels&#x27; and &#x27;Sign Clients&#x27; are present within the first 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> How to (result) Without (common sacrifice they hate)</div>
+      <div class="kv"><b>Pain/desire first:</b> The title leads with a mechanism and a desire, rather than directly with the ICP&#x27;s pain.</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile feeds and loses impact (SOP_Ideation.md STEP 3, &#x27;Under 50 characters&#x27;). While it promises a solution, it doesn&#x27;t immediately call out the specific person it&#x27;s for, making it less targeted (SOP_Ideation.md STEP 3, &#x27;Specific person, not everyone&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Script Instagram Reels to Sign $200K+ Clients</div>
+        <div class="fix-notes">This title shortens it to under 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses a variant of &#x27;How to (result) Without (common sacrifice they hate)&#x27; by focusing on the direct outcome of signing high-value clients through Reels (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The white text on a dark background, and the red underline/logos, create good contrast and stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;$200K SCRIPTING SYSTEM&#x27; is large and bold enough to be readable at mobile size, and your face is clear.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Your face is neutral, looking at your laptop. The faces of the other creators are also neutral. A stronger emotion from you would help grab attention.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;$200K SCRIPTING SYSTEM&#x27; is 3 words, which is good (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The split screen creates multiple competing focal points (text, you, three other creators), which makes it cluttered.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses a similar split-screen layout, text style (bold, white, red underline), and your presence, showing consistency with other thumbnails in this batch.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> $200K SCRIPTING SYSTEM</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;$200K SCRIPTING SYSTEM&#x27; largely repeats the title&#x27;s core message, rather than adding new curiosity or emotion. The images of other creators add credibility and context.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is Authority/How-To. The thumbnail uses a &#x27;data on screen (other creators/views) + creator&#x27;s confident face&#x27; concept (SOP_Thumbnail.md STEP 3), but your face is neutral, and the multiple faces create clutter.</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail effectively uses social proof by featuring well-known creators, but the overall composition is cluttered with too many competing elements. Your neutral expression doesn&#x27;t convey the authority of a &#x27;scripting system&#x27; that generated $200K+. Reducing clutter and focusing on one clear message would improve click-through (SOP_Thumbnail.md STEP 2.3, 2.5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, you with a confident, slightly intrigued expression, looking at the screen. Text overlay: &#x27;REELS SCRIPT: $200K&#x27; or &#x27;STOP SCRIPTING WRONG&#x27;. Colors: Bright yellow text on a dark, contrasting background. Focal point: Your face and the bold text. Composition: Your face on the right, looking left towards the text, which is overlaid on a simplified graphic showing a &#x27;before/after&#x27; or &#x27;wrong way/right way&#x27; for a Reel script.</div>
+        <div class="fix-notes">This concept uses a confident face and a concise, problem-solution text overlay to create a single, strong focal point. It directly supports the video&#x27;s contrarian hook and promise of a better scripting system for Reels, aligning with the Authority/How-To content type (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly states it&#x27;s for &#x27;Most of you guys&#x27; (implicitly coaches/agencies) and &#x27;you really want to sign high-ticket clients&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;break down the exact scripting structure I have used for Instagram Reels... I&#x27;m going to break the entire scripting system I use down in full details&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — You establish credibility by stating you&#x27;ve &#x27;Generated over $150,000 directly from YouTube and Instagram organic&#x27;, but it lacks a timeframe for the $150K (SOP_Scripting.md PART 5, &#x27;WHY&#x27;).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Contrarian Position</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise of breaking down Instagram Reels scripting for signing clients.</div>
+      <div class="kv"><b>Opening line:</b> In this video, I&#x27;m going to break down the exact scripting structure I have used for Instagram Reels.</div>
+      <h4>Verdict</h4>
+      <p>Your hook effectively uses a contrarian position to immediately grab attention, clearly states who it&#x27;s for, and what value it delivers. It provides specific results to establish credibility, though a timeframe for the $150K would make it even stronger (SOP_Scripting.md PART 5, &#x27;WHY&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">You&#x27;re making a huge mistake: scripting Reels like YouTube videos. That&#x27;s why your short-form organic isn&#x27;t signing high-ticket clients. My exact Instagram Reels scripting structure has generated over $150,000 from YouTube and Instagram organic. This video is specifically for Reels because it&#x27;s a completely different game with different principles. If you really want to sign high-ticket clients from short-form, you need this system. I&#x27;m breaking it down in full detail. Let&#x27;s begin.</div>
+        <div class="fix-notes">This uses a Contrarian Position hook, immediately challenging a common belief and then stating the value and who it&#x27;s for. It establishes credibility with specific results and a clear promise of a unique system (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video focuses entirely on the scripting principles and structure for Instagram Reels, staying on this core problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Transitions are clear, using phrases like &#x27;So, the first principle, which is negativity always wins,&#x27; &#x27;The second principle, which is the you format,&#x27; and &#x27;Now, the last principle, which is the audible flow check&#x27;.</div>
+      <div class="kv"><b>Specificity:</b> The video is highly specific, mentioning &#x27;$150,000,&#x27; &#x27;George Clements,&#x27; &#x27;1,000 followers to now 4,000 followers,&#x27; and &#x27;3 seconds&#x27; for the hook, making its claims concrete.</div>
+      <div class="kv"><b>Tone:</b> The tone is human, direct, and uses contractions. You generally avoid AI-tone patterns, though there are a few instances of nominalization and slightly clunky phrasing.</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets Stage 3 (Solution Aware) viewers, who know Instagram Reels exist for marketing but need a specific, proven scripting system to acquire high-ticket clients.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how to simplify content, &#x27;SAFE&#x27; by referencing client results, &#x27;NEW&#x27; by explaining the different system for Reels, and &#x27;BIG/FOMO&#x27; by highlighting the strong reaction to negativity (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[01:23] What I mean by this? If this is the emotion scale, this is zero and this is 10 and this is the more you go here, the more positive it gets. If it&#x27;s negative and it&#x27;s like [01:45] we give them only like five out of 10 negativity here, for example, it&#x27;s going to go on the emotion scale by like eight. Like if we only give five negativity, it&#x27;s going to go like eight. How much emotions are going to feel? But if it&#x27;s positive emotions, if only give also five, it&#x27;s going to go like the emotions are going to be like only like three, [02:06] maybe. I know I didn&#x27;t explain it a good way, but like basically people react more to negativity and loss than gain, okay?&rdquo;</div>
+          <div class="why">This explanation is rambling and unclear, making it hard to follow. It reduces the &#x27;value per second&#x27; (SOP_Scripting.md PART 3, &#x27;Shorten and simple&#x27;).</div>
+          <div class="better">Here&#x27;s what I mean: people react more strongly to negativity and loss than to positive gain. If you give 5 units of negativity, it feels like 8. But 5 units of positivity might only feel like 3. Basically, people would rather not lose $10K than gain $10K.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;[03:53] language that relates to your prospect. As you can see guys with this example here, this a script that while generated the the mistake here that Claude did and you really want to be aware especially if you&#x27;re going to use AI of these minor mistakes is a really thought using relatable language. It&#x27;s saying here every person. When in reality you should [04:14] really change it to every agency owner or every business owner or most business owners, something related to that.&rdquo;</div>
+          <div class="why">This section is very difficult to follow due to rambling, poor sentence structure, and unclear references (&#x27;Claude did&#x27;). It needs significant simplification and directness (SOP_Scripting.md PART 3, &#x27;Shorten and simple,&#x27; &#x27;Human Tone ✅&#x27;).</div>
+          <div class="better">Use language that directly relates to your prospect. For example, if you&#x27;re using AI, watch out for generic terms like &#x27;every person.&#x27; You should change it to &#x27;every agency owner&#x27; or &#x27;every business owner&#x27; to make it specific.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body provides valuable principles for scripting Reels, using specific examples and maintaining a direct tone. However, some explanations are rambling and unclear, reducing the &#x27;value per second&#x27; and making it harder for the viewer to comprehend and execute immediately (SOP_Scripting.md PART 3, &#x27;Shorten and simple&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction. This structure is ideal for breaking down a complex skill (scripting Reels) into its fundamental principles and actionable steps (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — You jump directly to the offer, not reiterating the video&#x27;s promise.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You don&#x27;t explicitly state that the viewer could achieve results if they follow the advice.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You jump directly to the offer, missing the pivot to the difficulty of DIY.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is specific: &#x27;If you want this entire system built completely done for you... click the first link in the description and book a call&#x27;.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This is a non-negotiable step for high-ticket offers and is completely missing (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues after the main CTA, redirecting to another video, which dilutes the primary call to action.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is framed as a &#x27;completely done for you&#x27; system, implying ease and saving time, positioning it as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;click the first link in the description and book a call&#x27; is specific and actionable.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely misses the first three steps of the Power Offer Outro, failing to reiterate the video&#x27;s value or pivot to the difficulty of DIY. Most critically, it omits the non-negotiable qualify/disqualify step, which is essential for high-ticket offers and pre-qualifying leads (SOP_Scripting.md PART 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the exact scripting structure I use for Instagram Reels to sign high-ticket clients. If you follow everything I&#x27;ve broken down here, you&#x27;ll be able to script Reels that actually convert. However, building this entire YouTube and Instagram system on your own takes months. Between the ideation, scripting, editing, SEO, and thumbnails — it&#x27;s a full-time job on top of running your coaching business. If you want to skip all that and have my team build and run the whole system for you — just record 4 to 6 hours every month — click the first link in the description right now. This isn&#x27;t for coaches just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making organic content your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is a done-for-you YouTube/Instagram system. Step 1 reiterates the Reels scripting promise. Step 2 validates the viewer&#x27;s potential. Step 3 clearly outlines the difficulty of DIY. Step 4 presents the done-for-you offer as the easy path with a specific CTA. Step 5 qualifies for established businesses with revenue and disqualifies beginners, as required by SOP_Scripting.md PART 7.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=K8oPBLf9b-M" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/K8oPBLf9b-M/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/K8oPBLf9b-M/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Why You&#x27;re Struggling to Close Clients From YouTube (And Exactly How To Fix It)</h3>
+          <span class="badge s-low">5.8/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>50 views</span>
+          <span>Published 26 May 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets a broad, problem-aware audience who knows they&#x27;re struggling to close clients from YouTube but doesn&#x27;t know why, aiming to interrupt their scroll and provide a clear solution (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 82 characters long, which is too long for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The phrase &#x27;Why You&#x27;re Struggling&#x27; directly calls out the viewer, making it highly specific to their situation.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to explain why they&#x27;re struggling and how to fix it.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — &#x27;Struggling to Close Clients From YouTube&#x27; is highly searchable for people experiencing this problem.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The keywords &#x27;Struggling to Close Clients From YouTube&#x27; are present within the first 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Why 90% of (niche) Never (result) — and How to Fix It</div>
+      <div class="kv"><b>Pain/desire first:</b> The title leads directly with the ICP&#x27;s pain (&#x27;Why You&#x27;re Struggling to Close Clients From YouTube&#x27;).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile feeds and loses impact (SOP_Ideation.md STEP 3, &#x27;Under 50 characters&#x27;). While it&#x27;s excellent at calling out the specific person and leading with pain, its length is a significant drawback (SOP_Ideation.md STEP 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Why Your YouTube Isn&#x27;t Getting Clients (Fix It)</div>
+        <div class="fix-notes">This title shortens it to under 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses the &#x27;Why 90% of (niche) Never (result) — and How to Fix It&#x27; template, directly addressing the viewer&#x27;s pain and promising a solution in a concise, impactful way (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The white text on a dark background, and the red elements, create good contrast and stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;NO SALES&#x27; is large and bold enough to be readable at mobile size, and your face is clear. The &#x27;$0.00&#x27; is also readable.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Your face is neutral, looking at your laptop. For a problem-aware video, a concerned or frustrated expression would be more impactful (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;NO SALES&#x27; is 2 words, which is good (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The split screen creates two competing focal points (you on the left, the &#x27;NO SALES&#x27; graphic on the right), though the graphic is very strong.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses a similar split-screen layout, text style (bold, white, red elements), and your presence, showing consistency with other thumbnails in this batch.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> NO SALES</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;NO SALES&#x27; directly reflects the pain point in the title (&#x27;Why You&#x27;re Struggling to Close Clients From YouTube&#x27;), adding strong visual emphasis to the problem.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is Problem-Aware Content. The thumbnail uses a &#x27;Bold problem statement in text&#x27; and &#x27;Before/After split&#x27; (implied by the current &#x27;$0.00&#x27; state) concept (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail effectively communicates the core problem of &#x27;no sales&#x27; with strong visual impact and clear text, making it highly relevant to the problem-aware viewer. However, your neutral expression misses an opportunity to convey empathy or concern, which could further engage the audience in their pain (SOP_Thumbnail.md STEP 2.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, you with a concerned or slightly frustrated expression, looking at the &#x27;NO SALES&#x27; graphic. Text overlay: &#x27;NO YOUTUBE CLIENTS&#x27; or &#x27;FIX THIS NOW&#x27;. Colors: Red and black for the problem, with a contrasting yellow or green for the &#x27;fix&#x27; element. Focal point: The &#x27;NO SALES&#x27; graphic and your expression. Composition: Your face on the left, looking towards the &#x27;NO SALES&#x27; graphic on the right, with a subtle upward arrow or &#x27;FIX&#x27; element to suggest a solution.</div>
+        <div class="fix-notes">This concept enhances the Problem-Aware content type by adding a strong, empathetic emotion to your face, directly connecting with the viewer&#x27;s struggle. The concise, action-oriented text overlay reinforces the problem and promises a solution, creating a clear focal point (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly states it&#x27;s for &#x27;your YouTube channel,&#x27; &#x27;you&#x27;re not booking enough goals,&#x27; and &#x27;you&#x27;re suffering with your organic content system&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;break down the biggest five mistakes killing your YouTube channel&#x27; and that &#x27;fixing them is going to take your YouTube channel... to the next level&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook completely misses establishing your credibility with specific results or a timeframe, which is a non-negotiable for a strong hook (SOP_Scripting.md PART 5, &#x27;WHY&#x27;).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Completion Compulsion</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise of addressing struggles and fixing them.</div>
+      <div class="kv"><b>Opening line:</b> In this video, I&#x27;m going to break down the biggest five mistakes killing your YouTube channel right now.</div>
+      <h4>Verdict</h4>
+      <p>Your hook clearly states who it&#x27;s for and what value it delivers, directly addressing the viewer&#x27;s pain. However, it completely misses establishing your credibility with specific results and a timeframe, which is a non-negotiable for a strong hook. This makes viewers less likely to trust the advice immediately (SOP_Scripting.md PART 5, &#x27;WHY&#x27; non-negotiable).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">You&#x27;re struggling to close clients from YouTube, and I&#x27;m about to show you exactly why—and how to fix it. I&#x27;m breaking down the biggest five mistakes killing your YouTube channel right now, the ones stopping you from booking calls and making money. Why listen to me? I&#x27;ve helped my clients generate over $400,000 in just 6 months using YouTube organic. Fixing these mistakes will take your channel to the next level. Let&#x27;s get into it.</div>
+        <div class="fix-notes">This uses a Completion Compulsion hook, immediately addressing the viewer&#x27;s pain and promising a solution. It then quickly establishes credibility with specific results and a timeframe, which was missing (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video focuses on five specific mistakes preventing client acquisition from YouTube and how to fix them, staying on this core problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Contrarian Reframe</div>
+      <div class="kv"><b>Transitions:</b> Transitions are clear, using phrases like &#x27;The first mistake, which is you&#x27;re judging your channel by the wrong metrics,&#x27; and &#x27;Now, the third mistake which is really important&#x27;.</div>
+      <div class="kv"><b>Specificity:</b> The video is highly specific, mentioning &#x27;subscribers, total views and likes,&#x27; &#x27;I closed and tracking the UTMs,&#x27; and &#x27;400 maximum&#x27; for production cost, making its claims concrete.</div>
+      <div class="kv"><b>Tone:</b> The tone is human, direct, and uses contractions. You generally avoid AI-tone patterns, though there are a few instances of nominalization and slightly clunky phrasing. The use of &#x27;shit&#x27; and &#x27;cooked&#x27; adds to the blunt, human tone.</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets Stage 2 (Problem Aware) viewers, who know they have a problem (not closing clients from YouTube) but don&#x27;t know the specific solutions or root causes.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by offering shortcuts and simple fixes, &#x27;SAFE&#x27; by framing your offer as the proven path, &#x27;NEW&#x27; by presenting a new way of thinking about YouTube, and &#x27;BIG/FOMO&#x27; by highlighting the cost of mistakes and lost opportunities (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[00:20] The first mistake, which is you&#x27;re judging your channel by the wrong metrics. So, wrong metrics that do not pay you are subscribers, total views and likes, click-through rate for the thumbnail, average view duration, watch time, and engagement rate.&rdquo;</div>
+          <div class="why">The phrase &#x27;Metrics that do not pay you are&#x27; is a bit clunky (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27;).</div>
+          <div class="better">The first mistake: you&#x27;re judging your channel by the wrong metrics. Things like subscribers, total views, likes, CTR, average view duration, watch time, and engagement rate? They don&#x27;t pay you.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;[02:07] So I hear this a lot. If I give away my whole methodology, no one will pay me to do it. If you&#x27;re selling a don&#x27;t for you offer, you really want to give away everything because you are not selling the info. With a don&#x27;t for your offer, you&#x27;re not selling the info. So, just give it away because you are selling the implementation of that info, right?&rdquo;</div>
+          <div class="why">The repetition of &#x27;don&#x27;t for you offer&#x27; and &#x27;selling the info&#x27; makes the explanation less concise. &#x27;Implementation of that info&#x27; is a nominalization (SOP_Scripting.md PART 3, &#x27;Shorten and simple,&#x27; &#x27;Nominalization Trap&#x27;).</div>
+          <div class="better">I hear this a lot: &#x27;If I give away my whole method, no one will pay me.&#x27; But if you sell a done-for-you offer, you&#x27;re not selling information. You&#x27;re selling the *doing* of that information. So give it all away.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively identifies common mistakes and provides clear, actionable solutions, directly addressing the viewer&#x27;s pain points. The tone is blunt and human, which is engaging. While mostly strong, some sections could be more concise and avoid minor nominalizations for even greater impact (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Contrarian Reframe. This structure is excellent for debunking common mistakes and presenting a new, more effective way of thinking and acting, which is exactly what this video does (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — You jump directly to the offer, not reiterating the video&#x27;s promise.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You don&#x27;t explicitly state that the viewer could achieve results if they follow the advice.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You jump directly to the offer, missing the pivot to the difficulty of DIY.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is specific: &#x27;If you want me on my team to implement an entire YouTube and Instagram content ecosystem handled completely done for you... click the first link in the description and book a call&#x27;.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This is a non-negotiable step for high-ticket offers and is completely missing (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues after the main CTA, redirecting to another video, which dilutes the primary call to action.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is framed as a &#x27;completely done for you&#x27; system, implying ease and saving time, positioning it as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;click the first link in the description and book a call&#x27; is specific and actionable.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses critical steps of the Power Offer Outro, specifically reiterating the video&#x27;s value and validating the viewer&#x27;s potential. Most critically, it omits the non-negotiable qualify/disqualify step, which is essential for high-ticket offers and pre-qualifying leads (SOP_Scripting.md PART 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the biggest five mistakes killing your YouTube channel and stopping you from closing clients. If you fix these, you&#x27;ll start making money easily. However, implementing an entire YouTube and Instagram content ecosystem — from ideation, scripting, editing, SEO, and thumbnails — is a massive undertaking. If you want to skip all that and have my team build and run the whole system for you — so you only record 4 to 6 hours every month — click the first link in the description right now. This isn&#x27;t for coaches just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is a done-for-you YouTube/Instagram system. Step 1 reiterates the video&#x27;s promise (fixing mistakes). Step 2 validates the viewer&#x27;s potential. Step 3 clearly outlines the difficulty of DIY. Step 4 presents the done-for-you offer as the easy path with a specific CTA. Step 5 qualifies for established businesses with revenue and disqualifies beginners, as required by SOP_Scripting.md PART 7.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=2FHTm53snF4" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/2FHTm53snF4/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/2FHTm53snF4/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>How We Made George Clements $150K+ Using YouTube &amp; Instagram Organic In 100 Days</h3>
+          <span class="badge s-low">5.8/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-bof">BOF</span>
+          <span>88 views</span>
+          <span>Published 19 May 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video is a detailed case study and system breakdown for a specific client, designed to provide proof of concept and push warm viewers closer to booking a call by showing how results are achieved (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 88 characters long, which is too long for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title focuses on &#x27;George Clements,&#x27; not directly on the viewer. While it shows what&#x27;s possible, it doesn&#x27;t immediately speak to the viewer&#x27;s situation.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to show how George Clements made $150K+ using YouTube &amp; Instagram Organic in 100 days.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — &#x27;George Clements YouTube Instagram Organic&#x27; is searchable for those who know him or are looking for case studies.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The keywords &#x27;George Clements&#x27; and &#x27;YouTube&#x27; are present within the first 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> How I Helped a (client type) Go From (A) to (B) in (timeframe)</div>
+      <div class="kv"><b>Pain/desire first:</b> The title leads with a result and a mechanism, which appeals to desire, but not directly with the ICP&#x27;s pain.</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile feeds and loses impact (SOP_Ideation.md STEP 3, &#x27;Under 50 characters&#x27;). While it&#x27;s a strong results-based title, it focuses on the client&#x27;s achievement rather than immediately framing it as a solution for the viewer (SOP_Ideation.md STEP 3, &#x27;Specific person, not everyone&#x27;).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Client Case Study: $150K+ in 100 Days (YouTube &amp; IG)</div>
+        <div class="fix-notes">This title shortens it to under 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses a direct, results-based approach, clearly labeling it as a &#x27;Client Case Study&#x27; which is a strong BOF content type (SOP_Ideation.md Method 3, &#x27;How I Helped a (client type) Go From (A) to (B) in (timeframe)&#x27; in spirit, but more direct).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The blue and white text on a dark background, and the logos, create good contrast and stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;$150K in 100 days&#x27; is large and bold enough to be readable at mobile size, and your face is clear.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Your face is neutral, looking at your laptop. For a case study, a more triumphant or confident expression could be stronger (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;$150K in 100 days&#x27; is 4 words, which is good (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The split screen creates two competing focal points (you on the left, the text/diagram on the right), which can divide attention.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses a similar split-screen layout, text style (bold, white/blue, logos), and your presence, showing consistency with other thumbnails in this batch.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> $150K in 100 days</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;$150K in 100 days&#x27; directly reflects the core result and timeframe from the title, adding strong visual emphasis to the proof.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is a Story/Case Study. The thumbnail uses a &#x27;Client photo (implied by the result) + big result number in bold&#x27; concept (SOP_Thumbnail.md STEP 3), but your face is neutral.</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail effectively communicates the core result and timeframe with strong visual impact and clear text, making it highly relevant for a case study. However, your neutral expression misses an opportunity to convey triumph or confidence, which could further engage the audience with the success story (SOP_Thumbnail.md STEP 2.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, you with a confident, triumphant expression. Text overlay: &#x27;$150K+ CLIENT WIN&#x27; or &#x27;90 DAY BREAKDOWN&#x27;. Colors: Bright blue/white text on a contrasting dark background. Focal point: Your face and the bold result number. Composition: Your face on the right, looking left towards the text, which is overlaid on a simplified graphic showing a clear upward trend or a &#x27;before/after&#x27; visual.</div>
+        <div class="fix-notes">This concept enhances the Story/Case Study video type by adding a strong, triumphant emotion to your face, directly connecting with the success story. The concise, benefit-driven text overlay reinforces the result and timeframe, creating a clear focal point (SOP_Thumbnail.md STEP 2.3, 2.4, 2.5, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly states it&#x27;s for &#x27;your business&#x27; (implicitly coaches/agencies).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;break down this entire system and what exactly we did for him and what are the exact steps so you can just replicate it for your business and start scaling with organic content&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — You establish credibility by stating you&#x27;ve &#x27;generated my client, George Clevis, over $155,000 using YouTube and Instagram organic in the last 90 days&#x27;, with specific results and a timeframe.</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Completion Compulsion</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise of breaking down the system used for George Clements&#x27; results.</div>
+      <div class="kv"><b>Opening line:</b> So, I&#x27;ve generated my client, George Clevis, over $155,000 using YouTube and Instagram organic in the last 90 days.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is strong, immediately establishing credibility with specific results and clearly stating what the viewer will learn and who it&#x27;s for. It effectively sets up the video as a comprehensive breakdown of a valuable system (SOP_Scripting.md PART 5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">You&#x27;re about to see how I generated my client, George Clements, over $155,000 using YouTube and Instagram organic in just 90 days. I&#x27;m breaking down this entire system and the exact steps we took so you can replicate it for your business and start scaling with organic content. Let&#x27;s begin.</div>
+        <div class="fix-notes">This uses a Completion Compulsion hook, immediately stating the value and who it&#x27;s for, then quickly establishing credibility with specific results and a timeframe (SOP_Scripting.md PART 5). It removes the &#x27;So, in this video, we&#x27;re going to break down&#x27; for a more direct opening.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video focuses on breaking down the system used for George Clements, covering his &#x27;before&#x27; situation, the results achieved, and the foundational strategies, staying on this core purpose.</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Transformation Path</div>
+      <div class="kv"><b>Transitions:</b> Transitions are clear, using phrases like &#x27;So, what was his before us situation?&#x27;, &#x27;So, what&#x27;s the full funnel flow?&#x27;, and &#x27;Now for the YouTube funnel&#x27;.</div>
+      <div class="kv"><b>Specificity:</b> The video is highly specific, mentioning &#x27;$155,000,&#x27; &#x27;90 days,&#x27; &#x27;400 subscribers,&#x27; &#x27;1,000 followers,&#x27; and &#x27;two to five warm leads every single day&#x27;, making its claims concrete.</div>
+      <div class="kv"><b>Tone:</b> The tone is human, direct, and uses contractions. You generally avoid AI-tone patterns, though there are a few instances of nominalization and slightly clunky phrasing.</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets Stage 4 (Product Aware) viewers, who know you exist and are looking for proof of your service&#x27;s effectiveness, specifically how you achieve results for clients.</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by highlighting delegation and minimum input, &#x27;SAFE&#x27; by referencing client results, &#x27;NEW&#x27; by explaining the unique system, and &#x27;BIG/FOMO&#x27; by showcasing large financial results and the cost of doing it alone (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[00:22] A not predictable system for content creation and he was super super involved in the content creation process.&rdquo;</div>
+          <div class="why">&#x27;A not predictable system&#x27; is grammatically awkward. &#x27;Super super involved&#x27; is repetitive. &#x27;Content creation process&#x27; is a nominalization (SOP_Scripting.md PART 3, &#x27;Human Tone ✅,&#x27; &#x27;Nominalization Trap&#x27;).</div>
+          <div class="better">His content creation system wasn&#x27;t predictable, and he was way too involved in making content.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;[02:24] We start by identifying the most common pain points, questions, and struggles. And pain points is ICP has I repeated pain points twice. Whatever.&rdquo;</div>
+          <div class="why">&#x27;Pain points is ICP has&#x27; is grammatically incorrect. The self-correction &#x27;I repeated pain points twice. Whatever.&#x27; is unprofessional for a script (SOP_Scripting.md PART 3, &#x27;Human Tone ✅&#x27;).</div>
+          <div class="better">We started by identifying the most common pain points, questions, and struggles our ICP had.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively breaks down a client case study, detailing the &#x27;before&#x27; and &#x27;after&#x27; and the system used. It uses specific numbers and examples to build strong social proof. While the tone is generally human, some grammatical errors and informal self-corrections detract from its professionalism and clarity (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Transformation Path. This structure is excellent for showcasing a client&#x27;s journey from a &#x27;before&#x27; state to a successful &#x27;after&#x27; state, which is the core of this case study (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — You start with &#x27;Now, I know this system is complicated...&#x27; instead of reiterating the case study&#x27;s promise.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You don&#x27;t explicitly state that the viewer could achieve results if they follow the advice.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — The phrase &#x27;Now, I know this system is complicated and I know it consumes a lot of time&#x27; effectively pivots to the difficulty of doing it alone.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is specific: &#x27;if you want someone to do this entire system completely done for you... click the first link in the description and book a call&#x27;.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This is a non-negotiable step for high-ticket offers and is completely missing (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues after the main CTA, redirecting to another video, which dilutes the primary call to action.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is framed as a &#x27;completely done for you&#x27; system, implying ease and saving time, positioning it as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;click the first link in the description and book a call&#x27; is specific and actionable.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses critical steps of the Power Offer Outro, specifically reiterating the video&#x27;s value and validating the viewer&#x27;s potential. Most critically, it omits the non-negotiable qualify/disqualify step, which is essential for high-ticket offers and pre-qualifying leads (SOP_Scripting.md PART 7).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s how we made George Clements $150K+ using YouTube and Instagram organic in 100 days. If you&#x27;ve seen these results and want them for your business, you know this system works. However, this entire system is complicated and takes a ton of time. You&#x27;d spend 20 hours a week just on content — ideating, scripting, editing, and posting — on top of running your business. If you want to skip all that and have my team build and run the whole system for you — so you only record 6 hours a month — click the first link in the description right now. This isn&#x27;t for business owners just starting with no budget. If you&#x27;re already making $30,000+ per month and you&#x27;re serious about scaling with organic content — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is a done-for-you YouTube/Instagram system. Step 1 reiterates the case study&#x27;s promise. Step 2 validates the viewer&#x27;s potential. Step 3 clearly outlines the difficulty of DIY. Step 4 presents the done-for-you offer as the easy path with a specific CTA. Step 5 qualifies for established businesses with revenue and disqualifies beginners, as required by SOP_Scripting.md PART 7.</div>
+      </div></div>
+            </details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Top 3 Recurring Gaps</h2>
+    
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 1 — Broken Call to Action</h3>
+          <div class="gap-freq">FOUND IN 8 OF 8 VIDEOS</div>
+          <p>Every video you make is an opportunity to get a new client, but your outros completely miss the mark. You&#x27;re not telling people who you help, what to do next, or why they should act now. This means warm leads are just watching your content and then leaving without taking the next step to work with you.</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 7</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 2 — Titles &amp; Thumbnails That Don&#x27;t Get Clicks</h3>
+          <div class="gap-freq">FOUND IN 8 OF 8 VIDEOS</div>
+          <p>Your titles are too long and often don&#x27;t speak directly to the viewer&#x27;s pain or desire, so people scroll past without clicking. Your thumbnails also lack strong emotional expressions or a clear focal point, making them blend in instead of stand out. This means fewer people click your videos, no matter how good the content is.</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Ideation.md STEP 3, SOP_Thumbnail.md STEP 2.3, 2.5</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 3 — Hooks That Don&#x27;t Hook Viewers</h3>
+          <div class="gap-freq">FOUND IN 5 OF 8 VIDEOS</div>
+          <p>You&#x27;re losing viewers in the first 15 seconds because your hooks don&#x27;t always clearly state who the video is for, what value it delivers, or why they should trust you. If people don&#x27;t immediately know this video is for them, they&#x27;ll just scroll to the next one.</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 5</div>
+        </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5 Recommended Videos</h2>
+    
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 1</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Why 90% of Coaches Never Get Clients From YouTube (And How to Fix It)</h3>
+          <div class="kv"><b>Why now:</b> This targets a huge pain point for coaches and promises a solution, bringing in new viewers who are problem-aware but don&#x27;t know you yet.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Alex Hormozi. Face: Yes. Text overlay: 3 words (&#x27;WHY YOU&#x27;RE BROKE&#x27;). Dominant colour: Red/Black. Expression: Concerned/Frustrated</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 2</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>STOP Cold DMing — Do This Instead to Get Clients</h3>
+          <div class="kv"><b>Why now:</b> This directly addresses a common, frustrating method coaches use and offers a better alternative, attracting people tired of the old way.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Grant Cardone. Face: Yes. Text overlay: 3 words (&#x27;COLD DMs DEAD&#x27;). Dominant colour: Red/White. Expression: Confident/Dismissive</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 3</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>How to Book High-Ticket Calls Without Posting Daily</h3>
+          <div class="kv"><b>Why now:</b> This appeals to coaches who want results but are overwhelmed by content demands, showing them an easier path to a big goal.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Iman Gadzhi. Face: Yes. Text overlay: 3 words (&#x27;NO DAILY POSTS&#x27;). Dominant colour: Blue/White. Expression: Calm/Confident</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 4</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Watch This If Your YouTube Videos Get No Views — Here&#x27;s Why</h3>
+          <div class="kv"><b>Why now:</b> This speaks directly to a common frustration for coaches trying YouTube, offering a clear explanation for their lack of results.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Patrick Bet-David. Face: Yes. Text overlay: 3 words (&#x27;NO VIEWS?&#x27;). Dominant colour: Yellow/Black. Expression: Surprised/Concerned</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-mof">MOF</span><span class="muted">RECOMMENDED VIDEO 5</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>The 3 Mistakes Keeping Coaches From Consistent Inbound Clients</h3>
+          <div class="kv"><b>Why now:</b> This establishes your authority by identifying core problems and implicitly promising a solution, deepening trust with viewers who already know you.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Ryan Serhant. Face: Yes. Text overlay: 3 words (&#x27;3 MISTAKES&#x27;). Dominant colour: Green/White. Expression: Authoritative/Direct</div>
+        </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <h2>READY TO FIX ALL OF THIS?</h2>
+    <p class="book"><i class="ti ti-calendar-event" style="margin-right:8px;vertical-align:-3px"></i>Book a free 30-minute strategy call.</p>
+    <div class="site">EMPIREPRODUCTION.NET</div>
+    <p class="qualify">This is not for anyone just starting out with no budget.
+    If you're already generating revenue and serious about making YouTube your primary
+    client acquisition channel — the link is above.</p>
+  </div>
+</div>
+
+<footer>EMPIRE PRODUCTION &middot; CHANNEL AUDIT ENGINE &middot; 12 July 2026</footer>
+
+</body>
+</html>
