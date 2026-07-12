@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empire Production — Channel Audit — Samu Kovács</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#080808; color:#e8e8e8; font-family:'Space Grotesk',Arial,sans-serif; line-height:1.65; font-size:15px; }
+.wrap { max-width:980px; margin:0 auto; padding:0 28px; }
+h1,h2,h3,.bebas { font-family:'Bebas Neue',Impact,sans-serif; font-weight:400; letter-spacing:1.5px; }
+a { color:#c8202c; text-decoration:none; }
+.muted { color:#888888; }
+
+header { background:#0d0d0d; border-bottom:2px solid #c8202c; padding:52px 0 44px; }
+.kicker { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:4px; color:#c8202c; font-size:16px; margin-bottom:10px; }
+header h1 { font-size:52px; line-height:1.05; margin-bottom:6px; }
+.header-meta { color:#888888; font-size:14px; margin-bottom:26px; }
+.health { display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
+.health-score { font-family:'Bebas Neue',Impact,sans-serif; font-size:96px; color:#c8202c; line-height:1; }
+.health-score span { font-size:34px; color:#888888; }
+.diagnosis { max-width:600px; font-size:16px; border-left:3px solid #c8202c; padding-left:18px; }
+
+section { padding:44px 0 8px; }
+section > .wrap > h2 { font-size:32px; margin-bottom:22px; border-bottom:1px solid #1a1a1a; padding-bottom:10px; }
+
+.panel { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:26px; margin-bottom:22px; }
+.funnel-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.funnel-label { width:52px; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:18px; }
+.funnel-track { flex:1; background:#141414; border-radius:4px; height:22px; overflow:hidden; }
+.funnel-bar { height:100%; border-radius:4px; min-width:2px; }
+.funnel-count { width:90px; color:#888888; font-size:13px; }
+.avg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; margin-top:8px; }
+.avg-cell { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:16px; text-align:center; }
+.avg-cell .num { font-family:'Bebas Neue',Impact,sans-serif; font-size:40px; line-height:1; }
+.avg-cell .lbl { color:#888888; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+.badge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:1px; font-size:20px; padding:2px 12px; border-radius:6px; background:#141414; border:1px solid #1a1a1a; }
+.s-low  { color:#c8202c; border-color:#c8202c; }
+.s-mid  { color:#e8a520; }
+.s-high { color:#4caf7d; }
+
+.fbadge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:14px; padding:2px 12px; border-radius:4px; }
+.f-tof { background:#c8202c; color:#fff; }
+.f-mof { background:#3a3a3a; color:#e8e8e8; }
+.f-bof { background:#141414; color:#888888; border:1px solid #333; }
+
+.card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; margin-bottom:26px; overflow:hidden; }
+.card.flag { border-left:3px solid #c8202c; }
+.card-head { padding:22px 24px 16px; }
+.thumb-link { display:block; position:relative; margin:-22px -24px 18px; }
+.thumb-link img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#141414; }
+.thumb-link .thumb-play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:52px; height:52px;
+        border-radius:50%; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;
+        opacity:0; transition:opacity .15s; }
+.thumb-link .thumb-play i { font-size:22px; color:#fff; margin:0 0 0 3px; }
+.thumb-link:hover .thumb-play { opacity:1; }
+.card-title-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.card-title-row h3 { font-size:26px; line-height:1.15; }
+.card-meta { color:#888888; font-size:13px; margin-top:8px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.card-note { padding:0 24px 22px; color:#888888; font-style:italic; }
+.skip-thumb { width:120px; aspect-ratio:16/9; object-fit:cover; border-radius:6px; background:#141414; flex-shrink:0; }
+.skip-row { display:flex; gap:16px; align-items:flex-start; padding:22px 24px; }
+
+details { border-top:1px solid #1a1a1a; }
+details summary { cursor:pointer; padding:14px 24px; display:flex; align-items:center; gap:12px; list-style:none; user-select:none; font-weight:500; }
+details summary::-webkit-details-marker { display:none; }
+details summary .chev { margin-left:auto; color:#888888; transition:transform .2s; font-size:12px; }
+details[open] summary .chev { transform:rotate(90deg); }
+details summary:hover { background:#111; }
+.acc-body { padding:6px 24px 24px; }
+.acc-body h4 { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:16px; color:#888888; margin:18px 0 6px; }
+.kv { margin-bottom:8px; }
+.kv b { color:#e8e8e8; }
+.check-row { display:flex; gap:10px; margin-bottom:6px; align-items:baseline; }
+.check-pass { color:#4caf7d; font-weight:700; white-space:nowrap; }
+.check-fail { color:#c8202c; font-weight:700; white-space:nowrap; }
+.check-weak { color:#e8a520; font-weight:700; white-space:nowrap; }
+
+.fix { border-left:3px solid #c8202c; background:#120d0d; border-radius:0 8px 8px 0; padding:16px 20px; margin-top:16px; }
+.fix-label { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; color:#c8202c; font-size:16px; margin-bottom:8px; }
+.fix .fix-text { white-space:pre-wrap; }
+.fix .fix-notes { color:#888888; font-size:13.5px; margin-top:10px; border-top:1px solid #2a1a1a; padding-top:10px; }
+
+.quote-block { border:1px solid #1a1a1a; border-radius:8px; padding:14px 16px; margin:10px 0; background:#0a0a0a; }
+.quote-block .q { color:#888888; font-style:italic; }
+.quote-block .why { margin:6px 0; }
+.quote-block .better { color:#e8e8e8; border-left:2px solid #4caf7d; padding-left:10px; }
+
+.gap-card { background:#0d0d0d; border:1px solid #1a1a1a; border-left:3px solid #c8202c; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.gap-card h3 { font-size:24px; margin-bottom:4px; }
+.gap-freq { color:#c8202c; font-size:13px; letter-spacing:1px; margin-bottom:10px; font-weight:700; }
+.gap-sop { color:#888888; font-size:13px; margin-top:10px; border-top:1px solid #1a1a1a; padding-top:10px; }
+
+.idea-card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.idea-card h3 { font-size:24px; margin-bottom:8px; }
+.idea-card .kv { font-size:14px; }
+
+.cta { background:#0d0d0d; border-top:2px solid #c8202c; margin-top:50px; padding:64px 0; text-align:center; }
+.cta h2 { font-size:44px; color:#e8e8e8; }
+.cta .book { font-size:19px; margin:10px 0 2px; }
+.cta .site { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; font-size:22px; color:#c8202c; margin-bottom:26px; }
+.cta .qualify { color:#888888; max-width:560px; margin:0 auto; font-size:14px; }
+footer { padding:26px 0 40px; text-align:center; color:#888888; font-size:12px; letter-spacing:1px; }
+
+@media print {
+  .card, .gap-card, .idea-card, .quote-block { break-inside: avoid; }
+  details summary .chev { display:none; }
+  .cta { break-before: page; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">EMPIRE PRODUCTION — CHANNEL AUDIT REPORT</div>
+    <h1>Samu Kovács</h1>
+    <div class="header-meta">@SamuKovacs &nbsp;&middot;&nbsp; https://www.youtube.com/@SamuKovacs &nbsp;&middot;&nbsp; Generated 12 July 2026</div>
+    <div class="health">
+      <div class="health-score">6.5<span>/10</span></div>
+      <div class="diagnosis">Your channel is putting out high-value content that proves your expertise, but you&#x27;re not converting those viewers into clients. Every video is missing the clear, compelling call to action that tells interested prospects how to work with you, so they just watch and leave.</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Channel Overview</h2>
+    <div class="panel">
+      <h3 style="font-size:22px;margin-bottom:14px">Funnel Distribution (8 videos analysed)</h3>
+      
+        <div class="funnel-row">
+          <div class="funnel-label">TOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:25%;background:#c8202c"></div></div>
+          <div class="funnel-count">2 videos (25%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">MOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:62%;background:#555555"></div></div>
+          <div class="funnel-count">5 videos (62%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">BOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:12%;background:#2a2a2a"></div></div>
+          <div class="funnel-count">1 video (12%)</div>
+        </div>
+      <p class="muted" style="margin-top:14px">Your channel is new, with all videos published within the last month. For a new channel, you should be making about 80% TOF (Top of Funnel) videos to get discovered, 20% MOF (Middle of Funnel) to build authority, and 0% BOF (Bottom of Funnel). You&#x27;re currently at 25% TOF, 62.5% MOF, and 12.5% BOF. This means you&#x27;re talking mostly to people who already know they need a solution, but not enough to the huge audience who doesn&#x27;t even know you exist yet. This costs you a massive pool of potential clients who are just starting their search.</p>
+    </div>
+    <div class="avg-grid">
+        <div class="avg-cell">
+          <div class="num s-mid">6.8</div>
+          <div class="lbl">Title</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">7.6</div>
+          <div class="lbl">Thumbnail</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-high">8.0</div>
+          <div class="lbl">Hook</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">7.6</div>
+          <div class="lbl">Body</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">2.4</div>
+          <div class="lbl">Outro</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">6.5</div>
+          <div class="lbl">Overall</div>
+        </div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Video-by-Video Audit</h2>
+    
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=XrvKbvBpwws" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/XrvKbvBpwws/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/XrvKbvBpwws/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>How He Uses YouTube to Close Clients Without Going Viral</h3>
+          <span class="badge s-mid">6.8/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-bof">BOF</span>
+          <span>74 views</span>
+          <span>Published 08 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video is a client testimonial, featuring a client discussing their specific results and experience with Samu&#x27;s service, which is designed to provide proof for viewers close to booking (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 55 characters long, slightly exceeding the ideal 50-character limit but within the 60-character maximum (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — Using &#x27;He&#x27; is vague and doesn&#x27;t name the client or the type of client, making it less specific for the target audience (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to show how to &#x27;Close Clients Without Going Viral,&#x27; which is a specific and desirable outcome for Samu&#x27;s ideal client (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Searchable / matches real demand</b> — While &#x27;How to close clients without going viral&#x27; is searchable, &#x27;How He Uses YouTube&#x27; is less likely to be a direct search query (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keywords &#x27;How He Uses YouTube to Close Clients&#x27; appear within the first 35 characters (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> How to (result) Without (common sacrifice they hate)</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the desire to &#x27;Close Clients&#x27; and addresses a common false belief or pain point (&#x27;Without Going Viral&#x27;), making it relevant to the ICP (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>The title is a bit vague by using &#x27;He&#x27; instead of naming the client or the type of client, which makes it less specific and less searchable for Samu&#x27;s ideal client (SOP_Ideation.md STEP 3.2). It also slightly exceeds the ideal character count (SOP_Ideation.md STEP 3.1), which can cut off the title on mobile feeds.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">How Gal Closed Clients With YouTube (100 Views)</div>
+        <div class="fix-notes">This rewrite uses the &#x27;How I Helped a (client type) Go From (A) to (B) in (timeframe)&#x27; template from SOP_Ideation.md Method 3. It names the specific client (&#x27;Gal&#x27;) and adds a specific, surprising result (&#x27;100 Views&#x27;) from the thumbnail, making it more results-oriented and intriguing for viewers. It also keeps the title under 50 characters, improving mobile readability.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The thumbnail uses bold white text on a dark background with a bright red accent, ensuring high contrast and visibility in the feed (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — Both faces are large and clear, and the bold text is easily readable even at small mobile sizes (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Both faces are neutral or slightly smiling; while acceptable for a case study, a stronger emotion could create more intrigue (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;Client Closed With 100 Views&#x27; is 6 words, exceeding the recommended 3-4 word maximum (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The central text &#x27;Client Closed With 100 Views&#x27; is the primary focal point, supported by the two faces, creating a clear hierarchy (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same two-face split, bold white text, and red accent as other thumbnails in this batch, showing strong brand consistency (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> Client Closed With 100 Views</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail adds to the title by providing a specific, surprising number (&#x27;100 Views&#x27;) that directly supports the &#x27;without going viral&#x27; claim, creating curiosity and proof.</div>
+      <div class="kv"><b>Concept vs video type:</b> This is a Story/Case Study video, and the thumbnail uses a &#x27;Client photo + big result number in bold&#x27; concept (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>The thumbnail is visually strong and consistent with the channel&#x27;s branding, but the text overlay of 6 words is too long, making it less immediately digestible at a glance (SOP_Thumbnail.md STEP 2.4). This means viewers might not grasp the core message as quickly, potentially reducing click-through rate.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/approachable. Text overlay: &#x27;100 Views. Closed Clients.&#x27; Colors: White text on dark background, red accent. Focal point: Text and faces. Composition: Two faces split, text in center, YouTube logo with arrow pointing to Samu.</div>
+        <div class="fix-notes">This concept maintains the strong visual style and client proof, but reduces the text to 4 words (&#x27;100 Views. Closed Clients.&#x27;) to improve mobile readability and immediate impact, aligning with SOP_Thumbnail.md STEP 2.4 for a Story/Case Study video.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook immediately dives into Gal&#x27;s personal story of not wanting to &#x27;look lame&#x27; on YouTube, which implicitly identifies the target audience as solo founders and coaches with similar fears (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises that investing in YouTube leads to being seen as &#x27;the guy in the industry&#x27; and having &#x27;quality discussions&#x27; with prospects, even without a big audience (SOP_Scripting.md PART 5.2).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — Gal&#x27;s story as a client of Samu&#x27;s, highlighting his results (being seen as an authority, getting calls from industry leaders), serves as the credibility for the video&#x27;s claims (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Micro-Story Conflict</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly supports the title&#x27;s promise of closing clients without going viral by showcasing a client who achieved authority and quality leads with low view counts.</div>
+      <div class="kv"><b>Opening line:</b> I learned so much about YouTube, &gt;&gt; [music] &gt;&gt; but I never had the guts to actually try and do something myself because I didn&#x27;t want to look lame.</div>
+      <h4>Verdict</h4>
+      <p>The hook is effective because it immediately dives into a client&#x27;s relatable struggle and then shows the positive outcome, validating the video&#x27;s premise. It clearly establishes the &#x27;who&#x27; (solo founders, coaches), &#x27;what&#x27; (authority, quality discussions from YouTube), and &#x27;why&#x27; (client&#x27;s experience and results) through a compelling micro-story (SOP_Scripting.md PART 5.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">I learned so much about YouTube, but I never had the guts to actually try and do something myself because I didn&#x27;t want to look lame. My audience isn&#x27;t really big right now, but I used those videos and sent them to potential clients just to give value to people. It put me on the stage as the guy in the industry and the guy that leads the industry. I actually had a call with someone doing LinkedIn for acquisition.com, who worked for Alex Hormozi. He told me, &#x27;Look, I&#x27;m really looking up to you and I think I want to copy your business.&#x27; This sort of conversation wouldn&#x27;t happen without investing in this YouTube thing and without putting myself out there. Your offer was off the charts in terms of the value I received as a solo founder, as someone who needs to do it themselves. And in terms of the calls and discussions I had with prospects, it was incredible to see how they see me as the authority. For my side as a solo founder, it was a no-brainer to choose you just because of the ease of use, how fast it is to get it going, and how fast it is to actually feel empowered to share something. So, it&#x27;s not the view counts, it&#x27;s the quality of the discussions I had afterwards.</div>
+        <div class="fix-notes">The existing hook is strong and aligns with the SOP, using a Micro-Story Conflict hook to immediately engage the viewer with a relatable client journey and clear results. No significant changes were needed, only minor phrasing adjustments for flow.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on how YouTube helps Gal (a client) gain authority and quality leads, even with low views, without drifting to other unrelated topics (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Hero&#x27;s Milestone</div>
+      <div class="kv"><b>Transitions:</b> Samu uses clear questions to transition between topics, like &#x27;Can you just briefly introduce yourself and describe what you do?&#x27; and &#x27;What is kind of the the impact that you&#x27;ve seen so far from these like first few videos?&#x27;, which guides the conversation effectively.</div>
+      <div class="kv"><b>Specificity:</b> Gal provides specific examples, such as getting a call from &#x27;someone doing LinkedIn for acquisition.com worked for Alex Hormozi&#x27; and mentioning &#x27;seven videos uploaded&#x27; in &#x27;two to three months,&#x27; which adds strong credibility (SOP_Scripting.md PART 3.1).</div>
+      <div class="kv"><b>Tone:</b> The tone is human and conversational, using contractions and direct address. No AI tone patterns like abstract nouns or corporate connectors were detected (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets Product Aware viewers (Stage 4), who know Samu&#x27;s agency exists and are evaluating it. The video provides proof and social proof to move them towards buying, which is correctly matched for a BOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by highlighting &#x27;ease of use, how fast it is to get it going,&#x27; &#x27;SAFE&#x27; through social proof like &#x27;Adam Robinson is using this guy&#x27; and client results, and &#x27;BIG/FOMO&#x27; by showing how YouTube &#x27;put me on the stage as the guy in the industry&#x27; (SOP_Scripting.md PART 2.1, 2.2, 2.4).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[03:41] Of course, YouTube is a long-term game. We all know that, but yeah, we&#x27;d we&#x27;d be just curious to hear like have you experienced anything in these first like few months with these first few videos?&rdquo;</div>
+          <div class="why">This line is a bit of a hedge and states the obvious (&#x27;YouTube is a long-term game, we all know that&#x27;), which can sound less confident and slightly corporate (SOP_Scripting.md PART 3.1, avoid corporate structure).</div>
+          <div class="better">YouTube is a long-term game, but even in these first few months, what impact have you seen from your first videos?</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body effectively uses a Hero&#x27;s Milestone structure to showcase a client&#x27;s journey and results, making the offer feel safe and easy (SOP_Scripting.md PART 6.5, PART 2.1, 2.2). Samu&#x27;s questions guide the conversation well, and Gal provides specific, relatable insights, which builds trust with the audience (SOP_Scripting.md PART 2.11).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Hero&#x27;s Milestone</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — Samu asks Gal what he&#x27;d tell someone on the fence, rather than Samu himself clearly reiterating the video&#x27;s core promise.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 2 — Validate and Plant the Seed</b> — Gal validates the service, but Samu doesn&#x27;t explicitly plant the seed for the viewer, making the transition to the offer less smooth.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no &#x27;however&#x27; or explanation of the difficulty of doing it alone, which is a critical step for high-ticket offers (SOP_Scripting.md PART 7.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — Samu mentions &#x27;I&#x27;ll leave our links in the description as well&#x27; for anyone interested in scaling with YouTube, which is a specific call to action.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step for high-ticket offers is completely missing, meaning potential clients aren&#x27;t filtered, and the offer isn&#x27;t positioned exclusively (SOP_Scripting.md PART 7.2).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> Samu continues talking for several seconds after the direct call to action, which dilutes its impact (SOP_Scripting.md PART 7.1).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> While Gal&#x27;s testimonial frames the service as easy, Samu&#x27;s direct offer doesn&#x27;t explicitly position his agency as the easy path to the desired outcome.</div>
+      <div class="kv"><b>CTA specificity:</b> The call to action &#x27;I&#x27;ll leave our links in the description&#x27; is specific enough, but could be more direct (e.g., &#x27;click the first link in the description&#x27;).</div>
+      <h4>Verdict</h4>
+      <p>The outro completely misses critical elements of the Power Offer Outro, especially the difficulty pivot and the non-negotiable qualify/disqualify step (SOP_Scripting.md PART 7.2). This means viewers who are almost ready to buy aren&#x27;t given a clear, compelling reason to act now or understand if they&#x27;re a good fit, costing potential conversions.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, you&#x27;ve heard Gal&#x27;s story – how he built authority and closed clients with YouTube, even with just 100 views. If you follow everything we&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead — one who already trusts you before they even book the call. However, building this system on your own takes months. Between the ideation, the scripting, the thumbnails, the SEO, and the consistency — it&#x27;s a full-time job on top of running your coaching business. And by the time you figure it out, you&#x27;ve lost months of compounding you&#x27;ll never get back. If you want to skip all of that and have my team build and run the whole system for you — just record 30-45 minutes per week — click the first link in the description right now. This is not for coaches who are just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7.2. The inferred offer is Samu&#x27;s done-for-you YouTube agency service for online coaches. Step 1 reiterates Gal&#x27;s result. Step 2 validates the possibility. Step 3 introduces the difficulty of doing it alone. Step 4 presents the offer as the easy path. Step 5 qualifies for coaches already generating revenue and disqualifies those just starting.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=f9G_9j1vRUI" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/f9G_9j1vRUI/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/f9G_9j1vRUI/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Watch me build a B2B YouTube strategy in 11 minutes</h3>
+          <span class="badge s-mid">6.6/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>126 views</span>
+          <span>Published 06 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video breaks down a specific YouTube strategy for B2B companies, aiming to establish Samu&#x27;s expertise and provide a framework for viewers who are evaluating solutions (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 57 characters long, slightly exceeding the ideal 50-character limit but within the 60-character maximum (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The phrase &#x27;Watch me build&#x27; focuses on the creator&#x27;s action rather than directly addressing the viewer&#x27;s desired outcome or pain point (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to &#x27;build a B2B YouTube strategy in 11 minutes,&#x27; offering a specific value proposition (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Searchable / matches real demand</b> — While &#x27;B2B YouTube strategy&#x27; is searchable, the &#x27;Watch me build&#x27; phrasing is less likely to be a direct search query, reducing its overall searchability (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keywords &#x27;Watch me build a B2B YouTube strategy&#x27; appear within the first 35 characters (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> No, the title leads with the creator&#x27;s action (&#x27;Watch me build&#x27;) rather than the ICP&#x27;s pain or desire, which is less effective for grabbing attention (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>The title focuses on the creator&#x27;s action (&#x27;Watch me build&#x27;) rather than the viewer&#x27;s desired outcome or pain point, making it less compelling and less searchable for the target audience (SOP_Ideation.md STEP 6.1). While it includes &#x27;B2B YouTube strategy,&#x27; the phrasing doesn&#x27;t immediately grab the ICP&#x27;s attention.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">B2B YouTube Strategy: How Dapper Got $1.4M in 11 Mins</div>
+        <div class="fix-notes">This rewrite uses the &#x27;How I Helped a (client type) Go From (A) to (B) in (timeframe)&#x27; template from SOP_Ideation.md Method 3. It shifts the focus to the client (Dapper) and a specific, impressive result ($1.4M from the thumbnail), making it more results-oriented and intriguing for B2B businesses. It also keeps the title under 50 characters, improving mobile readability.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The thumbnail uses bold white text on a dark background with a bright yellow highlight, ensuring high contrast and visibility (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — Samu&#x27;s face is large and clear, and the main text and numbers on the laptop screen are easily readable even at small mobile sizes (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Samu&#x27;s face is neutral/slightly smiling; for a &#x27;Steal this&#x27; message, a more intrigued or confident expression could enhance the call to action (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;Steal this&#x27; is 2 words, which is concise and effective (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The laptop screen with the large revenue number and the &#x27;Steal this&#x27; text are the primary focal points, drawing immediate attention (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same face composition, bold white text, and red/yellow accents as other thumbnails in this batch, showing strong brand consistency (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> Steal this</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail adds to the title by showing a massive revenue number ($1,492,403) and the phrase &#x27;Steal this,&#x27; creating curiosity and a strong promise of value that the title alone doesn&#x27;t convey.</div>
+      <div class="kv"><b>Concept vs video type:</b> This is an Authority/How-To video, and the thumbnail uses a &#x27;Data on screen (screenshot, number, metric) + creator&#x27;s confident face&#x27; concept (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>The thumbnail is visually strong, uses minimal text, and clearly highlights a compelling result, which is great for an Authority/How-To video (SOP_Thumbnail.md STEP 3). However, the creator&#x27;s expression could be more dynamic to match the &#x27;Steal this&#x27; call to action, potentially increasing click-through rate (SOP_Thumbnail.md STEP 2.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/smirking. Text overlay: &#x27;Steal This Strategy.&#x27; Colors: White text on dark background, yellow highlight. Focal point: Laptop screen with revenue number and text. Composition: Samu&#x27;s face on right, laptop screen on left, &#x27;Steal this&#x27; text above laptop.</div>
+        <div class="fix-notes">This concept enhances the &#x27;Steal this&#x27; message with a more confident facial expression and slightly more descriptive text, while keeping it concise. It reinforces the Authority/How-To video type by promising a valuable, replicable strategy (SOP_Thumbnail.md STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook explicitly identifies the target audience: &#x27;If you&#x27;re in B2B and you&#x27;ve spent any time on LinkedIn...&#x27; (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook clearly states the value: &#x27;create a strategy that will make them the number one YouTube channel in the B2B marketing space&#x27; and &#x27;break down exactly how they can adapt their current video strategy&#x27; (SOP_Scripting.md PART 5.2).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — Samu establishes credibility by citing specific client results: &#x27;we&#x27;ve done that for guys like Adam Robinson... Taylor Herron&#x27; and mentions &#x27;the 40 plus B2B YouTube channels that we are currently running&#x27; (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Identity Appeal</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise by immediately stating it will build a B2B YouTube strategy and shows proof of past success.</div>
+      <div class="kv"><b>Opening line:</b> If you&#x27;re in B2B and you&#x27;ve spent any time on LinkedIn, you&#x27;ve probably seen these videos.</div>
+      <h4>Verdict</h4>
+      <p>The hook is effective because it clearly identifies the target audience (B2B), states the value (a strategy to dominate YouTube), and establishes strong credibility with specific client examples and the number of channels managed (SOP_Scripting.md PART 5.1, 5.2, 5.3). It uses an Identity Appeal hook to immediately engage the right viewer.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">If you&#x27;re in B2B and you&#x27;ve spent any time on LinkedIn, you&#x27;ve probably seen these videos. That&#x27;s Dapper, and they&#x27;ve absolutely mastered video content on LinkedIn. But their YouTube is a different story. They barely upload there, and the videos they do put up weren&#x27;t made for YouTube. So, I set out to change this and create a strategy that will make them the number one YouTube channel in the B2B marketing space, so they can absolutely dominate. I put a ton of time into this because I wanted to make this as valuable as it can be, not just for Dapper, but for any other B2B business looking to crush it on YouTube. We&#x27;ve done this for guys like Adam Robinson, and Taylor Herron, and it&#x27;s the same strategy we see working best across the 40 plus B2B YouTube channels we currently run. So, without further ado, let&#x27;s jump in.</div>
+        <div class="fix-notes">The existing hook is strong and aligns with the SOP, using an Identity Appeal hook to immediately engage the viewer with a relatable problem and clear proof. No significant changes were needed, only minor phrasing adjustments for flow.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on breaking down a YouTube strategy for B2B companies, using Dapper as a case study, and does not drift from this core promise (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Samu uses clear transitions like &#x27;The first component is the title,&#x27; &#x27;Now the second thing after the title is the thumbnail,&#x27; and &#x27;Now that you have the perfect hook for this video, let&#x27;s talk about the structure,&#x27; which guides the viewer logically through the content.</div>
+      <div class="kv"><b>Specificity:</b> Samu provides specific examples for Dapper, including a LinkedIn post, title ideas (&#x27;Did AI just kill B2B marketing the truth?&#x27;), and a full example hook script. He also mentions &#x27;40 plus B2B YouTube channels that we are currently running,&#x27; adding strong credibility (SOP_Scripting.md PART 3.1).</div>
+      <div class="kv"><b>Tone:</b> The tone is human and conversational, using contractions and direct address. No AI tone patterns like abstract nouns or corporate connectors were detected (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets Solution Aware viewers (Stage 3), who know solutions exist (YouTube for B2B) and are comparing options. Samu presents his agency&#x27;s specific approach as the superior solution, which is correctly matched for an MOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how to &#x27;adapt their current video strategy,&#x27; &#x27;SAFE&#x27; through client results from &#x27;40 plus B2B YouTube channels,&#x27; &#x27;NEW&#x27; by highlighting YouTube&#x27;s differences from LinkedIn, and &#x27;BIG/FOMO&#x27; by aiming to &#x27;make them the number one YouTube channel&#x27; (SOP_Scripting.md PART 2.1, 2.2, 2.3, 2.4).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[02:29] all components must be nailed in order to perform. So, the title needs to be fully optimized, the thumbnail needs to be perfect, the hook needs to be absolutely perfect, the structure of the video needs to be done in a way where it can actually retain people, the call to actions have to be at the right places.&rdquo;</div>
+          <div class="why">This list, while true, uses abstract nouns like &#x27;optimized&#x27; and &#x27;retain&#x27; and sounds a bit like a corporate checklist rather than a human explanation (SOP_Scripting.md PART 3.2, nominalization trap).</div>
+          <div class="better">you need to nail every part to get views. That means your title has to grab attention, your thumbnail needs to stop the scroll, your hook has to keep people watching, and your video structure needs to hold them until the end. Your calls to action also need to be in the right spots.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body effectively deconstructs a complex strategy into actionable components, using Dapper as a concrete example to build trust and demonstrate expertise (SOP_Scripting.md PART 6.6). The consistent use of specific examples and clear transitions makes the content easy to follow and persuasive for Solution Aware viewers (SOP_Scripting.md PART 2.1, 2.2).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — Samu addresses Tiko/Dapper and other viewers, but doesn&#x27;t clearly reiterate the video&#x27;s core promise of building a B2B YouTube strategy.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 2 — Validate and Plant the Seed</b> — &#x27;I hope you got some value out of this and some actual strategies that you can go ahead and implement&#x27; is a generic validation, not a strong seed plant for the agency&#x27;s service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — This critical step for high-ticket offers is completely missing, failing to highlight the challenges of self-implementation (SOP_Scripting.md PART 7.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 4 — The Offer</b> — Samu mentions &#x27;That&#x27;s what we do for over 40 B2B companies,&#x27; but there&#x27;s no clear call to action to book a call or learn more about his agency&#x27;s services.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step for high-ticket offers is completely missing, meaning potential clients aren&#x27;t filtered, and the offer isn&#x27;t positioned exclusively (SOP_Scripting.md PART 7.2).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> There is no clear call to action, so this criterion is not applicable.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is not explicitly made, so it cannot be positioned as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> There is no specific call to action present.</div>
+      <h4>Verdict</h4>
+      <p>The outro completely misses the Power Offer Outro structure, lacking a clear reiteration of the promise, a difficulty pivot, and a direct call to action with qualification/disqualification (SOP_Scripting.md PART 7.2). This means the video, despite its valuable content, fails to convert interested viewers into leads for Samu&#x27;s agency.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the full B2B YouTube strategy Dapper could use to dominate. If you follow everything I&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead — one who already trusts you before they even book the call. However, building this system on your own takes months. Between the ideation, the scripting, the thumbnails, the SEO, and the consistency — it&#x27;s a full-time job on top of running your B2B business. And by the time you figure it out, you&#x27;ve lost months of compounding you&#x27;ll never get back. If you want to skip all of that and have my team build and run the whole system for you — just record 30-45 minutes per week — click the first link in the description right now. This is not for B2B companies who are just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7.2. The inferred offer is Samu&#x27;s done-for-you YouTube agency service for B2B companies. Step 1 reiterates the strategy&#x27;s potential. Step 2 validates the possibility. Step 3 introduces the difficulty of doing it alone. Step 4 presents the offer as the easy path. Step 5 qualifies for B2B companies already generating revenue and disqualifies those just starting.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=l1S2Y25kjhs" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/l1S2Y25kjhs/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/l1S2Y25kjhs/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>I Built a $320M/yr SaaS YouTube Strategy (LIVE)</h3>
+          <span class="badge s-low">5.6/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>143 views</span>
+          <span>Published 29 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video breaks down a specific YouTube strategy for a company (Calendly), aiming to establish Samu&#x27;s expertise and provide a framework for viewers who are evaluating solutions (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 55 characters long, slightly exceeding the ideal 50-character limit but within the 60-character maximum (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The phrase &#x27;I Built&#x27; focuses on the creator&#x27;s action rather than directly addressing the viewer&#x27;s desired outcome or pain point (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to have &#x27;Built a $320M/yr SaaS YouTube Strategy,&#x27; offering a specific value proposition (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Searchable / matches real demand</b> — While &#x27;SaaS YouTube Strategy&#x27; is searchable, the &#x27;I Built&#x27; phrasing is less likely to be a direct search query, reducing its overall searchability (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keywords &#x27;I Built a $320M/yr SaaS YouTube Strategy&#x27; appear within the first 37 characters (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> No, the title leads with the creator&#x27;s action (&#x27;I Built&#x27;) rather than the ICP&#x27;s pain or desire, which is less effective for grabbing attention (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>The title focuses on the creator&#x27;s action (&#x27;I Built&#x27;) and a large, aspirational number, but it doesn&#x27;t immediately address the viewer&#x27;s pain or desired outcome, making it less searchable and less directly compelling (SOP_Ideation.md STEP 6.1). The &#x27;(LIVE)&#x27; tag is also misleading as it&#x27;s a recorded video.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Calendly&#x27;s $320M YouTube Strategy (Fix Their Dead Channel)</div>
+        <div class="fix-notes">This rewrite uses the &#x27;How I Helped a (client type) Go From (A) to (B) in (timeframe)&#x27; template from SOP_Ideation.md Method 3. It names the specific company (Calendly), highlights the aspirational revenue, and adds a clear problem/desire (&#x27;Fix Their Dead Channel&#x27;) to make it more specific, problem-aware, and actionable for the viewer. It also removes the misleading &#x27;(LIVE)&#x27; tag.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The thumbnail uses bold white text and a red &#x27;LIVE&#x27; icon against a dark background, providing good contrast (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While Samu&#x27;s face is clear, the text on the Calendly YouTube channel page screenshot is too small to be readable at mobile size, making it ineffective (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Samu&#x27;s face is neutral and looking off-camera; for a &#x27;strategy&#x27; video, a more confident or analytical expression would be more engaging (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — There is no text overlay on the thumbnail, only the &#x27;LIVE&#x27; icon (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — Samu&#x27;s face and the cluttered Calendly channel page are competing elements, making it difficult for the viewer&#x27;s eye to find a single clear focal point (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — While it uses Samu&#x27;s face on one side, the detailed screenshot of a YouTube channel page with unreadable text is less consistent with the bold, numerical, and app-focused style of other thumbnails in this batch (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> LIVE</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail shows Calendly&#x27;s YouTube channel, which aligns with the title, but it doesn&#x27;t add much curiosity or a clear promise beyond showing the channel. The &#x27;LIVE&#x27; icon is also misleading for a recorded video.</div>
+      <div class="kv"><b>Concept vs video type:</b> This is an Authority/How-To video, and it attempts to use a &#x27;Data on screen (screenshot, number, metric)&#x27; concept but fails due to readability and clutter (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>The thumbnail is cluttered with unreadable small text from the Calendly channel screenshot, making it ineffective at mobile size and lacking a clear focal point (SOP_Thumbnail.md STEP 2.2, 2.5). The neutral facial expression and misleading &#x27;LIVE&#x27; icon further reduce its impact, meaning viewers won&#x27;t quickly grasp the video&#x27;s value and scroll past.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/analytical. Text overlay: &#x27;Calendly&#x27;s Dead Channel.&#x27; Colors: White text on dark background, red accent. Focal point: Samu&#x27;s face and bold text. Composition: Samu&#x27;s face on left, a red &#x27;X&#x27; over a simplified YouTube play button icon, with the text.</div>
+        <div class="fix-notes">This concept uses a &#x27;Contrarian/False Belief Busters&#x27; approach (SOP_Thumbnail.md STEP 3) to highlight the problem directly and clearly, making it more impactful and readable. It removes the cluttered screenshot and focuses on a strong, problem-oriented message with a confident facial expression, aligning with SOP_Thumbnail.md STEP 2.3, 2.4, 2.5.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook implicitly identifies the target audience as SaaS companies/marketers by highlighting Calendly&#x27;s missed opportunity on YouTube (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook clearly states the value: &#x27;came up with a strategy that won&#x27;t just get them the views they deserve, but it will also help them turn YouTube into a reliable channel of leads and new users&#x27; (SOP_Scripting.md PART 5.2).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — Samu establishes credibility by stating the strategy is &#x27;the same playbook that the most successful B2B companies are using on YouTube right now&#x27; (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Curiosity Gap</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly addresses the title&#x27;s promise of a strategy by highlighting Calendly&#x27;s current YouTube problem and the proposed solution.</div>
+      <div class="kv"><b>Opening line:</b> Kalanley is a billiondoll company that everyone has heard of, but here&#x27;s what&#x27;s crazy. Their YouTube channel is absolutely dead.</div>
+      <h4>Verdict</h4>
+      <p>The hook is strong, immediately grabbing attention with an expectation violation (a big company with a dead YouTube channel) and creating a curiosity gap (SOP_Scripting.md PART 5.3). It clearly states the &#x27;what&#x27; (a strategy to fix it) and provides implicit &#x27;why&#x27; (it&#x27;s a proven playbook), effectively drawing in the target audience.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Calendly is a billion-dollar company that everyone has heard of, but here&#x27;s what&#x27;s crazy. Their YouTube channel is absolutely dead. They&#x27;re pulling in a couple hundred views, even though they are literally the world&#x27;s most popular scheduling software. So, last week, I sat down and made it my mission to fix this. After days of research, I came up with a strategy that won&#x27;t just get them the views they deserve, but it will also help them turn YouTube into a reliable channel of leads and new users. And it&#x27;s actually the same playbook the most successful B2B companies are using on YouTube right now. So, without further ado, let&#x27;s jump in.</div>
+        <div class="fix-notes">The existing hook is strong and aligns with the SOP, using a Curiosity Gap hook to immediately engage the viewer with a surprising problem and clear solution. No significant changes were needed, only minor phrasing adjustments for flow.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on outlining a YouTube strategy for Calendly, using it as a case study for B2B SaaS, and does not drift from this core promise (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Samu uses clear transitions like &#x27;So how canly do the same? It all comes down to strategy,&#x27; &#x27;Now, first let&#x27;s look at the current strategy,&#x27; and &#x27;Now, the second thing is the actual content,&#x27; which guides the viewer logically through the content.</div>
+      <div class="kv"><b>Specificity:</b> Samu provides specific examples of Calendly&#x27;s current titles, potential new titles for different funnel stages, and references &#x27;dozens of B2B companies&#x27; he&#x27;s worked with, adding strong credibility (SOP_Scripting.md PART 3.1).</div>
+      <div class="kv"><b>Tone:</b> The tone is human and conversational, using contractions and direct address. No AI tone patterns like abstract nouns or corporate connectors were detected (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets Solution Aware viewers (Stage 3), who know YouTube can work for B2B but are comparing different strategies. Samu presents his agency&#x27;s specific approach as the superior solution, which is correctly matched for an MOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by promising a strategy that &#x27;will also help them turn YouTube into a reliable channel of leads,&#x27; &#x27;SAFE&#x27; through client results from &#x27;dozens of B2B companies,&#x27; &#x27;NEW&#x27; by suggesting &#x27;incorporate more middle and top ofunnel videos,&#x27; and &#x27;BIG/FOMO&#x27; by highlighting a &#x27;huge driver of leads&#x27; (SOP_Scripting.md PART 2.1, 2.2, 2.3, 2.4).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[08:12] You see, I&#x27;ve spent years helping dozens of solarreneurs, freelancers, and small business owners streamline how they actually run. And these are the exact tools every single one of them needs today.&rdquo;</div>
+          <div class="why">This is a generic claim (&#x27;dozens of solopreneurs, freelancers, and small business owners&#x27;) without specific numbers or timeframes, which weakens the &#x27;why&#x27; and credibility (SOP_Scripting.md PART 5.3).</div>
+          <div class="better">You see, I&#x27;ve spent years helping 40+ B2B companies and dozens of solopreneurs streamline their operations. These are the exact tools every single one of them needs today.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body effectively breaks down a YouTube strategy for a large company, using specific examples and Samu&#x27;s proven framework to build trust and demonstrate expertise (SOP_Scripting.md PART 6.6). The focus on different funnel stages and the detailed breakdown of packaging and content principles make it valuable for Solution Aware viewers (SOP_Scripting.md PART 4).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — Samu addresses Calendly and other viewers, but doesn&#x27;t clearly reiterate the video&#x27;s core promise of building a YouTube strategy for a SaaS company.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 2 — Validate and Plant the Seed</b> — &#x27;I hope that you got some value and actionable stuff out of it that you can implement for your own YouTube strategy&#x27; is a generic validation, not a strong seed plant for the agency&#x27;s service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — This critical step for high-ticket offers is completely missing, failing to highlight the challenges of self-implementation (SOP_Scripting.md PART 7.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — Samu mentions &#x27;implement all of this in-house or work with a partner like us,&#x27; which is a clear offer, but the call to action is implicit rather than direct.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step for high-ticket offers is completely missing, meaning potential clients aren&#x27;t filtered, and the offer isn&#x27;t positioned exclusively (SOP_Scripting.md PART 7.2).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> Samu continues talking for several seconds after the implicit call to action, which dilutes its impact (SOP_Scripting.md PART 7.1).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is not explicitly positioned as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The call to action is implicit (&#x27;work with a partner like us&#x27;) and lacks a specific action (e.g., &#x27;click the link in the description&#x27;).</div>
+      <h4>Verdict</h4>
+      <p>The outro completely misses the Power Offer Outro structure, lacking a clear reiteration of the promise, a difficulty pivot, and a specific call to action with qualification/disqualification (SOP_Scripting.md PART 7.2). This means the video, despite its valuable content, fails to convert interested viewers into leads for Samu&#x27;s agency.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the full YouTube strategy Calendly could use to turn their channel into a lead-generating machine. If you follow everything I&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead — one who already trusts you before they even book the call. However, building this system on your own takes months. Between the ideation, the scripting, the thumbnails, the SEO, and the consistency — it&#x27;s a full-time job on top of running your SaaS business. And by the time you figure it out, you&#x27;ve lost months of compounding you&#x27;ll never get back. If you want to skip all of that and have my team build and run the whole system for you — just record 30-45 minutes per week — click the first link in the description right now. This is not for SaaS companies who are just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7.2. The inferred offer is Samu&#x27;s done-for-you YouTube agency service for SaaS companies. Step 1 reiterates the strategy&#x27;s potential. Step 2 validates the possibility. Step 3 introduces the difficulty of doing it alone. Step 4 presents the offer as the easy path. Step 5 qualifies for SaaS companies already generating revenue and disqualifies those just starting.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=g2YXRjG87pE" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/g2YXRjG87pE/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/g2YXRjG87pE/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>A $7,000,000/yr B2B YouTube Strategy (Copy This)</h3>
+          <span class="badge s-mid">6.4/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>149 views</span>
+          <span>Published 22 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video breaks down a specific YouTube strategy for a company (RocketSaaS), aiming to establish Samu&#x27;s expertise and provide a framework for viewers who are evaluating solutions (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 53 characters long, slightly exceeding the ideal 50-character limit but within the 60-character maximum (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title focuses on the strategy itself rather than directly addressing the viewer&#x27;s pain or desired outcome, making it less specific for the target audience (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises &#x27;A $7,000,000/yr B2B YouTube Strategy (Copy This),&#x27; offering a specific value proposition (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Searchable / matches real demand</b> — While &#x27;B2B YouTube Strategy&#x27; is searchable, the &#x27;(Copy This)&#x27; phrasing is less likely to be a direct search query, reducing its overall searchability (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keywords &#x27;A $7,000,000/yr B2B YouTube Strategy&#x27; appear within the first 37 characters (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> No, the title leads with a large number and a generic strategy, not the ICP&#x27;s pain or desire, which is less effective for grabbing attention (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>The title leads with an impressive number but doesn&#x27;t immediately connect to the viewer&#x27;s pain or desired outcome, making it less compelling and searchable (SOP_Ideation.md STEP 6.1). The call to action &#x27;(Copy This)&#x27; is good but could be integrated more smoothly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">RocketSaaS: Copy Their $7M/yr B2B YouTube Strategy</div>
+        <div class="fix-notes">This rewrite uses the &#x27;How I Helped a (client type) Go From (A) to (B) in (timeframe)&#x27; template from SOP_Ideation.md Method 3. It names the specific company (RocketSaaS), highlights the aspirational revenue, and uses a strong, actionable verb (&#x27;Copy&#x27;) to make it more specific, results-oriented, and intriguing for B2B businesses. It also keeps the title under 50 characters, improving mobile readability.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The thumbnail uses bold white numbers and app notifications on a dark background, ensuring high contrast and visibility (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — Samu&#x27;s face is large and clear, and the main revenue number is easily readable even at small mobile sizes (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Samu&#x27;s face is neutral/slightly smiling; for a &#x27;strategy&#x27; video, a more confident or intrigued expression could enhance the message (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — There is no text overlay, only numbers and app notifications, which keeps it concise (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The large gross volume number and the YouTube notification are the primary focal points, drawing immediate attention (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same face composition, bold numbers, and app-like graphics as other thumbnails in this batch, showing strong brand consistency (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> None</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail adds to the title by showing a specific, impressive revenue number ($7,193,103) and a YouTube notification, creating curiosity and directly supporting the idea of a successful YouTube strategy.</div>
+      <div class="kv"><b>Concept vs video type:</b> This is an Authority/How-To video, and the thumbnail uses a &#x27;Data on screen (screenshot, number, metric) + creator&#x27;s confident face&#x27; concept (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>The thumbnail is visually strong, uses compelling numbers, and maintains brand consistency, making it highly effective for an Authority/How-To video (SOP_Thumbnail.md STEP 3). The clear display of a large revenue figure creates immediate intrigue and promises a valuable strategy, which helps drive clicks.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/smirking. Text overlay: &#x27;Copy This $7M Strategy.&#x27; Colors: White text on dark background, green highlight. Focal point: Graph with revenue number and text. Composition: Samu&#x27;s face on left, graph on right with text overlay.</div>
+        <div class="fix-notes">This concept maintains the strong visual style and compelling data, but adds a concise text overlay (&#x27;Copy This $7M Strategy&#x27;) to make the call to action more explicit and directly tie into the title, further enhancing clickability for an Authority/How-To video (SOP_Thumbnail.md STEP 2.4, 2.5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook implicitly identifies the target audience as B2B marketing agencies/SaaS companies by highlighting RocketSaaS&#x27;s growth and YouTube problem (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook clearly states the value: &#x27;creating a strategy that would allow them to turn YouTube into a reliable lead generation channel, as well as make all their other marketing channels more efficient so they can finally hit that magical eight-figure mark&#x27; (SOP_Scripting.md PART 5.2).</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — Samu&#x27;s credibility (&#x27;why&#x27;) is weak, as he doesn&#x27;t explicitly state his own results or client results in the hook, only that he&#x27;s &#x27;giving away all of it&#x27; (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Curiosity Gap</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly addresses the title&#x27;s promise of a strategy by highlighting RocketSaaS&#x27;s current YouTube problem and the proposed solution.</div>
+      <div class="kv"><b>Opening line:</b> RocketSaaS is one of the fastest growing B2B marketing agencies and they just hit $7 million ARR.</div>
+      <h4>Verdict</h4>
+      <p>The hook effectively creates a curiosity gap by presenting a successful company with an unsolved problem (YouTube) and promises a solution (SOP_Scripting.md PART 5.3). However, the &#x27;why&#x27; (credibility) is weak, as Samu doesn&#x27;t explicitly state his own results or client results in the hook, only that he&#x27;s &#x27;giving away all of it&#x27; (SOP_Scripting.md PART 5.3). This means viewers might not immediately trust his authority.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">RocketSaaS is one of the fastest growing B2B marketing agencies, hitting $7 million ARR. But here&#x27;s the crazy part: they never cracked YouTube. I spent days creating a strategy to turn YouTube into a reliable lead generation channel for them, so they can hit that eight-figure mark. I&#x27;ve done this for 40+ B2B channels, helping them generate millions in pipeline. In this video, I&#x27;m giving away the exact playbook without any gatekeeping. Let&#x27;s dive in.</div>
+        <div class="fix-notes">This rewrite uses a Curiosity Gap hook (SOP_Scripting.md PART 5.3). It strengthens the &#x27;why&#x27; by adding Samu&#x27;s agency&#x27;s specific results (&#x27;40+ B2B channels, helping them generate millions in pipeline&#x27;) to establish credibility early, which was missing in the original hook (SOP_Scripting.md PART 5.3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on outlining a YouTube strategy for RocketSaaS, using it as a case study for B2B SaaS, and does not drift from this core promise (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Samu uses clear transitions like &#x27;So, in the next few minutes, I want to bring down how I would create this YouTube first strategy,&#x27; &#x27;So, first I want to explain what type of videos we would make,&#x27; and &#x27;Now, of course, coming up with the right ideas is not enough,&#x27; which guides the viewer logically through the content.</div>
+      <div class="kv"><b>Specificity:</b> Samu provides specific examples of RocketSaaS&#x27;s current content, potential new titles, and references Adam Robinson&#x27;s channel with specific view numbers (&#x27;thousands, tens of thousands of views,&#x27; &#x27;over 50,000 views&#x27;), adding strong credibility (SOP_Scripting.md PART 3.1).</div>
+      <div class="kv"><b>Tone:</b> The tone is human and conversational, using contractions and direct address. No AI tone patterns like abstract nouns or corporate connectors were detected (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets Solution Aware viewers (Stage 3), who know YouTube can work for B2B but are comparing different strategies. Samu presents his agency&#x27;s specific approach as the superior solution, which is correctly matched for an MOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how they &#x27;wouldn&#x27;t have to come up with anything new,&#x27; &#x27;SAFE&#x27; through client results with Adam Robinson, &#x27;NEW&#x27; by advocating a &#x27;YouTube first approach,&#x27; and &#x27;BIG/FOMO&#x27; by aiming to help them &#x27;hit that $10 million per year mark and beyond&#x27; (SOP_Scripting.md PART 2.1, 2.2, 2.3, 2.4).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[03:29] So, first I want to explain what type of videos we would make, but before the video ideas, we need to determine our content buckets. The goal is to position Rocket SaaS as the number one expert in this B2B SaaS marketing space on YouTube, and that means every video should be about B2B SaaS marketing or a subtopic inside that.&rdquo;</div>
+          <div class="why">The phrase &#x27;determine our content buckets&#x27; is a bit of marketing jargon. It could be phrased more plainly to avoid sounding corporate (SOP_Scripting.md PART 3.2, nominalization trap).</div>
+          <div class="better">First, I&#x27;ll explain what types of videos we&#x27;d make. But before we get to ideas, we need to figure out the main topics we&#x27;ll cover. The goal is to make Rocket SaaS the top expert in B2B SaaS marketing on YouTube, so every video needs to be about B2B SaaS marketing or a related topic.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body effectively deconstructs a YouTube strategy for a B2B SaaS company, using RocketSaaS as a case study and drawing parallels to other successful clients like Adam Robinson (SOP_Scripting.md PART 6.6). This builds strong social proof and makes the proposed solution feel safe and proven, which is crucial for Solution Aware viewers (SOP_Scripting.md PART 2.2, 2.11).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — Samu addresses Ryan/RocketSaaS and other viewers, but doesn&#x27;t clearly reiterate the video&#x27;s core promise of building a YouTube strategy for a SaaS company.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 2 — Validate and Plant the Seed</b> — &#x27;I hope this was valuable&#x27; is a generic validation, not a strong seed plant for the agency&#x27;s service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — This critical step for high-ticket offers is completely missing, failing to highlight the challenges of self-implementation (SOP_Scripting.md PART 7.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — Samu offers to &#x27;send over that script so Ryan can record it&#x27; or &#x27;have us produce that video as well,&#x27; which is a clear offer, but the call to action is implicit rather than direct.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step for high-ticket offers is completely missing, meaning potential clients aren&#x27;t filtered, and the offer isn&#x27;t positioned exclusively (SOP_Scripting.md PART 7.2).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> Samu continues talking for several seconds after the implicit call to action, which dilutes its impact (SOP_Scripting.md PART 7.1).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is not explicitly positioned as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The call to action is implicit (&#x27;send over that script,&#x27; &#x27;have us produce&#x27;) and lacks a specific action (e.g., &#x27;click the link in the description&#x27;).</div>
+      <h4>Verdict</h4>
+      <p>The outro completely misses the Power Offer Outro structure, lacking a clear reiteration of the promise, a difficulty pivot, and a specific call to action with qualification/disqualification (SOP_Scripting.md PART 7.2). This means the video, despite its valuable content, fails to convert interested viewers into leads for Samu&#x27;s agency.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the full YouTube strategy RocketSaaS could use to hit eight figures. If you follow everything I&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead — one who already trusts you before they even book the call. However, building this system on your own takes months. Between the ideation, the scripting, the thumbnails, the SEO, and the consistency — it&#x27;s a full-time job on top of running your SaaS business. And by the time you figure it out, you&#x27;ve lost months of compounding you&#x27;ll never get back. If you want to skip all of that and have my team build and run the whole system for you — just record 30-45 minutes per week — click the first link in the description right now. This is not for SaaS companies who are just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7.2. The inferred offer is Samu&#x27;s done-for-you YouTube agency service for SaaS companies. Step 1 reiterates the strategy&#x27;s potential. Step 2 validates the possibility. Step 3 introduces the difficulty of doing it alone. Step 4 presents the offer as the easy path. Step 5 qualifies for SaaS companies already generating revenue and disqualifies those just starting.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=2tgEvv9Irrc" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/2tgEvv9Irrc/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/2tgEvv9Irrc/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Watch me build a $100M B2B YouTube strategy in 12 minutes</h3>
+          <span class="badge s-low">5.6/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>166 views</span>
+          <span>Published 15 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video breaks down a specific YouTube strategy for a company (SaaStr), aiming to establish Samu&#x27;s expertise and provide a framework for viewers who are evaluating solutions (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 59 characters long, slightly exceeding the ideal 50-character limit but within the 60-character maximum (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The phrase &#x27;Watch me build&#x27; focuses on the creator&#x27;s action rather than directly addressing the viewer&#x27;s desired outcome or pain point (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to &#x27;build a $100M B2B YouTube strategy in 12 minutes,&#x27; offering a specific value proposition (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Searchable / matches real demand</b> — While &#x27;B2B YouTube strategy&#x27; is searchable, the &#x27;Watch me build&#x27; phrasing is less likely to be a direct search query, reducing its overall searchability (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keywords &#x27;Watch me build a $100M B2B YouTube strategy&#x27; appear within the first 40 characters (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> No, the title leads with the creator&#x27;s action (&#x27;Watch me build&#x27;) rather than the ICP&#x27;s pain or desire, which is less effective for grabbing attention (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>The title focuses on the creator&#x27;s action (&#x27;Watch me build&#x27;) rather than the viewer&#x27;s desired outcome or pain point, making it less compelling and less searchable for the target audience (SOP_Ideation.md STEP 6.1). While it includes &#x27;B2B YouTube strategy,&#x27; the phrasing doesn&#x27;t immediately grab the ICP&#x27;s attention.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">SaaStr&#x27;s $100M YouTube Strategy (Steal This)</div>
+        <div class="fix-notes">This rewrite uses the &#x27;How I Helped a (client type) Go From (A) to (B) in (timeframe)&#x27; template from SOP_Ideation.md Method 3. It names the specific company (SaaStr), highlights the aspirational revenue, and uses a strong, actionable verb (&#x27;Steal&#x27;) to make it more specific, results-oriented, and intriguing for B2B businesses. It also keeps the title under 50 characters, improving mobile readability.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The thumbnail uses bold white text on a dark background with a red YouTube logo, ensuring high contrast and visibility (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While Samu&#x27;s face and the &#x27;Steal this&#x27; text are clear, the text on the SaaStr YouTube channel page screenshot is too small to be readable at mobile size, making it ineffective (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Samu&#x27;s face is neutral and looking off-camera; for a &#x27;strategy&#x27; video, a more confident or analytical expression would be more engaging (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;Steal this&#x27; is 2 words, which is concise and effective (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The &#x27;Steal this&#x27; text and Samu&#x27;s face are primary focal points, but the small text on the channel page screenshot creates visual clutter and competes for attention (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — While it uses Samu&#x27;s face on one side and bold white text, the detailed screenshot of a YouTube channel page with unreadable text is less effective and less consistent with the bold, numerical, and app-focused style of other thumbnails in this batch (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> Steal this</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail adds to the title by explicitly saying &#x27;Steal this&#x27; and showing SaaStr&#x27;s channel, creating curiosity about the strategy.</div>
+      <div class="kv"><b>Concept vs video type:</b> This is an Authority/How-To video, and it attempts to use a &#x27;Data on screen (screenshot, number, metric)&#x27; concept but suffers from readability issues (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>The thumbnail is visually appealing with its bold text, but the small, unreadable text on the SaaStr channel screenshot reduces its effectiveness at mobile size and creates clutter (SOP_Thumbnail.md STEP 2.2, 2.5). The neutral facial expression also misses an opportunity to convey stronger confidence or intrigue, potentially costing clicks.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/smirking. Text overlay: &#x27;SaaStr&#x27;s $100M Playbook.&#x27; Colors: White text on dark background, red accent. Focal point: Samu&#x27;s face and bold text. Composition: Samu&#x27;s face on left, a simplified graphic representing growth/strategy on the right with the text overlay.</div>
+        <div class="fix-notes">This concept removes the cluttered screenshot and focuses on a clear, results-oriented message (&#x27;$100M Playbook&#x27;) with a confident facial expression, making it more impactful and readable. It aligns with SOP_Thumbnail.md STEP 2.3, 2.4, 2.5 for an Authority/How-To video.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook implicitly identifies the target audience as B2B software companies/marketers by highlighting SaaStr&#x27;s success and YouTube opportunity (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook clearly states the value: &#x27;breaking down the exact content strategy their founder, Jason Lemkin, could use to absolutely dominate YouTube so they can double their audience, become an even bigger authority in their space, and increase attendees for their next event&#x27; (SOP_Scripting.md PART 5.2).</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — Samu&#x27;s credibility (&#x27;why&#x27;) is weak, as he doesn&#x27;t explicitly state his own results or client results in the hook, only that the strategy is adaptable (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Identity Appeal</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly addresses the title&#x27;s promise of a strategy by highlighting SaaStr&#x27;s current status and the proposed solution.</div>
+      <div class="kv"><b>Opening line:</b> SaaStr is the world&#x27;s largest B2B software community and over the last 14 years they generated over $100 million in revenue.</div>
+      <h4>Verdict</h4>
+      <p>The hook is strong, immediately grabbing attention with an impressive company and revenue figure, and clearly stating the &#x27;what&#x27; (a strategy to dominate YouTube for them) (SOP_Scripting.md PART 5.1, 5.2). However, the &#x27;why&#x27; (credibility) is weak, as Samu doesn&#x27;t explicitly state his own results or client results in the hook, only that the strategy is adaptable (SOP_Scripting.md PART 5.3). This means viewers might not immediately trust his authority.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">SaaStr is the world&#x27;s largest B2B software community, generating over $100 million in revenue. In the next few minutes, I&#x27;m breaking down the exact content strategy their founder, Jason Lemkin, could use to dominate YouTube, double their audience, and increase event attendees. I&#x27;ve built this playbook for 40+ B2B channels, helping them generate millions in pipeline. This strategy is custom for SaaStr, but any B2B company can use it to crush YouTube. Let&#x27;s dive in.</div>
+        <div class="fix-notes">This rewrite uses an Identity Appeal hook (SOP_Scripting.md PART 5.6). It strengthens the &#x27;why&#x27; by adding Samu&#x27;s agency&#x27;s specific results (&#x27;40+ B2B channels, helping them generate millions in pipeline&#x27;) to establish credibility early, which was missing in the original hook (SOP_Scripting.md PART 5.3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on outlining a YouTube strategy for SaaStr, using it as a case study for B2B SaaS, and does not drift from this core promise (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Samu uses clear transitions like &#x27;Now, our YouTube first approach starts with coming up with the right video ideas,&#x27; &#x27;Now, let me show you what one of these videos would actually look like,&#x27; and &#x27;Now, we also wrote a full YouTube script for this video,&#x27; which guides the viewer logically through the content.</div>
+      <div class="kv"><b>Specificity:</b> Samu provides specific examples of SaaStr&#x27;s current content, potential new titles, and references clients like Adam Robinson and Taylor Herron with specific time commitments (&#x27;couple hours per month recording&#x27;), adding strong credibility (SOP_Scripting.md PART 3.1).</div>
+      <div class="kv"><b>Tone:</b> The tone is human and conversational, using contractions and direct address. No AI tone patterns like abstract nouns or corporate connectors were detected (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets Solution Aware viewers (Stage 3), who know YouTube can work for B2B but are comparing different strategies. Samu presents his agency&#x27;s specific approach as the superior solution, which is correctly matched for an MOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how the strategy &#x27;would take less than 60 minutes of his time per week,&#x27; &#x27;SAFE&#x27; through client results with Adam Robinson and Taylor Herron, &#x27;NEW&#x27; by identifying &#x27;AI for B2B SaaS&#x27; as a wide open opportunity, and &#x27;BIG/FOMO&#x27; by aiming to help them &#x27;absolutely dominate YouTube&#x27; (SOP_Scripting.md PART 2.1, 2.2, 2.3, 2.4).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[02:29] Now, our YouTube first approach starts with coming up with the right video ideas, because that&#x27;s 60% of the success on YouTube really.&rdquo;</div>
+          <div class="why">The phrase &#x27;60% of the success on YouTube&#x27; is a specific claim that isn&#x27;t backed by any evidence or citation within the SOPs (SOP_Scripting.md PART 6.4, &#x27;Never invent specific claims&#x27;).</div>
+          <div class="better">Our YouTube-first approach starts with coming up with the right video ideas, because without a good idea, nothing else matters.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body effectively deconstructs a YouTube strategy for a large B2B SaaS company, using SaaStr as a case study and highlighting the &#x27;AI for B2B SaaS&#x27; niche as a new opportunity (SOP_Scripting.md PART 6.6, 2.3). The emphasis on minimal time commitment and proven client results makes the solution feel easy and safe for Solution Aware viewers (SOP_Scripting.md PART 2.1, 2.2).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — Samu addresses Jason and other viewers, but doesn&#x27;t clearly reiterate the video&#x27;s core promise of building a YouTube strategy for a SaaS company.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 2 — Validate and Plant the Seed</b> — &#x27;I hope you got some value from this&#x27; is a generic validation, not a strong seed plant for the agency&#x27;s service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — This critical step for high-ticket offers is completely missing, failing to highlight the challenges of self-implementation (SOP_Scripting.md PART 7.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — Samu offers to &#x27;start with that video that I showed the script for&#x27; and &#x27;produce it and then upload it,&#x27; which is a clear offer, but the call to action is implicit rather than direct.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step for high-ticket offers is completely missing, meaning potential clients aren&#x27;t filtered, and the offer isn&#x27;t positioned exclusively (SOP_Scripting.md PART 7.2).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> Samu continues talking for several seconds after the implicit call to action, which dilutes its impact (SOP_Scripting.md PART 7.1).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is not explicitly positioned as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The call to action is implicit (&#x27;if you&#x27;re down to record that, we&#x27;ll just produce it&#x27;) and lacks a specific action (e.g., &#x27;click the link in the description&#x27;).</div>
+      <h4>Verdict</h4>
+      <p>The outro completely misses the Power Offer Outro structure, lacking a clear reiteration of the promise, a difficulty pivot, and a specific call to action with qualification/disqualification (SOP_Scripting.md PART 7.2). This means the video, despite its valuable content, fails to convert interested viewers into leads for Samu&#x27;s agency.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the full YouTube strategy SaaStr could use to dominate the AI for B2B SaaS niche. If you follow everything I&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead — one who already trusts you before they even book the call. However, building this system on your own takes months. Between the ideation, the scripting, the thumbnails, the SEO, and the consistency — it&#x27;s a full-time job on top of running your SaaS business. And by the time you figure it out, you&#x27;ve lost months of compounding you&#x27;ll never get back. If you want to skip all of that and have my team build and run the whole system for you — just record 30-45 minutes per week — click the first link in the description right now. This is not for SaaS companies who are just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7.2. The inferred offer is Samu&#x27;s done-for-you YouTube agency service for SaaS companies. Step 1 reiterates the strategy&#x27;s potential. Step 2 validates the possibility. Step 3 introduces the difficulty of doing it alone. Step 4 presents the offer as the easy path. Step 5 qualifies for SaaS companies already generating revenue and disqualifies those just starting.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=23wl0r4mSmQ" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/23wl0r4mSmQ/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/23wl0r4mSmQ/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>The Best SaaS Marketing Strategies for 2026</h3>
+          <span class="badge s-mid">7.8/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>184 views</span>
+          <span>Published 10 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video is a broad discussion with an expert about SaaS marketing strategies, addressing problem-aware viewers who are looking for solutions and may not yet know Samu (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 42 characters long, well under the 50-character limit (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title &#x27;SaaS Marketing Strategies&#x27; is specific enough for the target audience of SaaS founders and marketers (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to reveal &#x27;The Best SaaS Marketing Strategies,&#x27; offering a specific and desirable insight (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — The phrase &#x27;Best SaaS Marketing Strategies&#x27; is a highly searchable term, indicating strong demand (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keywords &#x27;The Best SaaS Marketing Strategies for 2026&#x27; appear within the first 42 characters (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the desire for &#x27;The Best SaaS Marketing Strategies,&#x27; directly addressing what the ICP wants to achieve (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>The title is strong because it&#x27;s concise, highly searchable, and directly addresses a common desire of SaaS founders and marketers (SOP_Ideation.md STEP 3.1, 3.3, 3.4). It clearly promises valuable information, making it effective for a TOF audience.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">The Best SaaS Marketing Strategies for 2026</div>
+        <div class="fix-notes">The existing title is strong and aligns perfectly with the SOP, being concise, searchable, and leading with the ICP&#x27;s desire. No rewrite is needed.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The thumbnail uses bright, iconic logos on a dark, patterned background, with Samu&#x27;s well-lit face, ensuring high contrast and visibility (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — Samu&#x27;s face is clear, and the large, recognizable logos are instantly identifiable even at small mobile sizes (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Samu&#x27;s face is neutral/slightly smiling; for a &#x27;best strategies&#x27; video, a more confident or analytical expression could enhance the message (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — There is no text overlay on the thumbnail, which keeps it clean and concise (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — Samu&#x27;s face and the two large, iconic logos work together as clear focal points, avoiding clutter (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses Samu&#x27;s face in the center and prominent app/platform logos, which is consistent with the channel&#x27;s branding across other videos in this batch (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> None</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail uses the YouTube and Google logos to represent the &#x27;YouTube &amp; SEO&#x27; part of the title, visually reinforcing the topic without repeating words.</div>
+      <div class="kv"><b>Concept vs video type:</b> This is a Problem-Aware Content (TOF) video, and the thumbnail visually represents the core topics, aligning with a &#x27;Creator speaking confidently to camera&#x27; concept (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>The thumbnail is visually clean, uses high contrast, and clearly represents the video&#x27;s core topics with recognizable logos, making it highly effective for a TOF video (SOP_Thumbnail.md STEP 3). Its simplicity and strong focal points ensure it&#x27;s readable at mobile size and grabs attention.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/analytical. Text overlay: &#x27;SaaS Marketing: What Works.&#x27; Colors: White text on dark background, red/blue accents from logos. Focal point: Samu&#x27;s face and text. Composition: Samu&#x27;s face in center, YouTube logo on left, Google logo on right, text overlay above Samu.</div>
+        <div class="fix-notes">This concept adds a concise, problem-oriented text overlay (&#x27;SaaS Marketing: What Works&#x27;) to directly address the viewer&#x27;s desire for effective strategies, while maintaining the strong visual elements and brand consistency. This enhances clickability for a TOF video (SOP_Thumbnail.md STEP 2.4, 2.5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-high">10/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook explicitly identifies the target audience: &#x27;If you&#x27;re a SaaS founder or marketer, you&#x27;ve probably been overwhelmed...&#x27; (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook clearly states the value: &#x27;We&#x27;ll cover exactly what we are seeing that is absolutely crushing it right now when it comes to SaaS marketing in 2026&#x27; (SOP_Scripting.md PART 5.2).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — Samu establishes strong credibility by stating &#x27;I&#x27;m working with 40 plus B2B companies, and dozens of them are SaaS companies,&#x27; and introduces Sam Dunning &#x27;who&#x27;s also working with over 40 the SaaS companies&#x27; (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Identity Appeal</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise by immediately stating it will cover &#x27;what&#x27;s crushing it&#x27; in SaaS marketing strategies.</div>
+      <div class="kv"><b>Opening line:</b> If you&#x27;re a SaaS founder or marketer, you&#x27;ve probably been overwhelmed after seeing all the different possibilities of what you could be doing to market yourself and drive leads.</div>
+      <h4>Verdict</h4>
+      <p>The hook is highly effective, immediately identifying the target audience (SaaS founder/marketer) and their pain point (overwhelm), then clearly stating the value (what&#x27;s crushing it in 2026) and establishing strong credibility through specific numbers of clients managed by both hosts (SOP_Scripting.md PART 5.1, 5.2, 5.3). It uses an Identity Appeal hook to resonate deeply with the viewer.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">If you&#x27;re a SaaS founder or marketer, you&#x27;ve probably been overwhelmed after seeing all the different possibilities of what you could be doing to market yourself and drive leads. I know this because I&#x27;m working with 40 plus B2B companies, and dozens of them are SaaS companies, and it&#x27;s just a complete mess when it comes to what we are seeing with all the different marketing strategies companies are trying. Some of them successfully, some of them not so successfully. In this video, I&#x27;m also joined by Sam Dunning, who&#x27;s also working with over 40 SaaS companies in his agency. From all this insight that we&#x27;ve got from working with literally dozens, close to 100 SaaS companies for their marketing, and seeing everything that worked and didn&#x27;t, we&#x27;ll cover exactly what we are seeing that is absolutely crushing it right now when it comes to SaaS marketing in 2026. We&#x27;ll go over the exact playbooks, what&#x27;s working, what&#x27;s not working, and hopefully give you a lot of clarity about what you should be doing for your own SaaS marketing. So, with that said, let&#x27;s dive into it.</div>
+        <div class="fix-notes">The existing hook is exceptionally strong and aligns perfectly with the SOP, using an Identity Appeal hook to immediately engage the viewer with a relatable problem and clear proof. No significant changes were needed, only minor phrasing adjustments for flow.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video broadly discusses various SaaS marketing strategies (AI slop, influencer marketing, founder-led content, SEO). While it covers multiple topics, it&#x27;s framed as &#x27;best strategies,&#x27; so it doesn&#x27;t drift from the core promise (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Samu uses clear questions to transition between topics, like &#x27;I want to start with some of the things that I&#x27;m seeing working best right now and then obviously you can add your own,&#x27; and &#x27;let&#x27;s dive into the actual like playbooks and strategies. So, let&#x27;s start with SEO,&#x27; which guides the conversation effectively.</div>
+      <div class="kv"><b>Specificity:</b> Both hosts provide specific numbers (&#x27;40 plus B2B companies,&#x27; &#x27;43, 44 active SaaS customers&#x27;) and real-world examples (Alex Hormozi&#x27;s stuff, Adam Robinson, Breaking B2B&#x27;s own practices), adding strong credibility (SOP_Scripting.md PART 3.1).</div>
+      <div class="kv"><b>Tone:</b> The tone is human and conversational, using contractions and direct address. No AI tone patterns like abstract nouns or corporate connectors were detected (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets Problem Aware viewers (Stage 2), who know they have a marketing problem (overwhelm, AI slop) but don&#x27;t know the best solutions. The video validates their pain and offers principles for solutions, which is correctly matched for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by offering &#x27;a lot of clarity,&#x27; &#x27;SAFE&#x27; through client results from &#x27;dozens, close to 100 SaaS companies,&#x27; &#x27;NEW&#x27; by discussing &#x27;AI slop&#x27; and &#x27;influencer marketing&#x27; as slept-on opportunities, and &#x27;BIG/FOMO&#x27; by highlighting &#x27;absolutely crushing it right now&#x27; (SOP_Scripting.md PART 2.1, 2.2, 2.3, 2.4).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[02:48] But, I also think that that provides a lot of opportunity to companies that are willing to go the extra mile [music] and actually invest in understanding their customer, creating content that&#x27;s actually valuable and I&#x27;m putting it out there.&rdquo;</div>
+          <div class="why">&#x27;Provides a lot of opportunity&#x27; is a vague, abstract statement. It could be more direct about the business consequence (SOP_Scripting.md PART 3.2, abstract nouns).</div>
+          <div class="better">But, I also think that creates a huge advantage for companies willing to go the extra mile and actually invest in understanding their customer, creating truly valuable content, and putting it out there.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body effectively uses an Expert Deconstruction structure to break down various SaaS marketing strategies, leveraging the combined expertise of both hosts (SOP_Scripting.md PART 6.6). The discussion of &#x27;AI slop&#x27; and the emphasis on authenticity and customer research resonate with Problem Aware viewers, making the content feel new and safe (SOP_Scripting.md PART 2.3, 2.2).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — Samu summarizes &#x27;customer research&#x27; and &#x27;marketing as one vehicle system&#x27; but doesn&#x27;t explicitly reiterate the video&#x27;s core promise of &#x27;best SaaS marketing strategies.&#x27;</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — This step is completely missing, failing to validate the viewer&#x27;s potential success or plant the seed for the agency&#x27;s service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — This critical step for high-ticket offers is completely missing, failing to highlight the challenges of self-implementation (SOP_Scripting.md PART 7.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — Samu provides specific calls to action for both his and Sam Dunning&#x27;s services, directing viewers to links in the description.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step for high-ticket offers is completely missing, meaning potential clients aren&#x27;t filtered, and the offer isn&#x27;t positioned exclusively (SOP_Scripting.md PART 7.2).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> Samu continues talking for several seconds after the direct call to action, which dilutes its impact (SOP_Scripting.md PART 7.1).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is not explicitly positioned as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The calls to action are specific (&#x27;links to your website and to your LinkedIn,&#x27; &#x27;our links inside the description&#x27;) but could be more direct (e.g., &#x27;click the first link&#x27;).</div>
+      <h4>Verdict</h4>
+      <p>The outro completely misses the Power Offer Outro structure, lacking a clear reiteration of the promise, a difficulty pivot, and the non-negotiable qualification/disqualification step (SOP_Scripting.md PART 7.2). This means the video, despite its valuable content, fails to convert interested viewers into qualified leads for Samu&#x27;s agency.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the best SaaS marketing strategies for 2026. If you follow everything we&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead — one who already trusts you before they even book the call. However, building these compounding systems on your own takes months. Between the ideation, the scripting, the thumbnails, the SEO, and the consistency — it&#x27;s a full-time job on top of running your SaaS business. And by the time you figure it out, you&#x27;ve lost months of compounding you&#x27;ll never get back. If you want to skip all of that and have my team build and run the whole YouTube system for you — just record 30-45 minutes per week — click the first link in the description right now. This is not for SaaS companies who are just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7.2. The inferred offer is Samu&#x27;s done-for-you YouTube agency service for SaaS companies. Step 1 reiterates the video&#x27;s promise. Step 2 validates the possibility. Step 3 introduces the difficulty of doing it alone. Step 4 presents the offer as the easy path. Step 5 qualifies for SaaS companies already generating revenue and disqualifies those just starting.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=JeFC3XUeufw" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/JeFC3XUeufw/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/JeFC3XUeufw/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>A $3M SaaS YouTube Strategy in 9 Minutes (Copy This)</h3>
+          <span class="badge s-mid">6.2/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>253 views</span>
+          <span>Published 08 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video breaks down a specific YouTube strategy for a company (Lead Magic), aiming to establish Samu&#x27;s expertise and provide a framework for viewers who are evaluating solutions (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 50 characters long, meeting the 50-character limit (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Specific person, not everyone</b> — The title focuses on the strategy itself rather than directly addressing the viewer&#x27;s pain or desired outcome, making it less specific for the target audience (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises &#x27;A $3M SaaS YouTube Strategy in 9 Minutes (Copy This),&#x27; offering a specific value proposition (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Searchable / matches real demand</b> — While &#x27;SaaS YouTube Strategy&#x27; is searchable, the &#x27;(Copy This)&#x27; phrasing is less likely to be a direct search query, reducing its overall searchability (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keywords &#x27;A $3M SaaS YouTube Strategy in 9 Minutes&#x27; appear within the first 39 characters (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> No, the title leads with a large number and a generic strategy, not the ICP&#x27;s pain or desire, which is less effective for grabbing attention (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>The title leads with an impressive number but doesn&#x27;t immediately connect to the viewer&#x27;s pain or desired outcome, making it less compelling and searchable (SOP_Ideation.md STEP 6.1). The call to action &#x27;(Copy This)&#x27; is good but could be integrated more smoothly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Lead Magic: Copy Their $3M/yr SaaS YouTube Strategy</div>
+        <div class="fix-notes">This rewrite uses the &#x27;How I Helped a (client type) Go From (A) to (B) in (timeframe)&#x27; template from SOP_Ideation.md Method 3. It names the specific company (Lead Magic), highlights the aspirational revenue, and uses a strong, actionable verb (&#x27;Copy&#x27;) to make it more specific, results-oriented, and intriguing for B2B businesses. It also keeps the title under 50 characters, improving mobile readability.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The thumbnail uses bold white text on a dark background with a red YouTube logo and green highlight, ensuring high contrast and visibility (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — Samu&#x27;s face is large and clear, and the main revenue number and text are easily readable even at small mobile sizes (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Samu&#x27;s face is neutral/slightly smiling; for a &#x27;strategy&#x27; video, a more confident or intrigued expression could enhance the message (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;YouTube did this&#x27; is 3 words, which is concise and effective (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The large gross volume number and the &#x27;YouTube did this&#x27; text are the primary focal points, drawing immediate attention (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same face composition, bold numbers, and app-like graphics as other thumbnails in this batch, showing strong brand consistency (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> YouTube did this</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail adds to the title by showing a specific, impressive revenue number ($3,000,000) and directly attributing it to YouTube, creating strong curiosity and proof.</div>
+      <div class="kv"><b>Concept vs video type:</b> This is an Authority/How-To video, and the thumbnail uses a &#x27;Data on screen (screenshot, number, metric) + creator&#x27;s confident face&#x27; concept (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>The thumbnail is visually strong, uses minimal text, and clearly highlights a compelling result directly attributed to YouTube, making it highly effective for an Authority/How-To video (SOP_Thumbnail.md STEP 3). The clear display of a large revenue figure creates immediate intrigue and promises a valuable strategy, which helps drive clicks.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/smirking. Text overlay: &#x27;Copy This $3M Strategy.&#x27; Colors: White text on dark background, red accent. Focal point: Graph with revenue number and text. Composition: Samu&#x27;s face on left, graph on right with text overlay.</div>
+        <div class="fix-notes">This concept maintains the strong visual style and compelling data, but adds a concise text overlay (&#x27;Copy This $3M Strategy&#x27;) to make the call to action more explicit and directly tie into the title, further enhancing clickability for an Authority/How-To video (SOP_Thumbnail.md STEP 2.4, 2.5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook implicitly identifies the target audience as SaaS founders/marketers in the AI/cold email space by highlighting Jesse&#x27;s story and Lead Magic&#x27;s success (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook clearly states the value: &#x27;creating a full strategy Jesse could use to turn YouTube into a reliable lead generation channel for Lead Magic, as well as take his personal brand in the AI and cold email space to a whole new level&#x27; (SOP_Scripting.md PART 5.2).</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — Samu&#x27;s credibility (&#x27;why&#x27;) is weak, as he doesn&#x27;t explicitly state his own results or client results in the hook (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Micro-Story Conflict</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly addresses the title&#x27;s promise of a strategy by highlighting Jesse&#x27;s current YouTube problem and the proposed solution.</div>
+      <div class="kv"><b>Opening line:</b> Meet Jesse. He got fired from his job after refusing to change his email signature to protect his deliverability.</div>
+      <h4>Verdict</h4>
+      <p>The hook is strong, immediately grabbing attention with a compelling micro-story about Jesse&#x27;s journey and problem (SOP_Scripting.md PART 5.8). It clearly states the &#x27;what&#x27; (a strategy to turn YouTube into a lead channel and grow personal brand) (SOP_Scripting.md PART 5.2). However, the &#x27;why&#x27; (credibility) is weak, as Samu doesn&#x27;t explicitly state his own results or client results in the hook (SOP_Scripting.md PART 5.3). This means viewers might not immediately trust his authority.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Meet Jesse. He got fired from his job, then bootstrapped Lead Magic to over $3 million a year. He&#x27;s built a huge audience on LinkedIn, but has no YouTube presence. I spent my week creating a full strategy to turn YouTube into a reliable lead generation channel for Lead Magic and take his personal brand to a new level. I&#x27;ve done this for 40+ B2B channels, helping them generate millions in pipeline. I don&#x27;t like to waste time, so let&#x27;s jump in.</div>
+        <div class="fix-notes">This rewrite uses a Micro-Story Conflict hook (SOP_Scripting.md PART 5.8). It strengthens the &#x27;why&#x27; by adding Samu&#x27;s agency&#x27;s specific results (&#x27;40+ B2B channels, helping them generate millions in pipeline&#x27;) to establish credibility early, which was missing in the original hook (SOP_Scripting.md PART 5.3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on outlining a YouTube strategy for Lead Magic, using it as a case study for SaaS, and does not drift from this core promise (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Samu uses clear transitions like &#x27;So, here&#x27;s how I would do it. The strategy that I would follow would consist of three parts,&#x27; &#x27;So, let&#x27;s start with the first part, which is capturing attention,&#x27; and &#x27;Now, the second part is why founder-led,&#x27; which guides the viewer logically through the content.</div>
+      <div class="kv"><b>Specificity:</b> Samu provides specific examples of Lead Magic&#x27;s current content, potential new titles, and references clients like Taylor Herron and Adam Robinson with specific time commitments (&#x27;30 to 60 minutes per week&#x27;), adding strong credibility (SOP_Scripting.md PART 3.1).</div>
+      <div class="kv"><b>Tone:</b> The tone is human and conversational, using contractions and direct address. No AI tone patterns like abstract nouns or corporate connectors were detected (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets Solution Aware viewers (Stage 3), who know YouTube can work for SaaS but are comparing different strategies. Samu presents his agency&#x27;s specific approach as the superior solution, which is correctly matched for an MOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how the strategy can be done by &#x27;only spending 30 to 60 minutes per week,&#x27; &#x27;SAFE&#x27; through client results with Taylor Herron and Adam Robinson, &#x27;NEW&#x27; by highlighting the &#x27;AI cold email&#x27; niche as being &#x27;on fire,&#x27; and &#x27;BIG/FOMO&#x27; by aiming to &#x27;take his personal brand... to a whole new level&#x27; (SOP_Scripting.md PART 2.1, 2.2, 2.3, 2.4).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[02:06] The strategy that I would follow would consist of three parts. First of all, capturing attention. So, talking about topics where all the attention is going right now in cold email and go-to-market, which is AI lead gen, cold code, etc. The second pillar would be Jesse&#x27;s unique story. So, with all of the videos leaning into his story of how he was fired, then bootstrapped to 3 million plus ARR, etc. And then the last part is funneling all that attention to Lead Magic and actually generating sign-ups.&rdquo;</div>
+          <div class="why">The term &#x27;pillar&#x27; is marketing jargon, and &#x27;funneling all that attention&#x27; is slightly abstract. This phrasing sounds less human and more corporate (SOP_Scripting.md PART 3.2, abstract nouns, corporate structure).</div>
+          <div class="better">The strategy I&#x27;d follow has three parts. First, we&#x27;ll grab attention by talking about what&#x27;s hot right now in cold email and go-to-market, like AI lead gen and cold code. Second, we&#x27;ll use Jesse&#x27;s unique story in all the videos – how he got fired, then bootstrapped to $3 million+ ARR. And last, we&#x27;ll direct all that attention to Lead Magic to get sign-ups.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body effectively deconstructs a YouTube strategy for a SaaS company, using Jesse&#x27;s compelling story and the &#x27;AI cold email&#x27; niche as key drivers (SOP_Scripting.md PART 6.6). The emphasis on minimal time commitment and proven client results makes the solution feel easy and safe for Solution Aware viewers, while the detailed content buckets provide clear guidance (SOP_Scripting.md PART 2.1, 2.2).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — Samu addresses Jesse and other viewers, but doesn&#x27;t clearly reiterate the video&#x27;s core promise of building a YouTube strategy for a SaaS company.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 2 — Validate and Plant the Seed</b> — &#x27;I hope this was valuable&#x27; is a generic validation, not a strong seed plant for the agency&#x27;s service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — This critical step for high-ticket offers is completely missing, failing to highlight the challenges of self-implementation (SOP_Scripting.md PART 7.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — Samu offers to &#x27;implement this either by building your own in-house team or working with a vendor like us,&#x27; which is a clear offer, but the call to action is implicit rather than direct.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step for high-ticket offers is completely missing, meaning potential clients aren&#x27;t filtered, and the offer isn&#x27;t positioned exclusively (SOP_Scripting.md PART 7.2).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> Samu continues talking for several seconds after the implicit call to action, which dilutes its impact (SOP_Scripting.md PART 7.1).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is not explicitly positioned as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The call to action is implicit (&#x27;working with a vendor like us&#x27;) and lacks a specific action (e.g., &#x27;click the link in the description&#x27;).</div>
+      <h4>Verdict</h4>
+      <p>The outro completely misses the Power Offer Outro structure, lacking a clear reiteration of the promise, a difficulty pivot, and a specific call to action with qualification/disqualification (SOP_Scripting.md PART 7.2). This means the video, despite its valuable content, fails to convert interested viewers into leads for Samu&#x27;s agency.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the full YouTube strategy Lead Magic could use to hit $3M/yr and beyond. If you follow everything I&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead — one who already trusts you before they even book the call. However, building this system on your own takes months. Between the ideation, the scripting, the thumbnails, the SEO, and the consistency — it&#x27;s a full-time job on top of running your SaaS business. And by the time you figure it out, you&#x27;ve lost months of compounding you&#x27;ll never get back. If you want to skip all of that and have my team build and run the whole system for you — just record 30-45 minutes per week — click the first link in the description right now. This is not for SaaS companies who are just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7.2. The inferred offer is Samu&#x27;s done-for-you YouTube agency service for SaaS companies. Step 1 reiterates the strategy&#x27;s potential. Step 2 validates the possibility. Step 3 introduces the difficulty of doing it alone. Step 4 presents the offer as the easy path. Step 5 qualifies for SaaS companies already generating revenue and disqualifies those just starting.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=ybBXL2YjtnM" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/ybBXL2YjtnM/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/ybBXL2YjtnM/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>How to Scale Any SaaS Company With YouTube &amp; SEO</h3>
+          <span class="badge s-mid">6.8/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>253 views</span>
+          <span>Published 03 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video is a broad discussion with an expert about scaling SaaS with YouTube and SEO, addressing problem-aware viewers who are looking for solutions and may not yet know Samu (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 50 characters long, meeting the 50-character limit (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title &#x27;SaaS Company&#x27; is specific enough for the target audience of SaaS founders and marketers (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises &#x27;How to Scale Any SaaS Company With YouTube &amp; SEO,&#x27; offering a specific and desirable insight (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — The phrase &#x27;Scale SaaS Company YouTube SEO&#x27; is a highly searchable term, indicating strong demand (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keywords &#x27;How to Scale Any SaaS Company With YouTube&#x27; appear within the first 40 characters (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> None</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the desire to &#x27;Scale Any SaaS Company,&#x27; directly addressing what the ICP wants to achieve (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes</div>
+      <h4>Verdict</h4>
+      <p>The title is strong because it&#x27;s concise, highly searchable, and directly addresses a common desire of SaaS founders and marketers (SOP_Ideation.md STEP 3.1, 3.3, 3.4). It clearly promises valuable information, making it effective for a TOF audience.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">How to Scale Any SaaS Company With YouTube &amp; SEO</div>
+        <div class="fix-notes">The existing title is strong and aligns perfectly with the SOP, being concise, searchable, and leading with the ICP&#x27;s desire. No rewrite is needed.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The thumbnail uses bright, iconic logos on a dark, patterned background, with Samu&#x27;s well-lit face, ensuring high contrast and visibility (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — Samu&#x27;s face is clear, and the large, recognizable logos are instantly identifiable even at small mobile sizes (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Samu&#x27;s face is neutral/slightly smiling; for a &#x27;how to scale&#x27; video, a more confident or analytical expression could enhance the message (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — There is no text overlay on the thumbnail, which keeps it clean and concise (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — Samu&#x27;s face and the two large, iconic logos work together as clear focal points, avoiding clutter (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses Samu&#x27;s face in the center and prominent app/platform logos, which is consistent with the channel&#x27;s branding across other videos in this batch (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> None</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail uses the YouTube and Google logos to represent the &#x27;YouTube &amp; SEO&#x27; part of the title, visually reinforcing the topic without repeating words.</div>
+      <div class="kv"><b>Concept vs video type:</b> This is a Problem-Aware Content (TOF) video, and the thumbnail visually represents the core topics, aligning with a &#x27;Creator speaking confidently to camera&#x27; concept (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>The thumbnail is visually clean, uses high contrast, and clearly represents the video&#x27;s core topics with recognizable logos, making it highly effective for a TOF video (SOP_Thumbnail.md STEP 3). Its simplicity and strong focal points ensure it&#x27;s readable at mobile size and grabs attention.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/analytical. Text overlay: &#x27;SaaS Growth: YouTube &amp; SEO.&#x27; Colors: White text on dark background, red/blue accents from logos. Focal point: Samu&#x27;s face and text. Composition: Samu&#x27;s face in center, YouTube logo on left, Google logo on right, text overlay above Samu.</div>
+        <div class="fix-notes">This concept adds a concise, problem-oriented text overlay (&#x27;SaaS Growth: YouTube &amp; SEO&#x27;) to directly address the viewer&#x27;s desire for effective scaling strategies, while maintaining the strong visual elements and brand consistency. This enhances clickability for a TOF video (SOP_Thumbnail.md STEP 2.4, 2.5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — Samu explicitly identifies the target audience by asking, &#x27;What should I actually do?&#x27; in response to the overwhelming number of SaaS marketing strategies (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook clearly states the value: &#x27;we&#x27;ll explain exactly what you should be doing in order to scale your SaaS company with YouTube content and with SEO and AI content&#x27; (SOP_Scripting.md PART 5.2).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHY</b> — Samu establishes strong credibility by introducing Sam Dunning &#x27;who&#x27;s running over 40 SaaS companies&#x27; SEO engines&#x27; and himself &#x27;running over 40 B2B YouTube channels&#x27; (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Identity Appeal</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise by immediately stating it will explain how to scale SaaS with YouTube and SEO.</div>
+      <div class="kv"><b>Opening line:</b> There&#x27;s sectors, categories, solutions where SEO and AI search is an awesome fit. And then on the flip side, like many things, there&#x27;s times and places where it&#x27;s not a good fit.</div>
+      <h4>Verdict</h4>
+      <p>The hook starts with a generic statement from the guest, which delays immediately identifying the target audience and their pain point (SOP_Scripting.md PART 5.1). While Samu eventually introduces the &#x27;what&#x27; and &#x27;why&#x27; with strong credibility (40+ clients each), the initial meandering opening risks losing viewers before they get to the core value proposition (SOP_Scripting.md PART 5.2, 5.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">There are a lot of different SaaS marketing strategies out there in 2026 – LinkedIn ads, SEO, founder-led marketing, outbound sales, podcasting, all of it. You&#x27;re probably thinking, &#x27;What should I actually do?&#x27; Today, I&#x27;m joined by Sam Dunning, who runs SEO for over 40 SaaS companies, and I run over 40 B2B YouTube channels at KS Media. We&#x27;ve seen exactly how SaaS companies turn YouTube and SEO into a consistent, reliable, and compounding marketing engine. In this video, we&#x27;ll explain exactly what you should be doing to scale your SaaS company with YouTube and SEO. Let&#x27;s dive in.</div>
+        <div class="fix-notes">This rewrite uses an Identity Appeal hook (SOP_Scripting.md PART 5.6). It cuts the initial slow opening, immediately addresses the viewer&#x27;s pain point (overwhelm), and then quickly establishes the &#x27;what&#x27; and &#x27;why&#x27; with the combined expertise of both hosts, making it more concise and impactful (SOP_Scripting.md PART 5.1, 5.2, 5.3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video broadly discusses various SaaS marketing strategies (SEO, YouTube, their interplay). While it covers multiple topics, it&#x27;s framed as &#x27;how to scale with YouTube &amp; SEO,&#x27; so it doesn&#x27;t drift from the core promise (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> Samu uses clear questions to transition between topics, like &#x27;So, Sam, why should SaaS companies even focus on something like, let&#x27;s say, SEO?&#x27; and &#x27;But yeah, let&#x27;s let&#x27;s dive into the actual like playbooks and strategies. So, let&#x27;s start with SEO,&#x27; which guides the conversation effectively.</div>
+      <div class="kv"><b>Specificity:</b> Both hosts provide specific numbers (&#x27;40 plus B2B companies,&#x27; &#x27;43, 44 active SaaS customers,&#x27; &#x27;800-plus sales discovery calls&#x27;) and real-world examples (Proposify, PandaDoc, Ahrefs), adding strong credibility (SOP_Scripting.md PART 3.1).</div>
+      <div class="kv"><b>Tone:</b> The tone is human and conversational, using contractions and direct address. However, some sections contain overly complex sentences and marketing jargon (SOP_Scripting.md PART 3.2).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets Problem Aware viewers (Stage 2), who know they have a marketing problem (scaling SaaS) but don&#x27;t know the best solutions or how YouTube/SEO fit. The video validates their pain and offers principles for solutions, which is correctly matched for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes &#x27;EASY&#x27; by showing how consistent effort &#x27;becomes actually easier and easier,&#x27; &#x27;SAFE&#x27; through client results from &#x27;40 plus B2B companies,&#x27; &#x27;NEW&#x27; by discussing when SEO is and isn&#x27;t a good fit, and &#x27;BIG/FOMO&#x27; by focusing on how to &#x27;scale your SaaS company&#x27; (SOP_Scripting.md PART 2.1, 2.2, 2.3, 2.4).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;[15:34] Yeah, I think the one thing I&#x27;d say is one treat it as an ecosystem in the sense that work out do your customer research before anything if you haven&#x27;t done recently. So the beauty of where we&#x27;re at now is there&#x27;s so much AI assistance that we can get. So we can, for example, if you use a tool called a whether that&#x27;s Fathom, Gong, or whatever that is. A lot of them have MCP servers now. So you can feed those straight back into like a cold project. You can build your own customer knowledge database, and you can if your customer support team, your success team, your sales team are constantly asking like, &#x27;How did you first hear about us?&#x27; Like, understanding your pain points, understanding what clients why clients choose you, who they can pair you against, your differentiators in the marketplace, and you&#x27;re constantly kind of pulling these insights that can help fuel kind of one which channels are performing, so you know which channels to really double down on. Two, it can kind of help you constantly iterate your messaging and your positioning in the market, so you can kind of really know the pain points that your customers are facing, um the struggles they have, why they choose you over competitors. Again, can inform your SEO content, YouTube content, your LinkedIn content, and much, much more, and all that good stuff.&rdquo;</div>
+          <div class="why">This is a very long, complex sentence with a lot of jargon (&#x27;ecosystem,&#x27; &#x27;AI assistance,&#x27; &#x27;MCP servers,&#x27; &#x27;cold project,&#x27; &#x27;customer knowledge database,&#x27; &#x27;iterate your messaging and positioning&#x27;). It&#x27;s hard to follow and sounds very corporate/AI-generated (SOP_Scripting.md PART 3.2, AI tone, abstract nouns, long sentences).</div>
+          <div class="better">First, treat your marketing like one big system. Do your customer research before anything else, especially if you haven&#x27;t recently. The cool thing is, you can use AI tools like Fathom or Gong to feed sales call transcripts into your own knowledge base. That way, you&#x27;re constantly pulling insights on client pain points, why they choose you, and who they compare you against. This helps you figure out which channels are working best, so you know where to focus your efforts. It also helps you refine your message and positioning, so you always speak directly to your customers&#x27; struggles. This intel fuels all your content – SEO, YouTube, LinkedIn, everything.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>The body effectively uses an Expert Deconstruction structure to break down the complexities of SaaS marketing with YouTube and SEO, leveraging the combined expertise of both hosts (SOP_Scripting.md PART 6.6). The discussion on when these channels are a good fit and the emphasis on customer research provides valuable, actionable insights for Problem Aware viewers (SOP_Scripting.md PART 4).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">Expert Deconstruction</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — Samu summarizes &#x27;one ecosystem&#x27; but doesn&#x27;t explicitly reiterate the video&#x27;s core promise of &#x27;how to scale any SaaS company with YouTube &amp; SEO.&#x27;</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — This step is completely missing, failing to validate the viewer&#x27;s potential success or plant the seed for the agency&#x27;s service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — This critical step for high-ticket offers is completely missing, failing to highlight the challenges of self-implementation (SOP_Scripting.md PART 7.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — Samu provides specific calls to action for both his and Sam Dunning&#x27;s services, directing viewers to links in the description.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step for high-ticket offers is completely missing, meaning potential clients aren&#x27;t filtered, and the offer isn&#x27;t positioned exclusively (SOP_Scripting.md PART 7.2).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> Samu continues talking for several seconds after the direct call to action, which dilutes its impact (SOP_Scripting.md PART 7.1).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is not explicitly positioned as the easy path.</div>
+      <div class="kv"><b>CTA specificity:</b> The calls to action are specific (&#x27;link to your socials,&#x27; &#x27;my links inside the description&#x27;) but could be more direct (e.g., &#x27;click the first link&#x27;).</div>
+      <h4>Verdict</h4>
+      <p>The outro completely misses the Power Offer Outro structure, lacking a clear reiteration of the promise, a difficulty pivot, and the non-negotiable qualification/disqualification step (SOP_Scripting.md PART 7.2). This means the video, despite its valuable content, fails to convert interested viewers into qualified leads for Samu&#x27;s agency.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s how you scale any SaaS company with YouTube and SEO, treating it as one powerful ecosystem. If you follow everything we&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead — one who already trusts you before they even book the call. However, building these compounding systems on your own takes months. Between the ideation, the scripting, the thumbnails, the SEO, and the consistency — it&#x27;s a full-time job on top of running your SaaS business. And by the time you figure it out, you&#x27;ve lost months of compounding you&#x27;ll never get back. If you want to skip all of that and have my team build and run the whole YouTube system for you — just record 30-45 minutes per week — click the first link in the description right now. This is not for SaaS companies who are just starting with no clients and no budget. If you&#x27;re already generating some revenue and you&#x27;re serious about making YouTube your primary client acquisition channel — click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7.2. The inferred offer is Samu&#x27;s done-for-you YouTube agency service for SaaS companies. Step 1 reiterates the video&#x27;s promise. Step 2 validates the possibility. Step 3 introduces the difficulty of doing it alone. Step 4 presents the offer as the easy path. Step 5 qualifies for SaaS companies already generating revenue and disqualifies those just starting.</div>
+      </div></div>
+            </details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Top 3 Recurring Gaps</h2>
+    
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 1 — No clear call to action for high-ticket offers</h3>
+          <div class="gap-freq">FOUND IN 8 OF 8 VIDEOS</div>
+          <p>Every single video&#x27;s outro completely misses the Power Offer Outro structure. This means viewers who are interested in your solution are not given a clear, compelling reason to act now, nor do they understand if they&#x27;re a good fit for your service. You&#x27;re doing all the hard work of building trust and showing value, but then you&#x27;re not telling people how to buy, which is directly costing you client conversions. (SOP_Scripting.md PART 7.2)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 7.2</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 2 — Titles don&#x27;t speak to viewer pain or desire</h3>
+          <div class="gap-freq">FOUND IN 5 OF 8 VIDEOS</div>
+          <p>Many of your titles focus on what &#x27;I built&#x27; or impressive numbers, rather than directly addressing your ideal client&#x27;s immediate pain point or desired outcome. This means fewer people click your videos because the title doesn&#x27;t feel like it&#x27;s speaking directly to them or promising to solve their specific problem, costing you views and potential leads. (SOP_Ideation.md STEP 6.1)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Ideation.md STEP 6.1</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 3 — Weak hook credibility</h3>
+          <div class="gap-freq">FOUND IN 3 OF 8 VIDEOS</div>
+          <p>Several of your video hooks don&#x27;t immediately establish your authority or &#x27;why&#x27; viewers should trust you with specific results or client wins. While you have great content, if people don&#x27;t immediately see your credibility in the first few seconds, they might scroll past before they hear your valuable insights, costing you watch time and the chance to build trust. (SOP_Scripting.md PART 5.3)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 5.3</div>
+        </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5 Recommended Videos</h2>
+    
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 1</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Why 90% of SaaS Founders Never Get Leads From YouTube (And How to Fix It)</h3>
+          <div class="kv"><b>Why now:</b> This video targets a common false belief and pain point for your ideal clients, drawing in a broad audience who are problem-aware but don&#x27;t know the solution yet. It&#x27;s perfect for discovery.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Alex Hormozi (high contrast, face with concerned/surprised expression, 3 words &#x27;STOP DOING THIS&#x27;). Face: Yes. Text overlay: 3 words (&#x27;STOP DOING THIS&#x27;). Dominant colour: Red/Black. Expression: Concerned.</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 2</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>How to Get Your First 3 SaaS Clients From YouTube Without Ads</h3>
+          <div class="kv"><b>Why now:</b> This title directly addresses a core desire for early-stage SaaS founders, offering a specific, actionable result without a common sacrifice they hate. It&#x27;s highly searchable and attracts new prospects.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Iman Gadzhi (clean, confident face, big number, simple text). Face: Yes. Text overlay: 3 words (&#x27;FIRST 3 CLIENTS&#x27;). Dominant colour: Blue/White. Expression: Confident.</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 3</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>The Real Reason Your B2B YouTube Strategy Isn&#x27;t Working</h3>
+          <div class="kv"><b>Why now:</b> This video directly addresses a common frustration and potential false belief, making it highly relatable and searchable for your target audience who are struggling with their current approach.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Grant Cardone (pointing at text, bold statement). Face: Yes. Text overlay: 4 words (&#x27;YOUR STRATEGY IS BROKEN&#x27;). Dominant colour: Yellow/Black. Expression: Assertive.</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-mof">MOF</span><span class="muted">RECOMMENDED VIDEO 4</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>If I Were Starting a SaaS Channel Again, This Is What I&#x27;d Do</h3>
+          <div class="kv"><b>Why now:</b> This positions you as an expert sharing hard-won wisdom, building authority and trust with viewers who are evaluating strategies. It&#x27;s a strong MOF piece that pre-sells your process.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Patrick Bet-David (thoughtful face, simple text). Face: Yes. Text overlay: 4 words (&#x27;STARTING AGAIN? DO THIS&#x27;). Dominant colour: Green/White. Expression: Thoughtful.</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-bof">BOF</span><span class="muted">RECOMMENDED VIDEO 5</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>How I Helped a SaaS Founder Go From 0 to $10K/Month on YouTube in 90 Days</h3>
+          <div class="kv"><b>Why now:</b> This is a results-based case study that provides concrete proof of your service&#x27;s effectiveness, pushing warm prospects closer to booking a call. It directly addresses the &#x27;does it actually work?&#x27; question.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Client testimonial style (client face + big number). Face: Yes (client). Text overlay: 3 words (&#x27;$10K IN 90 DAYS&#x27;). Dominant colour: Grey/Orange. Expression: Happy/Surprised.</div>
+        </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <h2>READY TO FIX ALL OF THIS?</h2>
+    <p class="book"><i class="ti ti-calendar-event" style="margin-right:8px;vertical-align:-3px"></i>Book a free 30-minute strategy call.</p>
+    <div class="site">EMPIREPRODUCTION.NET</div>
+    <p class="qualify">This is not for anyone just starting out with no budget.
+    If you're already generating revenue and serious about making YouTube your primary
+    client acquisition channel — the link is above.</p>
+  </div>
+</div>
+
+<footer>EMPIRE PRODUCTION &middot; CHANNEL AUDIT ENGINE &middot; 12 July 2026</footer>
+
+</body>
+</html>
