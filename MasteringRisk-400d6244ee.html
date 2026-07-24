@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empire Production — Channel Audit — Mastering Risk</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#080808; color:#e8e8e8; font-family:'Space Grotesk',Arial,sans-serif; line-height:1.65; font-size:15px; }
+.wrap { max-width:980px; margin:0 auto; padding:0 28px; }
+h1,h2,h3,.bebas { font-family:'Bebas Neue',Impact,sans-serif; font-weight:400; letter-spacing:1.5px; }
+a { color:#c8202c; text-decoration:none; }
+.muted { color:#888888; }
+
+header { background:#0d0d0d; border-bottom:2px solid #c8202c; padding:52px 0 44px; }
+.kicker { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:4px; color:#c8202c; font-size:16px; margin-bottom:10px; }
+header h1 { font-size:52px; line-height:1.05; margin-bottom:6px; }
+.header-meta { color:#888888; font-size:14px; margin-bottom:26px; }
+.health { display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
+.health-score { font-family:'Bebas Neue',Impact,sans-serif; font-size:96px; color:#c8202c; line-height:1; }
+.health-score span { font-size:34px; color:#888888; }
+.diagnosis { max-width:600px; font-size:16px; border-left:3px solid #c8202c; padding-left:18px; }
+
+section { padding:44px 0 8px; }
+section > .wrap > h2 { font-size:32px; margin-bottom:22px; border-bottom:1px solid #1a1a1a; padding-bottom:10px; }
+
+.panel { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:26px; margin-bottom:22px; }
+.funnel-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.funnel-label { width:52px; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:18px; }
+.funnel-track { flex:1; background:#141414; border-radius:4px; height:22px; overflow:hidden; }
+.funnel-bar { height:100%; border-radius:4px; min-width:2px; }
+.funnel-count { width:90px; color:#888888; font-size:13px; }
+.avg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; margin-top:8px; }
+.avg-cell { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:16px; text-align:center; }
+.avg-cell .num { font-family:'Bebas Neue',Impact,sans-serif; font-size:40px; line-height:1; }
+.avg-cell .lbl { color:#888888; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+.badge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:1px; font-size:20px; padding:2px 12px; border-radius:6px; background:#141414; border:1px solid #1a1a1a; }
+.s-low  { color:#c8202c; border-color:#c8202c; }
+.s-mid  { color:#e8a520; }
+.s-high { color:#4caf7d; }
+
+.fbadge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:14px; padding:2px 12px; border-radius:4px; }
+.f-tof { background:#c8202c; color:#fff; }
+.f-mof { background:#3a3a3a; color:#e8e8e8; }
+.f-bof { background:#141414; color:#888888; border:1px solid #333; }
+
+.card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; margin-bottom:26px; overflow:hidden; }
+.card.flag { border-left:3px solid #c8202c; }
+.card-head { padding:22px 24px 16px; }
+.thumb-link { display:block; position:relative; margin:-22px -24px 18px; }
+.thumb-link img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#141414; }
+.thumb-link .thumb-play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:52px; height:52px;
+        border-radius:50%; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;
+        opacity:0; transition:opacity .15s; }
+.thumb-link .thumb-play i { font-size:22px; color:#fff; margin:0 0 0 3px; }
+.thumb-link:hover .thumb-play { opacity:1; }
+.card-title-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.card-title-row h3 { font-size:26px; line-height:1.15; }
+.card-meta { color:#888888; font-size:13px; margin-top:8px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.card-note { padding:0 24px 22px; color:#888888; font-style:italic; }
+.skip-thumb { width:120px; aspect-ratio:16/9; object-fit:cover; border-radius:6px; background:#141414; flex-shrink:0; }
+.skip-row { display:flex; gap:16px; align-items:flex-start; padding:22px 24px; }
+
+details { border-top:1px solid #1a1a1a; }
+details summary { cursor:pointer; padding:14px 24px; display:flex; align-items:center; gap:12px; list-style:none; user-select:none; font-weight:500; }
+details summary::-webkit-details-marker { display:none; }
+details summary .chev { margin-left:auto; color:#888888; transition:transform .2s; font-size:12px; }
+details[open] summary .chev { transform:rotate(90deg); }
+details summary:hover { background:#111; }
+.acc-body { padding:6px 24px 24px; }
+.acc-body h4 { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:16px; color:#888888; margin:18px 0 6px; }
+.kv { margin-bottom:8px; }
+.kv b { color:#e8e8e8; }
+.check-row { display:flex; gap:10px; margin-bottom:6px; align-items:baseline; }
+.check-pass { color:#4caf7d; font-weight:700; white-space:nowrap; }
+.check-fail { color:#c8202c; font-weight:700; white-space:nowrap; }
+.check-weak { color:#e8a520; font-weight:700; white-space:nowrap; }
+
+.fix { border-left:3px solid #c8202c; background:#120d0d; border-radius:0 8px 8px 0; padding:16px 20px; margin-top:16px; }
+.fix-label { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; color:#c8202c; font-size:16px; margin-bottom:8px; }
+.fix .fix-text { white-space:pre-wrap; }
+.fix .fix-notes { color:#888888; font-size:13.5px; margin-top:10px; border-top:1px solid #2a1a1a; padding-top:10px; }
+
+.quote-block { border:1px solid #1a1a1a; border-radius:8px; padding:14px 16px; margin:10px 0; background:#0a0a0a; }
+.quote-block .q { color:#888888; font-style:italic; }
+.quote-block .why { margin:6px 0; }
+.quote-block .better { color:#e8e8e8; border-left:2px solid #4caf7d; padding-left:10px; }
+
+.gap-card { background:#0d0d0d; border:1px solid #1a1a1a; border-left:3px solid #c8202c; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.gap-card h3 { font-size:24px; margin-bottom:4px; }
+.gap-freq { color:#c8202c; font-size:13px; letter-spacing:1px; margin-bottom:10px; font-weight:700; }
+.gap-sop { color:#888888; font-size:13px; margin-top:10px; border-top:1px solid #1a1a1a; padding-top:10px; }
+
+.idea-card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.idea-card h3 { font-size:24px; margin-bottom:8px; }
+.idea-card .kv { font-size:14px; }
+
+.cta { background:#0d0d0d; border-top:2px solid #c8202c; margin-top:50px; padding:64px 0; text-align:center; }
+.cta h2 { font-size:44px; color:#e8e8e8; }
+.cta .book { font-size:19px; margin:10px 0 2px; }
+.cta .site { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; font-size:22px; color:#c8202c; margin-bottom:26px; }
+.cta .qualify { color:#888888; max-width:560px; margin:0 auto; font-size:14px; }
+footer { padding:26px 0 40px; text-align:center; color:#888888; font-size:12px; letter-spacing:1px; }
+
+@media print {
+  .card, .gap-card, .idea-card, .quote-block { break-inside: avoid; }
+  details summary .chev { display:none; }
+  .cta { break-before: page; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">EMPIRE PRODUCTION — CHANNEL AUDIT REPORT</div>
+    <h1>Mastering Risk</h1>
+    <div class="header-meta">@MasteringRisk &nbsp;&middot;&nbsp; https://www.youtube.com/@MasteringRisk/videos &nbsp;&middot;&nbsp; Generated 24 July 2026</div>
+    <div class="health">
+      <div class="health-score">4.3<span>/10</span></div>
+      <div class="diagnosis">Your videos aren&#x27;t getting clicked because of bad packaging, and the few people who watch aren&#x27;t converting because your outros miss key sales triggers. This means your valuable content isn&#x27;t reaching or converting enough business owners into clients.</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Channel Overview</h2>
+    <div class="panel">
+      <h3 style="font-size:22px;margin-bottom:14px">Funnel Distribution (8 videos analysed)</h3>
+      
+        <div class="funnel-row">
+          <div class="funnel-label">TOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:62%;background:#c8202c"></div></div>
+          <div class="funnel-count">5 videos (62%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">MOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:38%;background:#555555"></div></div>
+          <div class="funnel-count">3 videos (38%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">BOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:0%;background:#2a2a2a"></div></div>
+          <div class="funnel-count">0 videos (0%)</div>
+        </div>
+      <p class="muted" style="margin-top:14px">Your channel is too new to have so many MOF (Middle of Funnel) videos. You&#x27;re making content for people who already know you, but you don&#x27;t have enough TOF (Top of Funnel) videos to bring new business owners in. This means you&#x27;re missing out on a huge audience who needs your help but hasn&#x27;t discovered your channel yet.</p>
+    </div>
+    <div class="avg-grid">
+        <div class="avg-cell">
+          <div class="num s-low">3.6</div>
+          <div class="lbl">Title</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">4.5</div>
+          <div class="lbl">Thumbnail</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">3.5</div>
+          <div class="lbl">Hook</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">7.0</div>
+          <div class="lbl">Body</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">3.0</div>
+          <div class="lbl">Outro</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">4.3</div>
+          <div class="lbl">Overall</div>
+        </div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Video-by-Video Audit</h2>
+    
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=tIWDHUq5Ndc" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/tIWDHUq5Ndc/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/tIWDHUq5Ndc/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Would Your Business Survive the Next Crisis? Most Owners Get This Wrong</h3>
+          <span class="badge s-low">4.0/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>5 views</span>
+          <span>Published 22 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video introduces a broad problem (surviving the next crisis) to an audience who may not yet be aware of specific solutions like resilience planning, aiming to interrupt their scroll and make them problem-aware (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 63 characters long, which is over the 50-character limit for mobile feeds.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title speaks directly to &#x27;Your Business&#x27; and &#x27;Most Owners&#x27;, making it specific to business owners.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — It clearly promises to address whether a business can survive a crisis and a common mistake owners make.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Phrases like &#x27;Business Survive Crisis&#x27; and &#x27;Owners Get This Wrong&#x27; are likely common search terms for business owners.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The key phrase &#x27;Would Your Business Survive the Next Crisis?&#x27; is 39 characters long, placing the core keyword early.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Why 90% of (niche) Never (result) — and How to Fix It</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point of a business not surviving a crisis and the desire to avoid getting things wrong.</div>
+      <div class="kv"><b>Title Case:</b> Yes, the title uses Title Case.</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long and will get cut off on mobile devices, costing you clicks from people scrolling their feed (SOP_Ideation.md STEP 3.1). While it hints at a problem, it could be more direct about the solution or insight you&#x27;re providing.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Crisis Ready? Why Most Owners Get This Wrong</div>
+        <div class="fix-notes">This new title is 45 characters, making it mobile-friendly. It uses a variation of the &#x27;Why 90% of (niche) Never (result) — and How to Fix It&#x27; template from SOP_Ideation.md Method 3, focusing on the core problem and the mistake. It leads with the desire to be &#x27;Crisis Ready&#x27; and the pain of &#x27;getting this wrong&#x27;.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bright yellow and white text on the dark, stormy background creates strong contrast, making it stand out.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While &#x27;ARE YOU READY?&#x27; is readable, the smaller text &#x27;THE NEXT DISRUPTION IS COMING. COULD YOUR BUSINESS SURVIVE?&#x27; and the icons at the bottom become very difficult to read on a small screen.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — The face is present but has a neutral/serious expression, not a strong emotion like shock or concern that would grab more attention for a problem-aware topic.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text overlay &#x27;ARE YOU READY? THE NEXT DISRUPTION IS COMING. COULD YOUR BUSINESS SURVIVE?&#x27; contains 13 words, far exceeding the 3-4 word maximum for impact and readability (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The thumbnail has multiple competing elements: the large text &#x27;ARE YOU READY?&#x27;, the speaker&#x27;s face, the shield, and the smaller text/icons at the bottom, making it cluttered.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same speaker, color palette (dark, yellow, white, red), and bold font style as other thumbnails in this batch, maintaining brand consistency.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> ARE YOU READY? THE NEXT DISRUPTION IS COMING. COULD YOUR BUSINESS SURVIVE?</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail largely repeats the title&#x27;s question and theme, rather than adding new curiosity or a strong emotional hook.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware concept. The thumbnail attempts a problem statement with a reaction face, but the text is too long (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is too cluttered and has too much text, making it hard to read on mobile and diluting its impact (SOP_Thumbnail.md STEP 2.4, 2.5). The neutral facial expression doesn&#x27;t create urgency for a problem-focused video, meaning fewer people will stop scrolling and click (SOP_Thumbnail.md STEP 2.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, concerned/determined expression. Text overlay: &#x27;CRISIS READY?&#x27; or &#x27;SURVIVE THIS?&#x27;. Colors: Bright yellow text on a dark, stormy background. Focal point: The speaker&#x27;s face and the bold, short text. Composition: Tight crop on face, with text prominently placed next to it, and a subtle background of a city under storm.</div>
+        <div class="fix-notes">This concept fits a Problem-Aware video by using a strong, emotional face and a concise, curiosity-inducing text overlay (&#x27;CRISIS READY?&#x27; or &#x27;SURVIVE THIS?&#x27;) to grab attention quickly (SOP_Thumbnail.md STEP 2.3, 2.4). It reduces clutter to create one clear focal point and ensures mobile readability (SOP_Thumbnail.md STEP 2.5, 2.2).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook implicitly targets &#x27;you as a business owner&#x27; by asking direct questions about their readiness.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — It clearly states the video will address whether you are &#x27;ready for whatever that disruption might be&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook does not establish your credibility with specific results or a timeframe, making it vague why viewers should trust your advice (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> Yes, the hook directly connects to the title by asking if the viewer is ready for the next disruption.</div>
+      <div class="kv"><b>Opening line:</b> Hi and welcome back to the latest episode of Mastering Risk. I am your host Dr. D. Today we are going to talk about the next disruption isn&#x27;t the question. The question to be asking you as a business owner is are you ready for whatever [clears throat] that disruption might be?</div>
+      <h4>Verdict</h4>
+      <p>Your hook starts with &#x27;welcome back&#x27;, which is a banned opening line (SOP_Scripting.md PART 5). More importantly, it doesn&#x27;t establish your credibility with specific results, so people don&#x27;t know why they should trust you in the first 60 seconds (SOP_Scripting.md PART 5.3). This means people might scroll past before hearing your valuable content.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Nobody knows if the next big hit will be an economic crash, a cyber attack, or a full-blown pandemic. But here&#x27;s what I do know: some kind of disruption is coming. And the real question for you as a business owner isn&#x27;t &#x27;if&#x27; but &#x27;are you ready for it?&#x27; I&#x27;m Dr. D, and after 28 years in the Canadian Army helping organizations navigate chaos, I&#x27;ve seen exactly what separates businesses that thrive from those that get wiped out. In this video, I&#x27;ll show you the core mistakes most owners make and how to fix them so your business can survive anything. Let&#x27;s get into it.</div>
+        <div class="fix-notes">This rewrite uses an Expectation Violation hook by stating &#x27;some kind of disruption is coming&#x27; and then immediately shifts to an Identity Appeal by asking &#x27;are you ready for it?&#x27;. It clearly establishes WHO (business owner), WHAT (fix mistakes, survive anything), and WHY (28 years in Canadian Army, seen what separates businesses) per SOP_Scripting.md PART 5. It removes the &#x27;welcome back&#x27; flag.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Yes, the video consistently focuses on the single problem of business vulnerability to disruption and the solution of building resilience, without drifting to unrelated topics.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Transformation Path</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions like &#x27;In section two, I want to deal with why small businesses suffer the most&#x27; and &#x27;So section three, I want to talk about something we refer to... the roller coaster test&#x27;, which helps guide the viewer through your points.</div>
+      <div class="kv"><b>Specificity:</b> You use specific examples like &#x27;March of 2020&#x27; and &#x27;Muhammad from payroll&#x27; to illustrate your points, making the content relatable and concrete.</div>
+      <div class="kv"><b>Tone:</b> Your tone is generally human, using contractions and direct address. However, there are instances of AI-like language, such as &#x27;emergence of a new normal&#x27; and &#x27;sense of normaly&#x27;, which turn verbs into abstract nouns (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets a Problem Aware audience (Stage 2), as it validates their existing fear of disruption and then introduces resilience as the solution, which is a correct match for this content (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body effectively pushes the &#x27;SAFE&#x27; emotion by emphasizing confidence and predictability through resilience, and the &#x27;EASY&#x27; emotion with simple processes. It also uses &#x27;BIG/FOMO&#x27; by highlighting the chaos of disruptions. The &#x27;NEW&#x27; emotion is less explicitly pushed, but implied through the unique mechanism of resilience.</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;emergence of a new normal some normaly&rdquo;</div>
+          <div class="why">This uses nominalizations like &#x27;emergence&#x27; and &#x27;normaly&#x27; which sound like AI-generated corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">a new normal emerges, some normalcy</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;facilitates your ability to make critical decisions&rdquo;</div>
+          <div class="why">The word &#x27;facilitates&#x27; is formal and less human-sounding than simpler alternatives (SOP_Scripting.md PART 3).</div>
+          <div class="better">helps you make critical decisions</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is strong in its structure and use of specific examples, but you can make it even more engaging by cutting out the few instances of AI-like nominalizations and formal language (SOP_Scripting.md PART 3). This will make your message feel more direct and personal to your audience.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Transformation Path structure (Pain/Problem → Possibility → Pitfalls → Principles → Proof → Practical Next Step) serves this video well by moving the viewer from understanding their current vulnerability to seeing a clear path forward with resilience.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the video&#x27;s main promise or the value delivered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — There&#x27;s no validation of the viewer&#x27;s effort or planting of the seed for future transformation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t introduce the &#x27;difficulty pivot&#x27; to frame your offer as the easier path.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is for &#x27;free downloads&#x27; and to &#x27;check out, follow us&#x27;, which is a low-friction ask, not a direct offer for your core service.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This crucial step is missing, so you&#x27;re not pre-qualifying ideal clients or filtering out those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues with general well-wishes and calls to follow after the main CTA, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> No, the offer is not framed as the easy path; it&#x27;s presented as a general resource or a free download.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;Drop over to our website at wwpreparnesslabs.ca&#x27; is specific about where to go, but vague about the immediate benefit beyond &#x27;free downloads&#x27;.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses all the key steps of a Power Offer Outro, which is the default for high-ticket offers (SOP_Scripting.md PART 7). By not reiterating the promise, validating the viewer, or framing your solution as the easy path, you&#x27;re leaving money on the table. Crucially, you&#x27;re not qualifying or disqualifying prospects, meaning you&#x27;ll get more unqualified leads on sales calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the critical mistakes most business owners make when facing disruption. If you apply what I&#x27;ve shared, you&#x27;ll definitely start seeing a clearer path to navigating chaos. However, building a full resilience system on your own takes serious time and effort. You&#x27;ll hit bottlenecks, make mistakes, and lose precious months of compounding growth trying to figure it all out. If you want to skip all that trial and error and have my team build and implement a custom operational resilience system for your business – so you can just focus on leading – click the first link in the description right now. This isn&#x27;t for businesses just starting out with no revenue. If you&#x27;re already generating some income and you&#x27;re serious about making your business bulletproof against future crises, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern (SOP_Scripting.md PART 7). It infers the core offer is building an &#x27;operational resilience system&#x27; for the client. Step 1 reiterates the promise of navigating chaos. Step 2 validates the viewer&#x27;s effort. Step 3 introduces the &#x27;difficulty pivot&#x27; by highlighting the challenges of doing it alone. Step 4 offers the client&#x27;s service as the easy path. Step 5 qualifies (&#x27;already generating some income&#x27;) and disqualifies (&#x27;not for businesses just starting out with no revenue&#x27;) to filter for ideal clients.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=Q7FnZwdwuSg" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/Q7FnZwdwuSg/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Q7FnZwdwuSg/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>How Fragile Is Your Business? The 4-Step Framework Every Owner Needs Before Disaster Strikes</h3>
+          <span class="badge s-low">4.2/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>13 views</span>
+          <span>Published 15 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video offers a &#x27;4-Step Framework&#x27; as a specific solution for building resilience, targeting viewers who are already aware of the problem and are now evaluating different solutions (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 90 characters long, which is significantly over the 50-character limit for mobile feeds.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title addresses &#x27;Your Business&#x27; and &#x27;Every Owner&#x27;, making it specific to business owners.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — It clearly promises a &#x27;4-Step Framework&#x27; needed before disaster strikes, offering a specific solution.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Phrases like &#x27;Fragile Business&#x27; and &#x27;4-Step Framework&#x27; are likely common search terms for business owners looking for solutions.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Keyword in first 40 characters</b> — The core keyword &#x27;4-Step Framework&#x27; appears at character 36, but the full promise &#x27;The 4-Step Framework Every Owner Needs Before Disaster Strikes&#x27; extends beyond 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> How to (result) Without (common sacrifice they hate)</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point &#x27;How Fragile Is Your Business?&#x27; before offering the solution.</div>
+      <div class="kv"><b>Title Case:</b> Yes, the title uses Title Case.</div>
+      <h4>Verdict</h4>
+      <p>Your title is far too long, meaning it will be cut off on mobile and lose impact (SOP_Ideation.md STEP 3.1). While it clearly states the value, the length makes it less effective at grabbing attention quickly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">4 Steps: How to Stop Your Business Being Fragile</div>
+        <div class="fix-notes">This new title is 47 characters, making it mobile-friendly. It uses a variation of the &#x27;How to (result) Without (common sacrifice they hate)&#x27; template from SOP_Ideation.md Method 3, focusing on the desired outcome (&#x27;Stop Your Business Being Fragile&#x27;) and the mechanism (&#x27;4 Steps&#x27;). It leads with the pain of fragility.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bright yellow and white text on the dark background creates strong contrast, making it stand out.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While &#x27;HOW FRAGILE IS YOUR BUSINESS?&#x27; is readable, the smaller text &#x27;THE 4-STEP FRAMEWORK EVERY OWNER NEEDS BEFORE DISASTER STRIKES&#x27; and the checklist/mug text are too small to be legible on a phone screen.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The speaker&#x27;s face shows a serious, concerned expression, which is appropriate for the video&#x27;s topic of business fragility.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text overlay &#x27;HOW FRAGILE IS YOUR BUSINESS? THE 4-STEP FRAMEWORK EVERY OWNER NEEDS BEFORE DISASTER STRIKES&#x27; contains 18 words, far exceeding the 3-4 word maximum for impact and readability (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The thumbnail has multiple competing elements: the large main text, the speaker&#x27;s face, the risk diagram, and the smaller text/objects at the bottom, making it cluttered.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same speaker, color palette (dark, yellow, white, red), and bold font style as other thumbnails in this batch, maintaining brand consistency.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> HOW FRAGILE IS YOUR BUSINESS? THE 4-STEP FRAMEWORK EVERY OWNER NEEDS BEFORE DISASTER STRIKES</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail largely repeats the title&#x27;s question and framework, rather than adding new curiosity or a strong emotional hook.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for an Authority/How-To concept. The thumbnail uses the creator&#x27;s face and attempts to show data (risk diagram), but the overall execution is too cluttered (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is too cluttered with excessive text and too many visual elements, making it difficult to quickly understand and read on mobile (SOP_Thumbnail.md STEP 2.4, 2.5). This visual overload means people will likely scroll past, costing you clicks even if the content is excellent.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, serious/determined expression. Text overlay: &#x27;4 STEPS TO RESILIENCE&#x27;. Colors: Bright yellow text on a dark, structured background. Focal point: The speaker&#x27;s face and the bold, short text. Composition: Tight crop on face, with text prominently placed next to it, and a subtle, clean visual representation of &#x27;4 steps&#x27; (e.g., four simple blocks).</div>
+        <div class="fix-notes">This concept fits an Authority/How-To video by using a confident face and a concise, actionable text overlay (&#x27;4 STEPS TO RESILIENCE&#x27;) to clearly communicate the video&#x27;s value (SOP_Thumbnail.md STEP 2.3, 2.4). It reduces clutter to create one clear focal point and ensures mobile readability (SOP_Thumbnail.md STEP 2.5, 2.2).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly identifies the target audience as those in &#x27;your small medium enterprise, in your solo entrepreneur venture, or in your organization in general&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — It explicitly states the video will provide &#x27;the four exact things that you need to do in the following order to embrace resilience&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook does not establish your credibility with specific results or a timeframe, making it vague why viewers should trust your advice (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Completion Compulsion</div>
+      <div class="kv"><b>Connection to title:</b> Yes, the hook directly connects to the title by promising to deliver the &#x27;four exact things&#x27; for resilience, validating the &#x27;4-Step Framework&#x27;.</div>
+      <div class="kv"><b>Opening line:</b> The world is full. YouTube is full. Everything is full of a whole bunch of series of ideas about building resilience. Do this, do that. Nobody actually sits down and says to you, here are the four exact things that you need to do in the following order to embrace resilience in your small medium enterprise, in your solo entrepreneur venture, or in your organization in general.</div>
+      <h4>Verdict</h4>
+      <p>While your hook clearly states what the video will deliver and for whom, it misses a crucial element: establishing your credibility with specific results (SOP_Scripting.md PART 5.3). Without a strong &#x27;why trust me&#x27; in the first 60 seconds, some viewers might not stick around.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">The internet is flooded with ideas about resilience, but nobody actually gives you the exact steps to build it. Today, I&#x27;m going to give you the 4-step framework, in order, that every business owner needs to make their company antifragile. I&#x27;m Dr. D, and after helping countless organizations, from military units to small businesses, navigate chaos for over two decades, I&#x27;ve distilled this process into something you can use right now. This is for you, whether you&#x27;re a solo entrepreneur or running a medium-sized enterprise, to get your business ready for whatever comes next. Let&#x27;s get at it.</div>
+        <div class="fix-notes">This rewrite uses a Completion Compulsion hook by promising &#x27;the 4-step framework, in order&#x27;. It clearly establishes WHO (solo entrepreneur, medium-sized enterprise), WHAT (4-step framework to make company antifragile), and WHY (over two decades helping military units and small businesses navigate chaos) per SOP_Scripting.md PART 5.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Yes, the video maintains a clear focus on the 4-step framework for building business resilience, ensuring it addresses one problem with one promise.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> You use clear and numbered transitions like &#x27;So, number one it is the very simple rule...&#x27; and &#x27;The second part is is understanding single points of failure&#x27;, which effectively guide the viewer through each step of the framework.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific, relatable examples such as using a &#x27;whiteboard&#x27; for a &#x27;dependency map&#x27; and referencing &#x27;Marcus Aurelius&#x27; and &#x27;Gary V&#x27; to illustrate abstract concepts, making them tangible for the audience.</div>
+      <div class="kv"><b>Tone:</b> Your tone is largely human and engaging, using direct address and conversational language. However, there are minor instances of nominalization, such as &#x27;adoption of AI&#x27;, which can sound a bit formal (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets a Solution Aware audience (Stage 3), as it presents a specific framework for resilience to viewers who are already looking for solutions to their business fragility (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body effectively pushes the &#x27;EASY&#x27; emotion by framing resilience as &#x27;very simple&#x27; and &#x27;easy to simplify&#x27;. It also emphasizes &#x27;SAFE&#x27; through &#x27;confidence&#x27; in skills and processes, and &#x27;NEW&#x27; by stating &#x27;nobody ever explains to you&#x27; how to find single points of failure. The &#x27;BIG/FOMO&#x27; emotion is present through the idea of &#x27;welcome to chaos&#x27;.</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;adoption of AI&rdquo;</div>
+          <div class="why">This uses the abstract noun &#x27;adoption&#x27; instead of a more active verb, which can make the language sound less human and more like AI-generated corporate speak (SOP_Scripting.md PART 3).</div>
+          <div class="better">how you use AI</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;periodically sit back, pause, reflect&rdquo;</div>
+          <div class="why">The phrase &#x27;periodically sit back, pause, reflect&#x27; is a bit formal and could be more direct and action-oriented for a human tone (SOP_Scripting.md PART 3).</div>
+          <div class="better">take time to stop and think</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is well-structured and provides clear, actionable steps, which is great for an authority-building video. To enhance its impact, you can refine a few phrases to be more conversational and less formal, ensuring every sentence feels like a direct conversation with your audience (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Expert Deconstruction structure is ideal here, as it systematically breaks down a complex topic (resilience framework) into understandable, actionable steps, making the viewer feel capable and clear (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the video&#x27;s main promise or the value delivered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — There&#x27;s no validation of the viewer&#x27;s effort or planting of the seed for future transformation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t introduce the &#x27;difficulty pivot&#x27; to frame your offer as the easier path.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is for &#x27;this service&#x27; on your website and to &#x27;stay in line with this&#x27;, which is vague about the immediate benefit or what the service entails.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This crucial step is missing, so you&#x27;re not pre-qualifying ideal clients or filtering out those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues with general encouragement and calls to follow after the main CTA, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> No, the offer is not framed as the easy path; it&#x27;s presented as a general service or a call to follow content.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;It&#x27;s on our website at www.preparednesslabs.ca&#x27; is specific about where to go, but vague about the immediate benefit beyond &#x27;this service&#x27;.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses all the key steps of a Power Offer Outro, which is the default for high-ticket offers (SOP_Scripting.md PART 7). By not reiterating the promise, validating the viewer, or framing your solution as the easy path, you&#x27;re leaving money on the table. Crucially, you&#x27;re not qualifying or disqualifying prospects, meaning you&#x27;ll get more unqualified leads on sales calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the four steps every business owner needs to stop their business from being fragile. If you follow this framework, you&#x27;ll definitely build a stronger, more confident business. However, actually implementing these steps and building a custom operational resilience system takes time, expertise, and consistent effort. You&#x27;ll run into roadblocks and waste valuable time trying to perfect it alone. If you want to skip all that struggle and have my team build and implement this entire system for you – so you can focus on running your business, not worrying about disaster – click the first link in the description right now. This isn&#x27;t for businesses without a clear offer or consistent revenue. If you&#x27;re serious about making your business antifragile and ready for anything, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern (SOP_Scripting.md PART 7). It infers the core offer is building an &#x27;operational resilience system&#x27;. Step 1 reiterates the promise of stopping fragility. Step 2 validates the viewer&#x27;s effort. Step 3 introduces the &#x27;difficulty pivot&#x27; by highlighting the challenges of doing it alone. Step 4 offers the client&#x27;s service as the easy path. Step 5 qualifies (&#x27;businesses with a clear offer or consistent revenue&#x27;) and disqualifies (&#x27;not for businesses without a clear offer or consistent revenue&#x27;) to filter for ideal clients.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=LhmaeP_eImQ" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/LhmaeP_eImQ/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/LhmaeP_eImQ/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Your Business Isn’t Resilient Until You Understand These 4 Risks</h3>
+          <span class="badge s-low">4.6/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>20 views</span>
+          <span>Published 07 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video aims to deepen trust and establish expertise by breaking down the &#x27;4 Risks&#x27; within resilience planning, targeting viewers who are evaluating solutions and need more specific understanding (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 60 characters long, which is over the 50-character limit for mobile feeds.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title addresses &#x27;Your Business&#x27; and &#x27;You&#x27;, making it specific to business owners.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — It clearly promises that understanding &#x27;These 4 Risks&#x27; is essential for business resilience.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Phrases like &#x27;Business Resilient 4 Risks&#x27; are likely common search terms for business owners looking to improve their resilience.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Keyword in first 40 characters</b> — The core keyword &#x27;4 Risks&#x27; appears at character 40, but the full promise &#x27;Your Business Isn’t Resilient Until You Understand These 4 Risks&#x27; extends beyond 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> What Every (niche) Gets Wrong About (topic)</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point &#x27;Isn’t Resilient&#x27; before offering the solution of understanding risks.</div>
+      <div class="kv"><b>Title Case:</b> Yes, the title uses Title Case.</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long and will get cut off on mobile devices, costing you clicks from people scrolling their feed (SOP_Ideation.md STEP 3.1). While it clearly states the value, the length makes it less effective at grabbing attention quickly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">4 Risks: Your Business Isn&#x27;t Resilient Without Them</div>
+        <div class="fix-notes">This new title is 50 characters, making it mobile-friendly. It uses a variation of the &#x27;What Every (niche) Gets Wrong About (topic)&#x27; template from SOP_Ideation.md Method 3, focusing on the core mechanism (&#x27;4 Risks&#x27;) and the consequence (&#x27;Isn&#x27;t Resilient Without Them&#x27;). It leads with the pain of lacking resilience.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bright yellow and white text on the dark, stormy background creates strong contrast, making it stand out.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The main text &#x27;YOUR BUSINESS IS EXPOSED&#x27; is large and clear. The four panel texts, while smaller, are still generally legible due to their clear font and contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The speaker&#x27;s face shows a serious, concerned expression, which is appropriate for the video&#x27;s topic of business exposure to risks.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The main text overlay &#x27;YOUR BUSINESS IS EXPOSED&#x27; contains 4 words, adhering to the maximum for impact and readability (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The thumbnail has a clear focal point on the speaker&#x27;s face and the bold main text &#x27;YOUR BUSINESS IS EXPOSED&#x27;, with the four panels providing supporting context without cluttering.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same speaker, color palette (dark, yellow, white, red), and bold font style as other thumbnails in this batch, maintaining brand consistency.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> YOUR BUSINESS IS EXPOSED</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail adds to the title by visually representing the &#x27;exposed&#x27; nature of the business and hinting at the specific risks, creating curiosity beyond just repeating the title.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware/Contrarian concept. The thumbnail uses a bold problem statement (&#x27;YOUR BUSINESS IS EXPOSED&#x27;) and visual tension (shattered shield, stormy background) effectively (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is strong, with clear text and a good focal point, making it effective at grabbing attention. It successfully communicates the video&#x27;s problem-focused message. Keep this kind of clear, concise text and strong visual representation for future thumbnails.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, serious/concerned expression. Text overlay: &#x27;4 RISKS EXPOSED&#x27;. Colors: Bright yellow text on a dark, stormy background with a shattered shield. Focal point: The speaker&#x27;s face and the bold text. Composition: Tight crop on face, with text prominently placed next to it, and subtle visual cues for the four risk types.</div>
+        <div class="fix-notes">This concept fits a Problem-Aware/Contrarian video by using a strong, emotional face and a concise, curiosity-inducing text overlay (&#x27;4 RISKS EXPOSED&#x27;) to grab attention quickly (SOP_Thumbnail.md STEP 2.3, 2.4). It maintains the visual tension of the original while being more direct about the &#x27;4 Risks&#x27; mentioned in the title, enhancing synergy (SOP_Thumbnail.md STEP 2.5, 2.2).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHO</b> — The hook implicitly targets &#x27;companies that thrive in disruption&#x27; but doesn&#x27;t explicitly state &#x27;who&#x27; the video is for in a direct, personal way (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — It states the video will &#x27;walk you through the six ideas that support it. the four risk domains that structure real and simple resilience planning&#x27;, though the &#x27;six ideas&#x27; vs &#x27;four risk domains&#x27; is confusing.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook does not establish your credibility with specific results or a timeframe, making it vague why viewers should trust your advice (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> Yes, the hook connects to the title by immediately discussing resilience and the &#x27;four risk domains&#x27;.</div>
+      <div class="kv"><b>Opening line:</b> Welcome back. The only difference between companies that thrive in disruption and companies that flounder around are those that decide that resilience is something that they want to take seriously.</div>
+      <h4>Verdict</h4>
+      <p>Your hook starts with &#x27;welcome back&#x27;, which is a banned opening line (SOP_Scripting.md PART 5). It also fails to explicitly state &#x27;who&#x27; the video is for and lacks specific credibility, meaning people won&#x27;t know if it&#x27;s relevant to them or why they should trust you (SOP_Scripting.md PART 5.1, 5.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">The difference between businesses that thrive in chaos and those that get crushed? It&#x27;s simple: they take resilience seriously. But true resilience isn&#x27;t some complex spreadsheet system; it&#x27;s about understanding the core risks. I&#x27;m Dr. D, and after two decades helping organizations like yours build bulletproof systems, I&#x27;ve seen these 4 risk domains make or break businesses. In this video, I&#x27;ll break down exactly what they are and how to build an operational resilience system to protect your company. Let&#x27;s get at it.</div>
+        <div class="fix-notes">This rewrite uses an Expectation Violation hook by stating &#x27;true resilience isn&#x27;t some complex spreadsheet system&#x27; and then immediately shifts to an Identity Appeal. It clearly establishes WHO (businesses like yours), WHAT (4 risk domains, how to build operational resilience), and WHY (two decades helping organizations build bulletproof systems) per SOP_Scripting.md PART 5. It removes the &#x27;welcome back&#x27; flag.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Yes, the video consistently focuses on the four risk domains and how understanding them is crucial for business resilience, maintaining a clear single problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> You use clear and distinct transitions for each risk domain, such as &#x27;The first one we&#x27;re going to start with is cyber&#x27; and &#x27;Second one we&#x27;re talking about is operational risk&#x27;, which effectively guides the viewer through the content.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific examples like &#x27;ISO of 33,000&#x27;, &#x27;QuickBooks&#x27;, and the &#x27;Canada Post striking&#x27; to illustrate your points, making the abstract concepts of risk tangible and relatable.</div>
+      <div class="kv"><b>Tone:</b> Your tone is largely human and direct. However, there are instances of formal or abstract language, such as &#x27;stakeholder engagement programs&#x27; and &#x27;materially change the bottom line&#x27;, which can sound less conversational (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets a Solution Aware audience (Stage 3), as it breaks down the components of resilience (the 4 risks) for viewers who are already seeking solutions to protect their business (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body effectively pushes the &#x27;EASY&#x27; emotion by emphasizing that resilience is &#x27;simple and easy&#x27; and that you&#x27;ve &#x27;simplified it to four domains&#x27;. It also uses &#x27;SAFE&#x27; by citing &#x27;History proves it, the literature proves it&#x27; and &#x27;BIG/FOMO&#x27; by highlighting &#x27;cancel culture&#x27; and &#x27;materially change the bottom line&#x27;. The &#x27;NEW&#x27; emotion is present through the unique framing of the four domains.</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;stakeholder engagement programs&rdquo;</div>
+          <div class="why">This is a corporate jargon phrase that sounds less human and more like AI-generated text (SOP_Scripting.md PART 3).</div>
+          <div class="better">programs for talking to stakeholders</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;materially change the bottom line&rdquo;</div>
+          <div class="why">This is a formal, abstract way of saying &#x27;change profits&#x27;, which sounds less direct and human (SOP_Scripting.md PART 3).</div>
+          <div class="better">really change your profits</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is strong in its systematic breakdown of the four risk domains, which is excellent for building authority. To make it even more impactful, you can refine a few phrases to be more conversational and less formal, ensuring every sentence feels like a direct conversation with your audience (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Expert Deconstruction structure is ideal here, as it systematically breaks down complex risk domains into understandable parts, making the viewer feel capable and clear about the challenges (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the video&#x27;s main promise or the value delivered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — There&#x27;s no validation of the viewer&#x27;s effort or planting of the seed for future transformation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t introduce the &#x27;difficulty pivot&#x27; to frame your offer as the easier path.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is for &#x27;free of charge&#x27; content and to &#x27;bring ideas&#x27;, which is vague about the immediate benefit or what the service entails.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This crucial step is missing, so you&#x27;re not pre-qualifying ideal clients or filtering out those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues with general encouragement and calls to follow after the main CTA, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> No, the offer is not framed as the easy path; it&#x27;s presented as general free content.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;We&#x27;re here every week free of charge and across social media to bring ideas about resilience&#x27; is vague and doesn&#x27;t provide a clear, actionable next step.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses all the key steps of a Power Offer Outro, which is the default for high-ticket offers (SOP_Scripting.md PART 7). By not reiterating the promise, validating the viewer, or framing your solution as the easy path, you&#x27;re leaving money on the table. Crucially, you&#x27;re not qualifying or disqualifying prospects, meaning you&#x27;ll get more unqualified leads on sales calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the four critical risk domains you need to understand to make your business truly resilient. If you apply this knowledge, you&#x27;ll definitely be better prepared for whatever comes your way. However, actually building a comprehensive operational resilience system that covers all these risks takes specialized expertise and a lot of dedicated time. You&#x27;ll face complexities and potential blind spots trying to do it all yourself. If you want to skip that struggle and have my team build and implement a custom, bulletproof resilience system for your business – so you can focus on growth, not worry about hidden risks – click the first link in the description right now. This isn&#x27;t for businesses without a clear offer or consistent revenue. If you&#x27;re serious about making your business antifragile and ready for anything, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern (SOP_Scripting.md PART 7). It infers the core offer is building an &#x27;operational resilience system&#x27;. Step 1 reiterates the promise of understanding risks for resilience. Step 2 validates the viewer&#x27;s effort. Step 3 introduces the &#x27;difficulty pivot&#x27; by highlighting the challenges of doing it alone. Step 4 offers the client&#x27;s service as the easy path. Step 5 qualifies (&#x27;businesses with a clear offer or consistent revenue&#x27;) and disqualifies (&#x27;not for businesses without a clear offer or consistent revenue&#x27;) to filter for ideal clients.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=lEcTWEi2Vv8" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/lEcTWEi2Vv8/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/lEcTWEi2Vv8/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>The Competitive Advantage Your Competitors Don&#x27;t Know They Need</h3>
+          <span class="badge s-low">4.2/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-mof">MOF</span>
+          <span>216 views</span>
+          <span>Published 01 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video positions resilience as a &#x27;competitive advantage&#x27;, targeting viewers who are already aware of the problem and are now evaluating specific solutions to gain an edge (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 67 characters long, which is significantly over the 50-character limit for mobile feeds.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title addresses &#x27;Your Competitors&#x27; and implicitly &#x27;your&#x27; business, making it specific to business owners and their market position.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — It clearly promises to reveal a &#x27;Competitive Advantage&#x27; that competitors are missing, creating a strong value proposition.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Phrases like &#x27;Competitive Advantage Business&#x27; and &#x27;Competitors Don&#x27;t Know&#x27; are likely common search terms for business owners seeking an edge.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Keyword in first 40 characters</b> — The core keyword &#x27;Competitive Advantage&#x27; appears at character 4, but the full promise &#x27;The Competitive Advantage Your Competitors Don&#x27;t Know They Need&#x27; extends beyond 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> What Every (niche) Gets Wrong About (topic)</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the desire for a &#x27;Competitive Advantage&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, the title uses Title Case.</div>
+      <h4>Verdict</h4>
+      <p>Your title is far too long, meaning it will be cut off on mobile and lose impact (SOP_Ideation.md STEP 3.1). While it clearly states the value, the length makes it less effective at grabbing attention quickly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Secret Weapon: Your Competitors Don&#x27;t Know This</div>
+        <div class="fix-notes">This new title is 47 characters, making it mobile-friendly. It uses a variation of the &#x27;What Every (niche) Gets Wrong About (topic)&#x27; template from SOP_Ideation.md Method 3, focusing on the &#x27;Secret Weapon&#x27; mechanism and the competitive insight. It leads with the desire for a secret advantage.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bright yellow and white text on the dark, stormy background creates strong contrast, making it stand out.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While &#x27;THE SECRET WEAPON&#x27; is readable, the smaller text &#x27;EVERY FOUNDER NEEDS: WHY RESILIENCE WINS IN BUSINESS&#x27; and the icons at the bottom become very difficult to read on a small screen.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The speaker&#x27;s face shows a serious, concerned expression, which is appropriate for the video&#x27;s topic of gaining an advantage.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text overlay &#x27;THE SECRET WEAPON EVERY FOUNDER NEEDS: WHY RESILIENCE WINS IN BUSINESS&#x27; contains 12 words, far exceeding the 3-4 word maximum for impact and readability (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The thumbnail has multiple competing elements: the large main text, the speaker&#x27;s face, the shield, and the smaller text/icons at the bottom, making it cluttered.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same speaker, color palette (dark, yellow, white, red), and bold font style as other thumbnails in this batch, maintaining brand consistency.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> THE SECRET WEAPON EVERY FOUNDER NEEDS: WHY RESILIENCE WINS IN BUSINESS</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail adds to the title by visually calling resilience a &#x27;secret weapon&#x27; and reinforcing its competitive benefits, creating a strong emotional connection.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for an Authority/How-To concept. The thumbnail uses the creator&#x27;s face and a strong benefit statement, but the text is too long (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is too cluttered with excessive text and too many visual elements, making it difficult to quickly understand and read on mobile (SOP_Thumbnail.md STEP 2.4, 2.5). This visual overload means people will likely scroll past, costing you clicks even if the content is excellent.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, confident/knowing expression. Text overlay: &#x27;SECRET WEAPON&#x27;. Colors: Bright yellow text on a dark, dynamic background (e.g., city with subtle lightning). Focal point: The speaker&#x27;s face and the bold, short text. Composition: Tight crop on face, with text prominently placed next to it, and a subtle visual of a shield or weapon icon.</div>
+        <div class="fix-notes">This concept fits an Authority/How-To video by using a confident face and a concise, intriguing text overlay (&#x27;SECRET WEAPON&#x27;) to clearly communicate the video&#x27;s value and create curiosity (SOP_Thumbnail.md STEP 2.3, 2.4). It reduces clutter to create one clear focal point and ensures mobile readability (SOP_Thumbnail.md STEP 2.5, 2.2).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHO</b> — The hook implicitly targets &#x27;founder-led business, your solo entrepreneur business&#x27; but doesn&#x27;t explicitly state &#x27;who&#x27; the video is for in a direct, personal way (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — It states the video will talk about &#x27;the five things that you can do and the core messages for you&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook does not establish your credibility with specific results or a timeframe, making it vague why viewers should trust your advice (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> Yes, the hook connects to the title by immediately discussing resilience as a &#x27;secret weapon&#x27; and its competitive benefits.</div>
+      <div class="kv"><b>Opening line:</b> Hi, and welcome back to the show. My name is Dr. D. Today, we want to talk about resilience.</div>
+      <h4>Verdict</h4>
+      <p>Your hook starts with &#x27;welcome back&#x27;, which is a banned opening line (SOP_Scripting.md PART 5). It also fails to explicitly state &#x27;who&#x27; the video is for and lacks specific credibility, meaning people won&#x27;t know if it&#x27;s relevant to them or why they should trust you (SOP_Scripting.md PART 5.1, 5.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">When disruptions hit, most businesses run out of time. Their solutions take too long, and their options expire. But what if you had a secret weapon that bought you time and gave you a head start? I&#x27;m Dr. D, and after two decades helping organizations like yours build bulletproof systems, I&#x27;ve seen how resilience becomes the ultimate competitive advantage. In this video, I&#x27;ll reveal the five core messages that make resilience your secret weapon, so you can outperform your competition when chaos strikes. Let&#x27;s get at it.</div>
+        <div class="fix-notes">This rewrite uses a Curiosity Gap hook by posing &#x27;what if you had a secret weapon&#x27; and then immediately shifts to an Identity Appeal. It clearly establishes WHO (organizations like yours), WHAT (five core messages, resilience as competitive advantage), and WHY (two decades helping organizations build bulletproof systems) per SOP_Scripting.md PART 5. It removes the &#x27;welcome back&#x27; flag.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Yes, the video consistently focuses on resilience as a competitive advantage, exploring how it buys time, protects revenue, and creates an edge during disruptions, maintaining a clear single problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> You use clear and numbered transitions for each core message, such as &#x27;The first one is resilience buys you time...&#x27; and &#x27;And the second core message is that resilience protects your ability to generate revenue&#x27;, which effectively guides the viewer through the content.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific, relatable examples like &#x27;Mike Tyson&#x27;, &#x27;COVID pandemic&#x27;, and &#x27;Alex Hormozi&#x27; to illustrate your points, making the abstract concepts of resilience tangible and engaging.</div>
+      <div class="kv"><b>Tone:</b> Your tone is largely human and direct, using contractions and conversational language. However, there are minor instances of nominalization, such as &#x27;imposition of tariffs&#x27; and &#x27;significant revenue bump&#x27;, which can sound a bit formal (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets a Solution Aware audience (Stage 3), as it presents resilience as a strategic advantage to viewers who are already seeking solutions to improve their business performance (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body effectively pushes the &#x27;NEW&#x27; emotion by framing resilience as a &#x27;secret weapon that nobody&#x27;s talking about&#x27; and a &#x27;competitive advantage&#x27;. It also emphasizes &#x27;EASY&#x27; by showing how it &#x27;buys you time&#x27; and &#x27;slows the clock&#x27;, and &#x27;SAFE&#x27; by protecting revenue. The &#x27;BIG/FOMO&#x27; emotion is present through statistics about businesses failing after disruption.</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;imposition of tariffs&rdquo;</div>
+          <div class="why">This is a formal, abstract noun phrase that sounds less human and more like AI-generated corporate speak (SOP_Scripting.md PART 3).</div>
+          <div class="better">when tariffs are put in place</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;significant revenue bump&rdquo;</div>
+          <div class="why">This is a formal, abstract way of saying &#x27;a big hit to your revenue&#x27;, which sounds less direct and human (SOP_Scripting.md PART 3).</div>
+          <div class="better">a big hit to your revenue</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is well-structured and uses compelling examples to explain the competitive benefits of resilience. To make it even more impactful, you can refine a few phrases to be more conversational and less formal, ensuring every sentence feels like a direct conversation with your audience (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Expert Deconstruction structure is ideal here, as it systematically breaks down the various benefits of resilience as a competitive advantage, making the viewer feel capable and clear about how to gain an edge (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the video&#x27;s main promise or the value delivered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — There&#x27;s no validation of the viewer&#x27;s effort or planting of the seed for future transformation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t introduce the &#x27;difficulty pivot&#x27; to frame your offer as the easier path.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is for a &#x27;free downloadable guide&#x27; in the show notes, which is a specific and low-friction offer.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This crucial step is missing, so you&#x27;re not pre-qualifying ideal clients or filtering out those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues with general calls to subscribe and follow after the main CTA, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> No, the offer is not framed as the easy path; it&#x27;s presented as a free resource.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;Check the show notes for that free downloadable guide&#x27; is specific about where to go and what to get.</div>
+      <h4>Verdict</h4>
+      <p>Your outro includes a clear, specific CTA for a free guide, which is good for a lead magnet. However, it misses the full Power Offer Outro structure (SOP_Scripting.md PART 7). By not reiterating the promise, framing your core solution as the easy path, or qualifying/disqualifying prospects, you&#x27;re missing an opportunity to convert warmer leads into sales calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the core messages that make resilience your secret weapon for competitive advantage. If you apply these insights, you&#x27;ll definitely be ahead of your competition. However, truly building a robust operational resilience system that gives you this edge takes strategic planning and consistent implementation. It&#x27;s a full-time job on top of running your business. If you want to skip that complexity and have my team build and manage this entire system for you – so you can focus on growth, not just survival – click the first link in the description right now. This isn&#x27;t for businesses without a clear offer or consistent revenue. If you&#x27;re serious about making your business antifragile and ready for anything, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern (SOP_Scripting.md PART 7). It infers the core offer is building an &#x27;operational resilience system&#x27;. Step 1 reiterates the promise of resilience as a competitive advantage. Step 2 validates the viewer&#x27;s effort. Step 3 introduces the &#x27;difficulty pivot&#x27; by highlighting the challenges of doing it alone. Step 4 offers the client&#x27;s service as the easy path. Step 5 qualifies (&#x27;businesses with a clear offer or consistent revenue&#x27;) and disqualifies (&#x27;not for businesses without a clear offer or consistent revenue&#x27;) to filter for ideal clients.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=YtdL0EAkD-Q" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/YtdL0EAkD-Q/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/YtdL0EAkD-Q/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Why Some Businesses Survive Crisis and Others Never Reopen</h3>
+          <span class="badge s-low">4.4/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>6 views</span>
+          <span>Published 23 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video addresses a broad, problem-aware topic (why some businesses survive crises and others don&#x27;t) for viewers who are likely experiencing or fearing this problem, aiming to get them to click and discover the underlying reasons (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 60 characters long, which is over the 50-character limit for mobile feeds.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title refers to &#x27;Businesses&#x27;, which is general but specific enough for the target audience of business owners.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — It clearly promises to explain why some businesses survive crises and others don&#x27;t, offering a valuable insight.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Phrases like &#x27;Businesses Survive Crisis&#x27; and &#x27;Businesses Never Reopen&#x27; are likely common search terms for business owners concerned about survival.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Keyword in first 40 characters</b> — The core keyword &#x27;Survive Crisis&#x27; appears at character 24, but the full promise &#x27;Why Some Businesses Survive Crisis and Others Never&#x27; extends beyond 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Why 90% of (niche) Never (result) — and How to Fix It</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the desire to &#x27;Survive Crisis&#x27; and the pain of &#x27;Never Reopen&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, the title uses Title Case.</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long and will get cut off on mobile devices, costing you clicks from people scrolling their feed (SOP_Ideation.md STEP 3.1). While it clearly states the value, the length makes it less effective at grabbing attention quickly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Survive or Shut Down? The Leadership Difference</div>
+        <div class="fix-notes">This new title is 49 characters, making it mobile-friendly. It uses a variation of the &#x27;Why 90% of (niche) Never (result) — and How to Fix It&#x27; template from SOP_Ideation.md Method 3, focusing on the core problem (&#x27;Survive or Shut Down?&#x27;) and the key insight (&#x27;The Leadership Difference&#x27;). It leads with the pain/desire dichotomy.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bright yellow and white text on the dark, split background creates strong contrast, making it stand out.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While &#x27;SURVIVE OR SHUT DOWN?&#x27; is readable, the smaller text &#x27;THE LEADERSHIP DIFFERENCE THAT DETERMINES WHO RECOVERS AND WHO DOESN&#x27;T.&#x27; and the icons at the bottom become very difficult to read on a small screen.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The speaker&#x27;s face shows a serious, concerned expression, which is appropriate for the video&#x27;s high-stakes topic.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text overlay &#x27;SURVIVE OR SHUT DOWN? THE LEADERSHIP DIFFERENCE THAT DETERMINES WHO RECOVERS AND WHO DOESN&#x27;T.&#x27; contains 16 words, far exceeding the 3-4 word maximum for impact and readability (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The thumbnail has multiple competing elements: the large main text, the speaker&#x27;s face, the split background, and the smaller text/icons at the bottom, making it cluttered.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same speaker, color palette (dark, yellow, white, red), and bold font style as other thumbnails in this batch, maintaining brand consistency.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> SURVIVE OR SHUT DOWN? THE LEADERSHIP DIFFERENCE THAT DETERMINES WHO RECOVERS AND WHO DOESN&#x27;T.</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually represents the title&#x27;s core question and the dichotomy of survival or failure, adding emotional weight to the message.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware concept. The thumbnail uses a before/after split background and a problem statement, but the text is too long (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is too cluttered with excessive text and too many visual elements, making it difficult to quickly understand and read on mobile (SOP_Thumbnail.md STEP 2.4, 2.5). This visual overload means people will likely scroll past, costing you clicks even if the content is excellent.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, serious/determined expression. Text overlay: &#x27;SURVIVE OR SHUT DOWN?&#x27;. Colors: Bright yellow text on a split background (left: destroyed city, right: thriving city). Focal point: The speaker&#x27;s face and the bold, short text. Composition: Tight crop on face, with text prominently placed next to it, and the split background clearly showing the &#x27;before&#x27; and &#x27;after&#x27; states.</div>
+        <div class="fix-notes">This concept fits a Problem-Aware video by using a strong, emotional face and a concise, high-stakes text overlay (&#x27;SURVIVE OR SHUT DOWN?&#x27;) to grab attention quickly (SOP_Thumbnail.md STEP 2.3, 2.4). The split background visually reinforces the video&#x27;s core question and the consequences, enhancing synergy (SOP_Thumbnail.md STEP 2.5, 2.2).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHO</b> — The hook implicitly targets &#x27;companies that thrive in disruption&#x27; but doesn&#x27;t explicitly state &#x27;who&#x27; the video is for in a direct, personal way (SOP_Scripting.md PART 5.1).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — It states the video will &#x27;talk about resilience as organizational leadership. How do companies and why do some companies have success in disruptions...&#x27;</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook does not establish your credibility with specific results or a timeframe, making it vague why viewers should trust your advice (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> Yes, the hook connects to the title by immediately discussing why some companies succeed in disruptions and others fail.</div>
+      <div class="kv"><b>Opening line:</b> Technology matters, processes matter, plans matter, but ultimately organizational resilience is a leadership function. Leaders create the culture, the trust, and decision-making environment that determines whether an organization succeeds through a disruption or becomes another casualty. Today, in this episode, we&#x27;re going to talk about resilience as organizational leadership.</div>
+      <h4>Verdict</h4>
+      <p>Your hook fails to explicitly state &#x27;who&#x27; the video is for and lacks specific credibility, meaning people won&#x27;t know if it&#x27;s relevant to them or why they should trust you (SOP_Scripting.md PART 5.1, 5.3). This can cause viewers to scroll past before understanding the value.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Why do some businesses thrive in crisis while others never reopen? It&#x27;s not about technology or plans; it&#x27;s about leadership. I&#x27;m Dr. D, and after two decades helping organizations like yours build bulletproof systems, I&#x27;ve seen how leadership creates the culture, trust, and decision-making environment that determines survival. In this video, I&#x27;ll reveal the 5 critical ideas that separate the winners from the casualties, so you can ensure your business recovers and thrives. Let&#x27;s get at it.</div>
+        <div class="fix-notes">This rewrite uses an Expectation Violation hook by stating &#x27;it&#x27;s not about technology or plans; it&#x27;s about leadership&#x27; and then immediately shifts to an Identity Appeal. It clearly establishes WHO (organizations like yours), WHAT (5 critical ideas, leadership&#x27;s role in survival), and WHY (two decades helping organizations build bulletproof systems) per SOP_Scripting.md PART 5.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Yes, the video consistently focuses on resilience as a leadership function, exploring how leadership impacts a company&#x27;s ability to survive and thrive during disruptions, maintaining a clear single problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> You use clear and numbered transitions for each point, such as &#x27;All right, back number one is resilience begins at the top&#x27; and &#x27;And the third point is training creates competency&#x27;, which effectively guides the viewer through the content.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific, relatable examples like &#x27;Tom Marazzo&#x27;, &#x27;Journal of Preparedness in Canada&#x27;, &#x27;Mike Tyson&#x27;, and &#x27;Ritz-Carlton&#x27; to illustrate your points, making the abstract concepts of leadership and resilience tangible.</div>
+      <div class="kv"><b>Tone:</b> Your tone is largely human and direct, using contractions and conversational language. However, there are minor instances of nominalization, such as &#x27;organizational cultures&#x27; and &#x27;significantly expanded scope&#x27;, which can sound a bit formal (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets a Problem Aware audience (Stage 2), as it addresses the fundamental question of why some businesses survive crises and others don&#x27;t, and then introduces leadership as the core differentiator (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body effectively pushes the &#x27;SAFE&#x27; emotion by emphasizing &#x27;trust&#x27; and &#x27;confidence&#x27; in leadership and teams. It also uses &#x27;NEW&#x27; by framing resilience as a &#x27;leadership function&#x27; and introducing concepts like &#x27;left of bang&#x27;. The &#x27;BIG/FOMO&#x27; emotion is present through the stakes of businesses becoming &#x27;casualties&#x27;. The &#x27;EASY&#x27; emotion is less explicitly pushed, but implied through simplified concepts.</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;organizational cultures&rdquo;</div>
+          <div class="why">This is an abstract noun phrase that sounds less human and more like AI-generated corporate speak (SOP_Scripting.md PART 3).</div>
+          <div class="better">how your company works</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;significantly expanded scope&rdquo;</div>
+          <div class="why">This is a formal, abstract way of saying &#x27;a much bigger area of what they can do&#x27;, which sounds less direct and human (SOP_Scripting.md PART 3).</div>
+          <div class="better">a much bigger area of what they can do</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is well-structured and uses compelling examples to explain the crucial role of leadership in resilience. To make it even more impactful, you can refine a few phrases to be more conversational and less formal, ensuring every sentence feels like a direct conversation with your audience (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Expert Deconstruction structure is ideal here, as it systematically breaks down the complex role of leadership in building resilience, making the viewer feel capable and clear about how to implement these principles (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the video&#x27;s main promise or the value delivered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — There&#x27;s no validation of the viewer&#x27;s effort or planting of the seed for future transformation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t introduce the &#x27;difficulty pivot&#x27; to frame your offer as the easier path.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is for &#x27;free downloads&#x27; and to &#x27;subscribe down below&#x27;, which is a specific and low-friction offer.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This crucial step is missing, so you&#x27;re not pre-qualifying ideal clients or filtering out those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues with general encouragement and calls to follow after the main CTA, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> No, the offer is not framed as the easy path; it&#x27;s presented as free resources.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;In the show notes, you&#x27;ll find the link to all of our free downloads&#x27; is specific about where to go and what to get.</div>
+      <h4>Verdict</h4>
+      <p>Your outro includes a clear, specific CTA for free downloads, which is good for a lead magnet. However, it misses the full Power Offer Outro structure (SOP_Scripting.md PART 7). By not reiterating the promise, framing your core solution as the easy path, or qualifying/disqualifying prospects, you&#x27;re missing an opportunity to convert warmer leads into sales calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the critical leadership differences that determine whether a business survives or shuts down. If you apply these insights, you&#x27;ll definitely build a stronger, more resilient team. However, actually building a leadership-driven resilience culture and empowering your team takes intentional investment, training, and consistent effort. It&#x27;s a longitudinal task, not an overnight fix. If you want to skip that complexity and have my team build and implement a custom operational resilience system for your business – and train your team to lead through any crisis – click the first link in the description right now. This isn&#x27;t for businesses without a clear offer or consistent revenue. If you&#x27;re serious about making your business antifragile and ready for anything, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern (SOP_Scripting.md PART 7). It infers the core offer is building an &#x27;operational resilience system&#x27; and team training. Step 1 reiterates the promise of leadership differences. Step 2 validates the viewer&#x27;s effort. Step 3 introduces the &#x27;difficulty pivot&#x27; by highlighting the challenges of doing it alone. Step 4 offers the client&#x27;s service as the easy path. Step 5 qualifies (&#x27;businesses with a clear offer or consistent revenue&#x27;) and disqualifies (&#x27;not for businesses without a clear offer or consistent revenue&#x27;) to filter for ideal clients.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=b0Ulls0FlZ0" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/b0Ulls0FlZ0/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/b0Ulls0FlZ0/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>What Happens When Your AI Stops Working? The Risk Nobody Is Planning For</h3>
+          <span class="badge s-low">4.4/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>22 views</span>
+          <span>Published 15 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video addresses a new, unacknowledged problem (&#x27;The Risk Nobody Is Planning For&#x27; regarding AI failure) for viewers who are likely problem-aware about AI but not this specific vulnerability, aiming to interrupt their scroll and make them aware (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 74 characters long, which is significantly over the 50-character limit for mobile feeds.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title addresses &#x27;Your AI&#x27; and implicitly &#x27;your&#x27; business, making it specific to business owners using AI.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — It clearly promises to address the risk of AI stopping working, which is a specific and valuable insight.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Phrases like &#x27;AI Stops Working&#x27; and &#x27;Risk Nobody Planning For AI&#x27; are likely common search terms for business owners concerned about AI implementation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Keyword in first 40 characters</b> — The core keyword &#x27;AI Stops Working&#x27; appears at character 24, but the full promise &#x27;What Happens When Your AI Stops Working? The Risk&#x27; extends beyond 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Watch This If (problem they&#x27;re experiencing) — Here&#x27;s Why</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point &#x27;What Happens When Your AI Stops Working?&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, the title uses Title Case.</div>
+      <h4>Verdict</h4>
+      <p>Your title is far too long, meaning it will be cut off on mobile and lose impact (SOP_Ideation.md STEP 3.1). While it clearly states the value, the length makes it less effective at grabbing attention quickly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">AI Offline? The Risk Nobody Is Planning For</div>
+        <div class="fix-notes">This new title is 45 characters, making it mobile-friendly. It uses a variation of the &#x27;Watch This If (problem they&#x27;re experiencing) — Here&#x27;s Why&#x27; template from SOP_Ideation.md Method 3, focusing on the immediate problem (&#x27;AI Offline?&#x27;) and the unique insight (&#x27;The Risk Nobody Is Planning For&#x27;). It leads with the pain of AI failure.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The red and white text on the dark background creates strong contrast, making it stand out.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While &#x27;AI OFFLINE. NOW WHAT?&#x27; is readable, the smaller text &#x27;THE RISK NOBODY IS PLANNING FOR&#x27; and the icons at the bottom become very difficult to read on a small screen.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The speaker&#x27;s face shows a concerned/worried expression, which is appropriate for the video&#x27;s topic of AI failure.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text overlay &#x27;AI OFFLINE. NOW WHAT? THE RISK NOBODY IS PLANNING FOR&#x27; contains 12 words, far exceeding the 3-4 word maximum for impact and readability (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The thumbnail has multiple competing elements: the large main text, the speaker&#x27;s face, the laptop screen, and the icons at the bottom, making it cluttered.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail uses the same speaker, color palette (dark, red, white), and bold font style as other thumbnails in this batch, maintaining brand consistency.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> AI OFFLINE. NOW WHAT? THE RISK NOBODY IS PLANNING FOR</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually represents the title&#x27;s problem of AI failure and adds urgency with &#x27;NOW WHAT?&#x27;, enhancing curiosity.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware/Contrarian concept. The thumbnail uses a reaction face and a bold problem statement, but the text is too long (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is too cluttered with excessive text and too many visual elements, making it difficult to quickly understand and read on mobile (SOP_Thumbnail.md STEP 2.4, 2.5). This visual overload means people will likely scroll past, costing you clicks even if the content is excellent.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, concerned/frustrated expression. Text overlay: &#x27;AI OFFLINE. NOW WHAT?&#x27;. Colors: Bright red text on a dark background. Focal point: The speaker&#x27;s face and the bold, short text. Composition: Tight crop on face, with text prominently placed next to it, and a subtle visual of a broken AI icon or a laptop screen showing an error message.</div>
+        <div class="fix-notes">This concept fits a Problem-Aware/Contrarian video by using a strong, emotional face and a concise, urgent text overlay (&#x27;AI OFFLINE. NOW WHAT?&#x27;) to grab attention quickly (SOP_Thumbnail.md STEP 2.3, 2.4). It reduces clutter to create one clear focal point and ensures mobile readability (SOP_Thumbnail.md STEP 2.5, 2.2).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly identifies the target audience as those who have &#x27;integrated artificial intelligence into your customer service... or any one of these integral processes that make up your small and medium business&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — It explicitly states the video is &#x27;all about the risk that you&#x27;re un noticeably assuming when you integrate artificial intelligence into your complete business operations&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook does not establish your credibility with specific results or a timeframe, making it vague why viewers should trust your advice (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Identity Appeal</div>
+      <div class="kv"><b>Connection to title:</b> Yes, the hook directly connects to the title by immediately discussing the risks of AI being unavailable after integration.</div>
+      <div class="kv"><b>Opening line:</b> If you&#x27;ve integrated artificial intelligence into your customer service, into your ordering, into your supply chain, into managing your cyber, your customer awareness, your customer relations management, or any one of these integral processes that make up your small and medium business? What does your world look like when AI is no longer available?</div>
+      <h4>Verdict</h4>
+      <p>While your hook clearly identifies the audience and the problem, it misses a crucial element: establishing your credibility with specific results (SOP_Scripting.md PART 5.3). Without a strong &#x27;why trust me&#x27; in the first 60 seconds, some viewers might not stick around.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">You&#x27;ve integrated AI into your customer service, your ordering, your supply chain. It&#x27;s boosting your business. But what happens when that AI bot crashes, or the company behind it goes under? I&#x27;m Dr. D, and after two decades helping organizations like yours build bulletproof systems, I&#x27;ve seen the hidden dangers of over-reliance. In this video, I&#x27;ll expose the risk nobody is planning for when AI stops working, and how you can ensure your business stays operational. Let&#x27;s get at it.</div>
+        <div class="fix-notes">This rewrite uses an Identity Appeal hook by directly addressing businesses using AI. It clearly establishes WHO (organizations like yours), WHAT (expose the risk of AI stopping, how to stay operational), and WHY (two decades helping organizations build bulletproof systems) per SOP_Scripting.md PART 5.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Yes, the video consistently focuses on the problem of AI dependency and the risks associated with AI failure, maintaining a clear single problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Contrarian Reframe</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions like &#x27;So our opening problem is this&#x27; and &#x27;Now if we think about the strategic context for this discussion&#x27;, which effectively guides the viewer through the content.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific, relatable examples such as &#x27;dot bubble&#x27;, &#x27;2008 2009 crash&#x27;, &#x27;chat GPT&#x27;, and &#x27;Perplexity&#x27; to illustrate your points, making the abstract concepts of AI risk tangible.</div>
+      <div class="kv"><b>Tone:</b> Your tone is largely human and direct, using contractions and conversational language. However, there are minor instances of nominalization, such as &#x27;rate of adoption&#x27; and &#x27;human mind can comprehend&#x27;, which can sound a bit formal (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets a Problem Aware audience (Stage 2), as it introduces a new, unacknowledged problem (AI failure risk) to viewers who are already aware of AI but not its specific vulnerabilities (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body effectively pushes the &#x27;NEW&#x27; emotion by framing AI failure as &#x27;the risk nobody is planning for&#x27; and &#x27;un noticeably assuming&#x27;. It also emphasizes &#x27;BIG/FOMO&#x27; by highlighting the &#x27;rate of change&#x27; and &#x27;significant amount of risk&#x27;. The &#x27;SAFE&#x27; emotion is present through the concept of &#x27;human in the loop&#x27; and &#x27;operational resilience system&#x27;. The &#x27;EASY&#x27; emotion is less explicitly pushed, but implied through the benefits of AI.</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;rate of adoption&rdquo;</div>
+          <div class="why">This uses the abstract noun &#x27;adoption&#x27; instead of a more active verb, which can make the language sound less human and more like AI-generated corporate speak (SOP_Scripting.md PART 3).</div>
+          <div class="better">how fast you use AI</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;human mind can comprehend&rdquo;</div>
+          <div class="why">This is a formal, abstract way of saying &#x27;people can understand&#x27;, which sounds less direct and human (SOP_Scripting.md PART 3).</div>
+          <div class="better">people can understand</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is well-structured and uses compelling examples to explain the risks of AI dependency. To make it even more impactful, you can refine a few phrases to be more conversational and less formal, ensuring every sentence feels like a direct conversation with your audience (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Contrarian Reframe structure is ideal here, as it challenges the common wisdom of full AI adoption and introduces a new framework for thinking about AI risk, making the viewer question their current approach (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">2/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the video&#x27;s main promise or the value delivered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — There&#x27;s no validation of the viewer&#x27;s effort or planting of the seed for future transformation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t introduce the &#x27;difficulty pivot&#x27; to frame your offer as the easier path.</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is for &#x27;Drop over at our website&#x27; and &#x27;Follow us on all across social media&#x27;, which is vague about the immediate benefit or what the service entails.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This crucial step is missing, so you&#x27;re not pre-qualifying ideal clients or filtering out those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues with music after the main CTA, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> No, the offer is not framed as the easy path; it&#x27;s presented as a general call to engage with content.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;Drop over at our website at triplewparnesslabs.ca&#x27; is specific about where to go, but vague about the immediate benefit beyond general engagement.</div>
+      <h4>Verdict</h4>
+      <p>Your outro misses all the key steps of a Power Offer Outro, which is the default for high-ticket offers (SOP_Scripting.md PART 7). By not reiterating the promise, validating the viewer, or framing your solution as the easy path, you&#x27;re leaving money on the table. Crucially, you&#x27;re not qualifying or disqualifying prospects, meaning you&#x27;ll get more unqualified leads on sales calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the hidden risk of AI dependency that nobody is planning for. If you apply what I&#x27;ve shared, you&#x27;ll definitely be more aware of your vulnerabilities. However, actually building an operational resilience system that fully integrates AI safely and ensures you stay operational when it fails takes specialized expertise and consistent effort. It&#x27;s a complex task to get right alone. If you want to skip that complexity and have my team build and implement a custom, human-in-the-loop AI resilience system for your business – so you can leverage AI&#x27;s power without the hidden risks – click the first link in the description right now. This isn&#x27;t for businesses without a clear offer or consistent revenue. If you&#x27;re serious about making your business antifragile and ready for anything, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern (SOP_Scripting.md PART 7). It infers the core offer is building an &#x27;operational resilience system&#x27; with safe AI integration. Step 1 reiterates the promise of understanding AI risk. Step 2 validates the viewer&#x27;s effort. Step 3 introduces the &#x27;difficulty pivot&#x27; by highlighting the challenges of doing it alone. Step 4 offers the client&#x27;s service as the easy path. Step 5 qualifies (&#x27;businesses with a clear offer or consistent revenue&#x27;) and disqualifies (&#x27;not for businesses without a clear offer or consistent revenue&#x27;) to filter for ideal clients.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=GZ2wm9kmow8" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/GZ2wm9kmow8/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/GZ2wm9kmow8/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Most Founders Ignore These 6 Risks… And Pay for It Later</h3>
+          <span class="badge s-low">4.4/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>8 views</span>
+          <span>Published 22 Apr 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video highlights &#x27;hidden risks&#x27; that &#x27;Most Founders Ignore&#x27;, targeting a problem-aware audience who might not know these specific vulnerabilities exist, aiming to interrupt their scroll and make them aware (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 60 characters long, which is over the 50-character limit for mobile feeds.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title addresses &#x27;Most Founders&#x27;, making it specific to business owners.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — It clearly promises to reveal &#x27;6 Risks&#x27; that are ignored and their negative consequences.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Phrases like &#x27;Founders Ignore Risks&#x27; and &#x27;Pay for It Later&#x27; are likely common search terms for business owners concerned about hidden vulnerabilities.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The core keyword &#x27;6 Risks&#x27; appears at character 29, placing the key information early in the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> The (number) Mistakes Keeping (ICP) From (desired outcome)</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point &#x27;Ignore These 6 Risks&#x27; and the consequence &#x27;Pay for It Later&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, the title uses Title Case.</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long and will get cut off on mobile devices, costing you clicks from people scrolling their feed (SOP_Ideation.md STEP 3.1). While it clearly states the value, the length makes it less effective at grabbing attention quickly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">6 Risks Most Founders Ignore (And Pay For!)</div>
+        <div class="fix-notes">This new title is 45 characters, making it mobile-friendly. It uses the &#x27;The (number) Mistakes Keeping (ICP) From (desired outcome)&#x27; template from SOP_Ideation.md Method 3, focusing on the core problem (&#x27;6 Risks Most Founders Ignore&#x27;) and the consequence (&#x27;And Pay For!&#x27;). It leads with the pain of ignored risks.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bright yellow, white, and red text on the dark, fiery background creates strong contrast, making it stand out.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While &#x27;MOST FOUNDERS IGNORE THESE 6 RISKS&#x27; is somewhat readable, the smaller text &#x27;AND PAY FOR IT LATER!&#x27; becomes very difficult to read on a small screen.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The man&#x27;s face shows a serious, direct gaze with a pointing finger, conveying urgency and direct address, which is strong emotion.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text overlay &#x27;MOST FOUNDERS IGNORE THESE 6 RISKS… AND PAY FOR IT LATER!&#x27; contains 12 words, far exceeding the 3-4 word maximum for impact and readability (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The thumbnail has multiple competing elements: the large main text, the man pointing, and the fiery background, making it cluttered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — This thumbnail features a different speaker than all other videos in this batch, breaking channel branding consistency (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> MOST FOUNDERS IGNORE THESE 6 RISKS… AND PAY FOR IT LATER!</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually represents the title&#x27;s warning and urgency, adding emotional weight with the pointing finger and fiery background.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware/Contrarian concept. The thumbnail uses a reaction face (pointing) and a bold problem statement with visual tension (fire) effectively, but the text is too long (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is too cluttered with excessive text and features a different speaker, breaking channel branding (SOP_Thumbnail.md STEP 2.4, 2.6). This inconsistency and visual overload will confuse viewers and reduce clicks, as they won&#x27;t immediately recognize your brand.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, Dr. D with a serious/concerned expression, pointing at the camera. Text overlay: &#x27;6 RISKS YOU MISS&#x27;. Colors: Bright yellow text on a dark, subtly fiery background. Focal point: Dr. D&#x27;s face and the bold, short text. Composition: Tight crop on Dr. D&#x27;s face, with text prominently placed next to it, and a subtle visual cue for &#x27;risks&#x27; (e.g., a warning symbol).</div>
+        <div class="fix-notes">This concept fits a Problem-Aware/Contrarian video by using Dr. D&#x27;s consistent face and a concise, urgent text overlay (&#x27;6 RISKS YOU MISS&#x27;) to grab attention quickly and maintain brand consistency (SOP_Thumbnail.md STEP 2.3, 2.4, 2.6). It reduces clutter to create one clear focal point and ensures mobile readability (SOP_Thumbnail.md STEP 2.5, 2.2).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly identifies the target audience as &#x27;most small and medium businesses that owners going 100 miles an hour trying to get her done and maximize revenue&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — It states the video is &#x27;talking about the hidden risks that exist inside most small and medium businesses&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook does not establish your credibility with specific results or a timeframe, making it vague why viewers should trust your advice (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> Yes, the hook directly connects to the title by immediately discussing &#x27;hidden risks&#x27; that owners &#x27;often miss&#x27;.</div>
+      <div class="kv"><b>Opening line:</b> Welcome back to the show. I am your host Dr. Dee. Today we are talking about the hidden risks that exist inside most small and medium businesses that owners going 100 miles an hour trying to get her done and maximize revenue often miss.</div>
+      <h4>Verdict</h4>
+      <p>Your hook starts with &#x27;welcome back&#x27;, which is a banned opening line (SOP_Scripting.md PART 5). It also lacks specific credibility, meaning people won&#x27;t know why they should trust you in the first 60 seconds (SOP_Scripting.md PART 5.3). This can cause viewers to scroll past before understanding the value.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Most founders are going 100 miles an hour, focused on revenue, and completely miss the hidden risks lurking in their business. I&#x27;m Dr. D, and after two decades helping organizations like yours build bulletproof systems, I&#x27;ve seen these overlooked dangers cost businesses dearly. In this video, I&#x27;ll expose the 6 hidden risks most founders ignore and why they end up paying for it later, so you can protect your company. Let&#x27;s get at it.</div>
+        <div class="fix-notes">This rewrite uses an Identity Appeal hook by directly addressing founders focused on revenue. It clearly establishes WHO (organizations like yours), WHAT (expose 6 hidden risks, why they pay for it), and WHY (two decades helping organizations build bulletproof systems) per SOP_Scripting.md PART 5. It removes the &#x27;welcome back&#x27; flag.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Yes, the video consistently focuses on the six hidden risks that founders often ignore, maintaining a clear single problem and promise throughout.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> You use clear and numbered transitions for each risk, such as &#x27;First one right up front, key person dependency&#x27; and &#x27;And number two is your informal or inconsistent processes&#x27;, which effectively guides the viewer through the content.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific, relatable examples like &#x27;Sarah&#x27;, &#x27;Shopify&#x27;, &#x27;Stripe&#x27;, and &#x27;Ritz-Carlton&#x27; to illustrate your points, making the abstract concepts of risk tangible and engaging.</div>
+      <div class="kv"><b>Tone:</b> Your tone is largely human and direct, using contractions and conversational language. However, there are minor instances of nominalization, such as &#x27;revenue concentration problem&#x27; and &#x27;dispute mechanisms&#x27;, which can sound a bit formal (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets a Problem Aware audience (Stage 2), as it introduces specific &#x27;hidden risks&#x27; that founders might not be aware of, validating their implicit concerns about business vulnerabilities (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body effectively pushes the &#x27;NEW&#x27; emotion by exposing &#x27;hidden risks&#x27; that &#x27;most founders ignore&#x27;. It also emphasizes &#x27;BIG/FOMO&#x27; by highlighting &#x27;significant liability&#x27;, &#x27;massive risk&#x27;, and &#x27;big trouble&#x27;. The &#x27;SAFE&#x27; emotion is present through the idea of &#x27;cyber hygiene&#x27; and &#x27;trusted managed service provider&#x27;. The &#x27;EASY&#x27; emotion is pushed by stating &#x27;it&#x27;s not difficult, does not cost a lot of money&#x27; and &#x27;30 minutes a month&#x27;.</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;revenue concentration problem&rdquo;</div>
+          <div class="why">This is an abstract noun phrase that sounds less human and more like AI-generated corporate speak (SOP_Scripting.md PART 3).</div>
+          <div class="better">a problem with too much revenue from one place</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;dispute mechanisms&rdquo;</div>
+          <div class="why">This is a formal, abstract way of saying &#x27;ways to handle disagreements&#x27;, which sounds less direct and human (SOP_Scripting.md PART 3).</div>
+          <div class="better">ways to handle disagreements</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is well-structured and uses compelling examples to explain the six hidden risks. To make it even more impactful, you can refine a few phrases to be more conversational and less formal, ensuring every sentence feels like a direct conversation with your audience (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Expert Deconstruction structure is ideal here, as it systematically breaks down complex hidden risks into understandable parts, making the viewer feel capable and clear about how to address these vulnerabilities (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the video&#x27;s main promise or the value delivered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — There&#x27;s no validation of the viewer&#x27;s effort or planting of the seed for future transformation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t introduce the &#x27;difficulty pivot&#x27; to frame your offer as the easier path.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is for &#x27;free downloads&#x27; and to &#x27;Sign up for one of our programs&#x27;, which is a specific and low-friction offer.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This crucial step is missing, so you&#x27;re not pre-qualifying ideal clients or filtering out those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues with general encouragement and calls to follow after the main CTA, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> No, the offer is not framed as the easy path; it&#x27;s presented as free resources and general program sign-ups.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;Drop over to our website www.preparednesslabs.ca. The link is down in the show notes. We have got lots of free downloads for you&#x27; is specific about where to go and what to get.</div>
+      <h4>Verdict</h4>
+      <p>Your outro includes clear, specific CTAs for free downloads and program sign-ups, which is good for lead generation. However, it misses the full Power Offer Outro structure (SOP_Scripting.md PART 7). By not reiterating the promise, framing your core solution as the easy path, or qualifying/disqualifying prospects, you&#x27;re missing an opportunity to convert warmer leads into sales calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the 6 hidden risks most founders ignore and why they end up paying for it later. If you apply these insights, you&#x27;ll definitely be more secure in your business. However, actually identifying and mitigating all these risks, especially in a fast-paced environment, takes dedicated time and expertise. It&#x27;s easy to overlook crucial details when you&#x27;re busy running your business. If you want to skip that complexity and have my team build and implement a custom operational resilience system for your business – so you can focus on growth, not hidden vulnerabilities – click the first link in the description right now. This isn&#x27;t for businesses without a clear offer or consistent revenue. If you&#x27;re serious about making your business antifragile and ready for anything, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern (SOP_Scripting.md PART 7). It infers the core offer is building an &#x27;operational resilience system&#x27;. Step 1 reiterates the promise of understanding hidden risks. Step 2 validates the viewer&#x27;s effort. Step 3 introduces the &#x27;difficulty pivot&#x27; by highlighting the challenges of doing it alone. Step 4 offers the client&#x27;s service as the easy path. Step 5 qualifies (&#x27;businesses with a clear offer or consistent revenue&#x27;) and disqualifies (&#x27;not for businesses without a clear offer or consistent revenue&#x27;) to filter for ideal clients.</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card flag">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=q9Kjfpb73Sw" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/q9Kjfpb73Sw/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/q9Kjfpb73Sw/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>If Your Business Went Dark Tomorrow, Would You Survive the First 72 Hours?</h3>
+          <span class="badge s-low">4.4/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>3 views</span>
+          <span>Published 15 Apr 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video presents a high-stakes, hypothetical problem (&#x27;If Your Business Went Dark Tomorrow, Would You Survive the First 72 Hours?&#x27;) for a problem-aware audience, aiming to interrupt their scroll and make them aware of their vulnerability (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 80 characters long, which is significantly over the 50-character limit for mobile feeds.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title addresses &#x27;Your Business&#x27; and &#x27;You&#x27;, making it specific to business owners.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — It clearly promises to address survival during a 72-hour shutdown, creating a strong value proposition.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Phrases like &#x27;Business Went Dark&#x27; and &#x27;Survive 72 Hours&#x27; are likely common search terms for business owners concerned about outages.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Keyword in first 40 characters</b> — The core keyword &#x27;Business Went Dark&#x27; appears at character 10, but the full promise &#x27;If Your Business Went Dark Tomorrow, Would You&#x27; extends beyond 40 characters.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Watch This If (problem they&#x27;re experiencing) — Here&#x27;s Why</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point &#x27;If Your Business Went Dark Tomorrow&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, the title uses Title Case.</div>
+      <h4>Verdict</h4>
+      <p>Your title is far too long, meaning it will be cut off on mobile and lose impact (SOP_Ideation.md STEP 3.1). While it clearly states the value, the length makes it less effective at grabbing attention quickly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Business Went Dark? Survive The First 72 Hours</div>
+        <div class="fix-notes">This new title is 50 characters, making it mobile-friendly. It uses a variation of the &#x27;Watch This If (problem they&#x27;re experiencing) — Here&#x27;s Why&#x27; template from SOP_Ideation.md Method 3, focusing on the immediate problem (&#x27;Business Went Dark?&#x27;) and the critical outcome (&#x27;Survive The First 72 Hours&#x27;). It leads with the pain of a business shutdown.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bright yellow and white text on the dark, distressed background creates strong contrast, making it stand out.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While &#x27;IF YOUR BUSINESS WENT DARK TOMORROW...&#x27; is somewhat readable, the smaller text &#x27;WOULD YOU SURVIVE 72 HOURS?&#x27; becomes very difficult to read on a small screen.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The faces of the people in the image show concern and worry, which is appropriate for the video&#x27;s high-stakes topic.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text overlay &#x27;IF YOUR BUSINESS WENT DARK TOMORROW... WOULD YOU SURVIVE 72 HOURS?&#x27; contains 15 words, far exceeding the 3-4 word maximum for impact and readability (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The thumbnail has multiple competing elements: the large main text, the group of concerned people, and the &#x27;CLOSED&#x27; sign, making it cluttered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — While the color palette is similar, this thumbnail features a group of people instead of the consistent speaker (Dr. D) from most other videos, breaking channel branding consistency (SOP_Thumbnail.md STEP 2.6).</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> IF YOUR BUSINESS WENT DARK TOMORROW... WOULD YOU SURVIVE 72 HOURS?</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually represents the title&#x27;s high-stakes scenario and the question of survival, adding emotional weight with the worried faces.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware concept. The thumbnail uses a reaction face (worried group) and a bold problem statement, but the text is too long and the faces are not the consistent speaker (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is too cluttered with excessive text and features a group of people instead of your consistent speaker, breaking channel branding (SOP_Thumbnail.md STEP 2.4, 2.6). This inconsistency and visual overload will confuse viewers and reduce clicks, as they won&#x27;t immediately recognize your brand or grasp the core message quickly.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, Dr. D with a worried/concerned expression. Text overlay: &#x27;WENT DARK? 72 HOURS!&#x27;. Colors: Bright yellow/red text on a dark, distressed background. Focal point: Dr. D&#x27;s face and the bold, short text. Composition: Tight crop on Dr. D&#x27;s face, with text prominently placed next to it, and a subtle visual cue for &#x27;darkness&#x27; or &#x27;shutdown&#x27; (e.g., a &#x27;CLOSED&#x27; sign in the background).</div>
+        <div class="fix-notes">This concept fits a Problem-Aware video by using Dr. D&#x27;s consistent face and a concise, urgent text overlay (&#x27;WENT DARK? 72 HOURS!&#x27;) to grab attention quickly and maintain brand consistency (SOP_Thumbnail.md STEP 2.3, 2.4, 2.6). It reduces clutter to create one clear focal point and ensures mobile readability (SOP_Thumbnail.md STEP 2.5, 2.2).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly identifies the target audience as &#x27;the average small to medium business&#x27; by discussing their likely experience during a shutdown.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — It states the video is &#x27;talking about your 3-day shutdown. What does that likely look like... and then we&#x27;ll wrap it up at the end of exactly what you can do, specifically, step-by-step to be ready&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook does not establish your credibility with specific results or a timeframe, making it vague why viewers should trust your advice (SOP_Scripting.md PART 5.3).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> Yes, the hook directly connects to the title by immediately discussing a &#x27;3-day shutdown&#x27; and what it would look like.</div>
+      <div class="kv"><b>Opening line:</b> All right, welcome back to Mastering Risk. I am your host Dr. Dee. Today, we are talking about your 3-day shutdown.</div>
+      <h4>Verdict</h4>
+      <p>Your hook starts with &#x27;welcome back&#x27;, which is a banned opening line (SOP_Scripting.md PART 5). It also lacks specific credibility, meaning people won&#x27;t know why they should trust you in the first 60 seconds (SOP_Scripting.md PART 5.3). This can cause viewers to scroll past before understanding the value.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Imagine this: you walk into your business tomorrow, and everything&#x27;s dark. Systems are down, orders are canceled, and your revenue hits zero. Would your business survive the first 72 hours? I&#x27;m Dr. D, and after two decades helping organizations like yours build bulletproof systems, I&#x27;ve seen exactly what happens when businesses go dark. In this video, I&#x27;ll walk you through the brutal reality of a 3-day shutdown and give you the step-by-step plan to ensure your business not only survives but thrives. Let&#x27;s get at it.</div>
+        <div class="fix-notes">This rewrite uses a Stakes Escalation hook by immediately presenting a vivid, high-stakes scenario. It clearly establishes WHO (organizations like yours), WHAT (brutal reality of shutdown, step-by-step plan to survive/thrive), and WHY (two decades helping organizations build bulletproof systems) per SOP_Scripting.md PART 5. It removes the &#x27;welcome back&#x27; flag.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> Yes, the video consistently focuses on the scenario of a 3-day business shutdown and the necessary preparations for it, maintaining a clear single problem and promise.</div>
+      <div class="kv"><b>Body type:</b> Instructing Bullet Points</div>
+      <div class="kv"><b>Story structure:</b> Stakes Escalation</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions to move through the timeline of the shutdown, such as &#x27;Now, this first day it goes on for a little bit&#x27; and &#x27;Day two. You&#x27;re on the second day of your crash&#x27;, which effectively guides the viewer through the escalating problems.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific, relatable examples like &#x27;Windows update&#x27;, &#x27;Microsoft 365&#x27;, and &#x27;Small Business Administration&#x27; statistics to illustrate your points, making the abstract concepts of risk tangible and impactful.</div>
+      <div class="kv"><b>Tone:</b> Your tone is largely human and direct, using contractions and conversational language. However, there are minor instances of nominalization, such as &#x27;blissfully unaware&#x27; and &#x27;intelligence preparation of the battle phase battle space&#x27;, which can sound a bit formal (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video correctly targets a Problem Aware audience (Stage 2), as it presents a vivid, high-stakes scenario of a business shutdown, making viewers acutely aware of a potential problem they might not have fully considered (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body effectively pushes the &#x27;BIG/FOMO&#x27; emotion by detailing the escalating &#x27;financial bleeding&#x27; and &#x27;reputational risk&#x27; during a shutdown. It also emphasizes &#x27;SAFE&#x27; by offering &#x27;risk mitigation&#x27; and &#x27;contingency&#x27; plans, and &#x27;EASY&#x27; by suggesting &#x27;little tweaks&#x27;. The &#x27;NEW&#x27; emotion is present through concepts like &#x27;intelligence preparation of the battle space&#x27;.</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;blissfully unaware&rdquo;</div>
+          <div class="why">This is a formal, somewhat poetic phrase that sounds less direct and human for a business context (SOP_Scripting.md PART 3).</div>
+          <div class="better">not knowing what&#x27;s coming</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;intelligence preparation of the battle phase battle space&rdquo;</div>
+          <div class="why">This is military jargon that is not immediately clear to a general business audience and sounds like AI-generated text (SOP_Scripting.md PART 3).</div>
+          <div class="better">understanding the environment you&#x27;ll operate in</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is well-structured and uses compelling examples to create a vivid picture of a business shutdown. To make it even more impactful, you can refine a few phrases to be more conversational and less formal, ensuring every sentence feels like a direct conversation with your audience (SOP_Scripting.md PART 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Stakes Escalation structure is ideal here, as it effectively builds tension and urgency by detailing the worsening situation over time, making the viewer feel the impact of inaction and the need for a solution (SOP_Scripting.md PART 6).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the video&#x27;s main promise or the value delivered.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — There&#x27;s no validation of the viewer&#x27;s effort or planting of the seed for future transformation.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You don&#x27;t introduce the &#x27;difficulty pivot&#x27; to frame your offer as the easier path.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is for a &#x27;free small and medium business risk download&#x27; and a &#x27;low monthly subscription program&#x27;, which are specific offers.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This crucial step is missing, so you&#x27;re not pre-qualifying ideal clients or filtering out those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues with general encouragement and calls to subscribe and follow after the main CTA, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> No, the offers are not framed as the easy path; they are presented as free resources and a subscription program.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTAs for the &#x27;free small and medium business risk download&#x27; and the &#x27;low monthly subscription program&#x27; are specific about what to get and where to go.</div>
+      <h4>Verdict</h4>
+      <p>Your outro includes clear, specific CTAs for a free download and a subscription program, which is good for lead generation. However, it misses the full Power Offer Outro structure (SOP_Scripting.md PART 7). By not reiterating the promise, framing your core solution as the easy path, or qualifying/disqualifying prospects, you&#x27;re missing an opportunity to convert warmer leads into sales calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the brutal reality of a 3-day business shutdown. If you apply what I&#x27;ve shared, you&#x27;ll definitely be more prepared to face the unexpected. However, actually building a comprehensive operational resilience system that ensures you survive those first 72 hours, and beyond, takes strategic planning and consistent implementation. It&#x27;s a complex task to get right alone. If you want to skip that complexity and have my team build and implement a custom operational resilience system for your business – so you can focus on leading, not just reacting – click the first link in the description right now. This isn&#x27;t for businesses without a clear offer or consistent revenue. If you&#x27;re serious about making your business antifragile and ready for anything, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern (SOP_Scripting.md PART 7). It infers the core offer is building an &#x27;operational resilience system&#x27;. Step 1 reiterates the promise of understanding a 3-day shutdown. Step 2 validates the viewer&#x27;s effort. Step 3 introduces the &#x27;difficulty pivot&#x27; by highlighting the challenges of doing it alone. Step 4 offers the client&#x27;s service as the easy path. Step 5 qualifies (&#x27;businesses with a clear offer or consistent revenue&#x27;) and disqualifies (&#x27;not for businesses without a clear offer or consistent revenue&#x27;) to filter for ideal clients.</div>
+      </div></div>
+            </details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Top 3 Recurring Gaps</h2>
+    
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 1 — Bad Packaging (Titles &amp; Thumbnails)</h3>
+          <div class="gap-freq">FOUND IN 8 OF 8 VIDEOS</div>
+          <p>People aren&#x27;t clicking your videos because your titles get cut off and your thumbnails are too busy to understand on a phone. This means your valuable content never gets seen, and you lose potential clients at the very first step. (SOP_Ideation.md STEP 3.1, SOP_Thumbnail.md STEP 2.4)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Ideation.md STEP 3.1</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 2 — Missing Credibility in Hooks</h3>
+          <div class="gap-freq">FOUND IN 6 OF 8 VIDEOS</div>
+          <p>Even if someone clicks, they don&#x27;t know why they should trust you in the first minute of your video. They&#x27;ll scroll away before you can prove your expertise, meaning you lose their attention and a chance to build trust. (SOP_Scripting.md PART 5.3)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 5.3</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 3 — Weak Sales Outros</h3>
+          <div class="gap-freq">FOUND IN 8 OF 8 VIDEOS</div>
+          <p>You&#x27;re not guiding warm viewers to the next step effectively. By not clearly framing your offer as the easy solution or filtering out bad fits, you&#x27;re missing opportunities to book qualified sales calls and wasting time on unqualified leads. (SOP_Scripting.md PART 7)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 7</div>
+        </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5 Recommended Videos</h2>
+    
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 1</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Why 90% of Businesses Fail After a Crisis (And How to Fix It)</h3>
+          <div class="kv"><b>Why now:</b> This directly addresses a major fear for business owners and uses a proven title structure to grab attention, bringing in new viewers who are problem-aware.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Graham Stephan. Face: Yes. Text overlay: 3 words (&#x27;FAIL AFTER CRISIS&#x27;). Dominant colour: Red/Black. Expression: Concerned/Serious</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 2</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>The 3 Mistakes Keeping Your Business Fragile</h3>
+          <div class="kv"><b>Why now:</b> This targets specific perceived micro-problems, making it highly searchable for business owners trying to understand their vulnerabilities.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Alex Hormozi. Face: Yes. Text overlay: 3 words (&#x27;3 MISTAKES FRAGILE&#x27;). Dominant colour: Yellow/Black. Expression: Pointing/Confident</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-mof">MOF</span><span class="muted">RECOMMENDED VIDEO 3</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Build Business Resilience Without Hiring a Huge Team</h3>
+          <div class="kv"><b>Why now:</b> This addresses a common objection to implementing resilience plans (cost/effort) and positions your solution as the easier path, warming up viewers for your offer.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Consulting channel (e.g., McKinsey). Face: No. Text overlay: 4 words (&#x27;RESILIENCE WITHOUT HUGE TEAM&#x27;). Dominant colour: Blue/White. Expression: N/A</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 4</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>What Every CEO Gets Wrong About Risk Planning</h3>
+          <div class="kv"><b>Why now:</b> This challenges common assumptions, creating curiosity and attracting new viewers who think they already know the answers but are still struggling.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Valuetainment. Face: Yes. Text overlay: 3 words (&#x27;CEOs GET WRONG&#x27;). Dominant colour: Red/White. Expression: Surprised/Disbelief</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-mof">MOF</span><span class="muted">RECOMMENDED VIDEO 5</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>If I Were Building a Resilient Business, I&#x27;d Do THIS</h3>
+          <div class="kv"><b>Why now:</b> This positions you as an authority by revealing a core strategy, building trust with viewers who are looking for a clear, proven path.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Impaulsive. Face: Yes. Text overlay: 2 words (&#x27;DO THIS&#x27;). Dominant colour: Green/Black. Expression: Confident/Direct</div>
+        </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <h2>READY TO FIX ALL OF THIS?</h2>
+    <p class="book"><i class="ti ti-calendar-event" style="margin-right:8px;vertical-align:-3px"></i>Book a free 30-minute strategy call.</p>
+    <div class="site">EMPIREPRODUCTION.NET</div>
+    <p class="qualify">This is not for anyone just starting out with no budget.
+    If you're already generating revenue and serious about making YouTube your primary
+    client acquisition channel — the link is above.</p>
+  </div>
+</div>
+
+<footer>EMPIRE PRODUCTION &middot; CHANNEL AUDIT ENGINE &middot; 24 July 2026</footer>
+
+</body>
+</html>
