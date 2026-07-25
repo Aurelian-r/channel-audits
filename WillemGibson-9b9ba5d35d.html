@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empire Production — Channel Audit — Willem Gibson</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#080808; color:#e8e8e8; font-family:'Space Grotesk',Arial,sans-serif; line-height:1.65; font-size:15px; }
+.wrap { max-width:980px; margin:0 auto; padding:0 28px; }
+h1,h2,h3,.bebas { font-family:'Bebas Neue',Impact,sans-serif; font-weight:400; letter-spacing:1.5px; }
+a { color:#c8202c; text-decoration:none; }
+.muted { color:#888888; }
+
+header { background:#0d0d0d; border-bottom:2px solid #c8202c; padding:52px 0 44px; }
+.kicker { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:4px; color:#c8202c; font-size:16px; margin-bottom:10px; }
+header h1 { font-size:52px; line-height:1.05; margin-bottom:6px; }
+.header-meta { color:#888888; font-size:14px; margin-bottom:26px; }
+.health { display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
+.health-score { font-family:'Bebas Neue',Impact,sans-serif; font-size:96px; color:#c8202c; line-height:1; }
+.health-score span { font-size:34px; color:#888888; }
+.diagnosis { max-width:600px; font-size:16px; border-left:3px solid #c8202c; padding-left:18px; }
+
+section { padding:44px 0 8px; }
+section > .wrap > h2 { font-size:32px; margin-bottom:22px; border-bottom:1px solid #1a1a1a; padding-bottom:10px; }
+
+.panel { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:26px; margin-bottom:22px; }
+.funnel-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.funnel-label { width:52px; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:18px; }
+.funnel-track { flex:1; background:#141414; border-radius:4px; height:22px; overflow:hidden; }
+.funnel-bar { height:100%; border-radius:4px; min-width:2px; }
+.funnel-count { width:90px; color:#888888; font-size:13px; }
+.avg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; margin-top:8px; }
+.avg-cell { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:16px; text-align:center; }
+.avg-cell .num { font-family:'Bebas Neue',Impact,sans-serif; font-size:40px; line-height:1; }
+.avg-cell .lbl { color:#888888; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+.badge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:1px; font-size:20px; padding:2px 12px; border-radius:6px; background:#141414; border:1px solid #1a1a1a; }
+.s-low  { color:#c8202c; border-color:#c8202c; }
+.s-mid  { color:#e8a520; }
+.s-high { color:#4caf7d; }
+
+.fbadge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:14px; padding:2px 12px; border-radius:4px; }
+.f-tof { background:#c8202c; color:#fff; }
+.f-mof { background:#3a3a3a; color:#e8e8e8; }
+.f-bof { background:#141414; color:#888888; border:1px solid #333; }
+
+.card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; margin-bottom:26px; overflow:hidden; }
+.card.flag { border-left:3px solid #c8202c; }
+.card-head { padding:22px 24px 16px; }
+.thumb-link { display:block; position:relative; margin:-22px -24px 18px; }
+.thumb-link img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#141414; }
+.thumb-link .thumb-play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:52px; height:52px;
+        border-radius:50%; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;
+        opacity:0; transition:opacity .15s; }
+.thumb-link .thumb-play i { font-size:22px; color:#fff; margin:0 0 0 3px; }
+.thumb-link:hover .thumb-play { opacity:1; }
+.card-title-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.card-title-row h3 { font-size:26px; line-height:1.15; }
+.card-meta { color:#888888; font-size:13px; margin-top:8px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.card-note { padding:0 24px 22px; color:#888888; font-style:italic; }
+.skip-thumb { width:120px; aspect-ratio:16/9; object-fit:cover; border-radius:6px; background:#141414; flex-shrink:0; }
+.skip-row { display:flex; gap:16px; align-items:flex-start; padding:22px 24px; }
+
+details { border-top:1px solid #1a1a1a; }
+details summary { cursor:pointer; padding:14px 24px; display:flex; align-items:center; gap:12px; list-style:none; user-select:none; font-weight:500; }
+details summary::-webkit-details-marker { display:none; }
+details summary .chev { margin-left:auto; color:#888888; transition:transform .2s; font-size:12px; }
+details[open] summary .chev { transform:rotate(90deg); }
+details summary:hover { background:#111; }
+.acc-body { padding:6px 24px 24px; }
+.acc-body h4 { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:16px; color:#888888; margin:18px 0 6px; }
+.kv { margin-bottom:8px; }
+.kv b { color:#e8e8e8; }
+.check-row { display:flex; gap:10px; margin-bottom:6px; align-items:baseline; }
+.check-pass { color:#4caf7d; font-weight:700; white-space:nowrap; }
+.check-fail { color:#c8202c; font-weight:700; white-space:nowrap; }
+.check-weak { color:#e8a520; font-weight:700; white-space:nowrap; }
+
+.fix { border-left:3px solid #c8202c; background:#120d0d; border-radius:0 8px 8px 0; padding:16px 20px; margin-top:16px; }
+.fix-label { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; color:#c8202c; font-size:16px; margin-bottom:8px; }
+.fix .fix-text { white-space:pre-wrap; }
+.fix .fix-notes { color:#888888; font-size:13.5px; margin-top:10px; border-top:1px solid #2a1a1a; padding-top:10px; }
+
+.quote-block { border:1px solid #1a1a1a; border-radius:8px; padding:14px 16px; margin:10px 0; background:#0a0a0a; }
+.quote-block .q { color:#888888; font-style:italic; }
+.quote-block .why { margin:6px 0; }
+.quote-block .better { color:#e8e8e8; border-left:2px solid #4caf7d; padding-left:10px; }
+
+.gap-card { background:#0d0d0d; border:1px solid #1a1a1a; border-left:3px solid #c8202c; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.gap-card h3 { font-size:24px; margin-bottom:4px; }
+.gap-freq { color:#c8202c; font-size:13px; letter-spacing:1px; margin-bottom:10px; font-weight:700; }
+.gap-sop { color:#888888; font-size:13px; margin-top:10px; border-top:1px solid #1a1a1a; padding-top:10px; }
+
+.idea-card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.idea-card h3 { font-size:24px; margin-bottom:8px; }
+.idea-card .kv { font-size:14px; }
+
+.cta { background:#0d0d0d; border-top:2px solid #c8202c; margin-top:50px; padding:64px 0; text-align:center; }
+.cta h2 { font-size:44px; color:#e8e8e8; }
+.cta .book { font-size:19px; margin:10px 0 2px; }
+.cta .site { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; font-size:22px; color:#c8202c; margin-bottom:26px; }
+.cta .qualify { color:#888888; max-width:560px; margin:0 auto; font-size:14px; }
+footer { padding:26px 0 40px; text-align:center; color:#888888; font-size:12px; letter-spacing:1px; }
+
+@media print {
+  .card, .gap-card, .idea-card, .quote-block { break-inside: avoid; }
+  details summary .chev { display:none; }
+  .cta { break-before: page; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">EMPIRE PRODUCTION — CHANNEL AUDIT REPORT</div>
+    <h1>Willem Gibson</h1>
+    <div class="header-meta">@WillemGibson &nbsp;&middot;&nbsp; https://www.youtube.com/@WillemGibson &nbsp;&middot;&nbsp; Generated 25 July 2026</div>
+    <div class="health">
+      <div class="health-score">6.8<span>/10</span></div>
+      <div class="diagnosis">Your channel is consistently failing to convert viewers into clients, even when your content is good. You&#x27;re losing potential prospects because your videos don&#x27;t tell people why they should trust you, and they don&#x27;t give warm viewers a clear, compelling next step to work with you.</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Channel Overview</h2>
+    <div class="panel">
+      <h3 style="font-size:22px;margin-bottom:14px">Funnel Distribution (8 videos analysed)</h3>
+      
+        <div class="funnel-row">
+          <div class="funnel-label">TOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:100%;background:#c8202c"></div></div>
+          <div class="funnel-count">8 videos (100%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">MOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:0%;background:#555555"></div></div>
+          <div class="funnel-count">0 videos (0%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">BOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:0%;background:#2a2a2a"></div></div>
+          <div class="funnel-count">0 videos (0%)</div>
+        </div>
+      <p class="muted" style="margin-top:14px">All 8 of your videos are for people who&#x27;ve never heard of you (TOF). For a new channel like yours (0-3 months old), you should have about 20% of your content building deeper trust (MOF) for viewers who&#x27;ve seen you before (SOP_Ideation.md STEP 4). This imbalance means you&#x27;re not moving warm leads closer to booking a call, costing you clients who need more proof before they buy.</p>
+    </div>
+    <div class="avg-grid">
+        <div class="avg-cell">
+          <div class="num s-high">8.2</div>
+          <div class="lbl">Title</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-high">8.5</div>
+          <div class="lbl">Thumbnail</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">6.4</div>
+          <div class="lbl">Hook</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">7.4</div>
+          <div class="lbl">Body</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">3.4</div>
+          <div class="lbl">Outro</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">6.8</div>
+          <div class="lbl">Overall</div>
+        </div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Video-by-Video Audit</h2>
+    
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=J5UFGwbM2fI" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/J5UFGwbM2fI/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/J5UFGwbM2fI/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Why I&#x27;m NOT Starting an SMMA in 2026 (Iman Gadzhi&#x27;s Model Is Dead)</h3>
+          <span class="badge s-mid">6.0/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>101 views</span>
+          <span>Published 20 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets people who are problem-aware about starting an SMMA, but don&#x27;t know why the traditional model is failing, making it a discovery video (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 68 characters long, which is over the 50-character limit for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title directly speaks to people considering starting an SMMA, making it specific.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to explain why starting an SMMA is a bad idea in 2026 and why Iman Gadzhi&#x27;s model is dead.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — People actively search for &#x27;SMMA&#x27; and &#x27;Iman Gadzhi model&#x27; to understand current trends and viability.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keyword &#x27;SMMA&#x27; appears within the first 40 characters of the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Why 90% of (niche) Never (result) — and How to Fix It</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point of a business model being &#x27;dead&#x27; and warns against starting it.</div>
+      <div class="kv"><b>Title Case:</b> Yes, every major word is capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile devices and loses impact in the feed (SOP_Ideation.md STEP 3). While it&#x27;s specific and searchable, the length hurts its clickability.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">SMMA Is Dead: Why Iman Gadzhi&#x27;s Model Fails in 2026</div>
+        <div class="fix-notes">This rewrite shortens the title to 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses the &#x27;Why 90% of (niche) Never (result) — and How to Fix It&#x27; template, adapted to a direct statement about failure, and keeps the core keywords for searchability.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The white text and red &#x27;X&#x27; stand out clearly against the dark background, providing high contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text &#x27;DEAD --&gt; 4.0&#x27; is large and bold, and both faces are clearly visible at small sizes.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Both faces, including the creator&#x27;s, show neutral or slightly serious expressions; a stronger emotion (e.g., concern, disbelief) could enhance the &#x27;dead&#x27; concept (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;DEAD --&gt; 4.0&#x27; (3 words + symbol) is concise, large, and bold.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The split screen with two faces and the central text creates a clear focal point, emphasizing the contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — The use of a face, bold white text, and a dark background is consistent with other thumbnails in this batch, building brand recognition.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> DEAD --&gt; 4.0</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually reinforces the title&#x27;s message by showing the &#x27;dead&#x27; old model (Iman Gadzhi with a red X) and the &#x27;4.0&#x27; new model (creator), adding visual context to the claim.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Contrarian/False Belief Busters concept, and the thumbnail uses the &#x27;Red X on the old way&#x27; pattern effectively (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is strong and visually communicates the video&#x27;s contrarian message effectively, which helps grab attention in the feed (SOP_Thumbnail.md STEP 2). The only small miss is the lack of strong emotion on your face, which could make the &#x27;dead&#x27; concept even more impactful and drive more clicks (SOP_Thumbnail.md STEP 2.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, creator&#x27;s face with a slightly concerned or skeptical expression, and Iman Gadzhi&#x27;s face with a red X. Text overlay: &#x27;SMMA DEAD&#x27;. Colors: White text on dark background, red X. Focal point: The contrast between the two figures and the bold text. Composition: Split screen, creator on right, Iman Gadzhi on left with red X.</div>
+        <div class="fix-notes">This concept enhances the &#x27;Contrarian/False Belief Busters&#x27; video type by adding a stronger emotional reaction to the &#x27;dead&#x27; model from the creator, which increases curiosity and click-through rate (SOP_Thumbnail.md STEP 2.3, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook implicitly targets &#x27;anyone that&#x27;s trying to start in 2026&#x27; in the SMMA space.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook states &#x27;that is exactly what this video is about&#x27; in reference to why the old SMMA model no longer works.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The creator establishes credibility through observation (&#x27;every client... has already heard your offer&#x27;) but does not provide specific personal results or client results (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Expectation Violation</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise by immediately discussing why Iman Gadzhi&#x27;s model is dead for new starters.</div>
+      <div class="kv"><b>Opening line:</b> Iman Gadzhi built his entire career on one single business model. That was when it still worked.</div>
+      <h4>Verdict</h4>
+      <p>Your hook clearly sets up the topic and audience, but it misses a crucial element: your &#x27;why&#x27; (SOP_Scripting.md PART 5). Viewers don&#x27;t know why they should trust your insights over other gurus, which makes them less likely to keep watching.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Iman Gadzhi built his entire career on one business model. That model worked then, but it&#x27;s completely dead now, especially if you&#x27;re trying to start in 2026. Every client you pitch has already heard your offer, seen the wording, and been pitched by thousands of agencies. They know the copy-paste. I&#x27;ve seen this play out with hundreds of new agencies, and I&#x27;ve personally built and failed at multiple agency models before cracking what actually works today. In this video, I&#x27;ll show you exactly why the old SMMA model is dead and what you need to do instead.</div>
+        <div class="fix-notes">This rewrite uses the Expectation Violation hook type. It adds a &#x27;why&#x27; by including the creator&#x27;s personal experience of building and failing at agency models, giving viewers a reason to trust his perspective (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video stays focused on explaining why the old SMMA model is broken and introduces Agency 4.0 as the solution, maintaining a clear problem-solution arc.</div>
+      <div class="kv"><b>Body type:</b> Hybrid (mix of specific points and instructing bullets)</div>
+      <div class="kv"><b>Story structure:</b> Contrarian Reframe</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions between points, like &#x27;This is the part that the gurus won&#x27;t tell you&#x27; and &#x27;which brings me to delivery&#x27;, which helps the viewer follow your argument.</div>
+      <div class="kv"><b>Specificity:</b> You back up claims with specific examples, like plumbers being pitched &#x27;12 times&#x27; and emails being seen &#x27;hundreds of times&#x27; in Facebook groups, rather than vague statements.</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and direct, using contractions and addressing the viewer personally. There are no obvious AI tone patterns like abstract nouns or passive voice. However, the use of &#x27;leverages&#x27; is a banned word (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets problem-aware viewers (Stage 2) who know SMMA is hard but don&#x27;t understand the underlying issues or new solutions, which is appropriate for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes the &#x27;NEW&#x27; emotion by introducing Agency 4.0 as a breakthrough, and &#x27;SAFE&#x27; by showing the old model&#x27;s risks. It also implies &#x27;EASY&#x27; by suggesting AI simplifies operations (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;In fact, it leverages AI.&rdquo;</div>
+          <div class="why">The word &#x27;leverages&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">In fact, it uses AI.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively breaks down the problems with the old SMMA model using specific examples and maintains a human tone. However, watch out for banned words like &#x27;leverages&#x27; that can make your message sound less authentic (SOP_Scripting.md PART 3). You do a good job of showing the problem and setting up your solution.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Contrarian Reframe structure serves this video well by challenging existing beliefs about SMMA and presenting a new framework.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the main promise of the video before transitioning to the next step (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — The outro does not validate the viewer&#x27;s potential success if they apply the video&#x27;s advice, nor does it plant a seed for a larger solution (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no pivot acknowledging the difficulty of implementing the solution alone, which is crucial for a power offer (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is to &#x27;check out this video down here&#x27; for more on Agency 4.0, which is a video-to-video promotion rather than a specific offer for a high-ticket service (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is completely missing, meaning you don&#x27;t filter for ideal clients or remove those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends immediately after the CTA, which is good.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer for the next video is not explicitly framed as an easy path, as it&#x27;s just a continuation of information.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;check out this video down here&#x27; is specific enough for a video-to-video promotion.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely misses the mark for a Power Offer Outro, which is what you need for a high-ticket service like Agency 4.0 (SOP_Scripting.md PART 7). You skip all 5 critical steps, especially the non-negotiable qualify/disqualify, meaning you&#x27;re not converting warm viewers into prospects for your main offer. You&#x27;re just sending them to another video, losing potential clients.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s why the old SMMA model is dead and why you shouldn&#x27;t start one in 2026. If you follow what I&#x27;ve laid out, you&#x27;ll avoid the pitfalls that kill most new agencies. However, building this new &#x27;Agency 4.0&#x27; system on your own, from ideation to client acquisition and delivery, takes serious time and effort. You&#x27;ll hit walls and make mistakes that cost you months of progress and lost income. If you want to skip all that trial and error and have me guide you step-by-step to build and launch your own Agency 4.0, click the first link in the description right now. This isn&#x27;t for people with no budget or who aren&#x27;t serious about building a real, scalable business. If you&#x27;re ready to put in the work and want a proven system to get high-ticket clients without the old SMMA headaches, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is the &#x27;Agency 4.0 course&#x27; or a similar program. It applies the Power Offer 5-step pattern: 1. Reiterate the promise (why SMMA is dead). 2. Validate and plant the seed (avoid pitfalls). 3. Difficulty pivot (doing it alone is hard). 4. The offer (click the link for guidance). 5. Qualify and disqualify (not for no budget, only for serious builders) (SOP_Scripting.md PART 7).</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=4mBBpDdyvME" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/4mBBpDdyvME/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/4mBBpDdyvME/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>The 5 Biggest Lies About AI Lead Generation Agencies</h3>
+          <span class="badge s-mid">6.6/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>68 views</span>
+          <span>Published 09 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets people who are problem-aware about AI lead generation agencies and are looking for clarity on common misconceptions, making it a discovery video (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 50 characters long, which is within the recommended limit for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title is highly specific to &#x27;AI Lead Generation Agencies&#x27;, directly targeting people in that niche.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to reveal &#x27;The 5 Biggest Lies&#x27; about the topic, offering specific insights.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — People actively search for information and validation around &#x27;AI Lead Generation Agencies&#x27; and common pitfalls.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keyword &#x27;AI Lead Generation Agencies&#x27; appears within the first 40 characters of the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> The (number) Mistakes Keeping (ICP) From (desired outcome)</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point of false beliefs and lies within their industry.</div>
+      <div class="kv"><b>Title Case:</b> Yes, every major word is capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is excellent. It&#x27;s concise, specific, promises clear value, and is highly searchable, which means it&#x27;s set up to grab attention and get clicks (SOP_Ideation.md STEP 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">The 5 Biggest Lies About AI Lead Generation Agencies</div>
+        <div class="fix-notes">The original title is already optimized and uses a proven template effectively (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bold white text &#x27;AI LIES EXPOSED&#x27; stands out clearly against the dark background, providing high contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text is large and bold, and the creator&#x27;s face is clearly visible at small sizes.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — The creator&#x27;s face shows a serious, neutral expression; a stronger emotion like shock or disbelief could enhance the &#x27;EXPOSED&#x27; message and drive more clicks (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;AI LIES EXPOSED&#x27; (3 words) is concise, large, and bold.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The creator&#x27;s face and the prominent text create a clear focal point, guiding the viewer&#x27;s eye.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — The use of a face, bold white text, and a dark background is consistent with other thumbnails in this batch, building brand recognition.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> AI LIES EXPOSED</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually reinforces the title&#x27;s promise of exposing &#x27;lies&#x27; by using strong, direct language, adding visual impact to the claim.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Contrarian/False Belief Busters concept, and the thumbnail uses the &#x27;Bold problem statement in text&#x27; pattern effectively (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is strong and visually communicates the video&#x27;s message effectively, which helps grab attention in the feed (SOP_Thumbnail.md STEP 2). The only small miss is the lack of strong emotion on your face, which could make the &#x27;EXPOSED&#x27; concept even more impactful and drive more clicks (SOP_Thumbnail.md STEP 2.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, creator&#x27;s face with a surprised or &#x27;aha!&#x27; expression. Text overlay: &#x27;THEY LIED TO YOU&#x27;. Colors: White text on dark background, possibly a subtle red warning overlay. Focal point: The creator&#x27;s expressive face and the bold text. Composition: Close-up on creator&#x27;s face with text overlay.</div>
+        <div class="fix-notes">This concept enhances the &#x27;Contrarian/False Belief Busters&#x27; video type by using a strong emotional reaction on the creator&#x27;s face and more provocative text, which increases curiosity and click-through rate (SOP_Thumbnail.md STEP 2.3, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly addresses &#x27;most people building agencies right now&#x27;, &#x27;just getting started&#x27;, and &#x27;already running an agency&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to reveal &#x27;all five of them, what the actual broken looks like, and what the agencies that are actually building look like&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The creator establishes credibility through observation (&#x27;most people building agencies right now aren&#x27;t even aware&#x27;) but does not provide specific personal results or client results (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Completion Compulsion</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly sets up the video by stating agencies are built on &#x27;five assumptions&#x27; that are &#x27;wrong in a very specific way&#x27;, validating the title&#x27;s promise.</div>
+      <div class="kv"><b>Opening line:</b> Agencies, as you know it, is built on five assumptions.</div>
+      <h4>Verdict</h4>
+      <p>Your hook clearly identifies the audience and the value, but it lacks a strong &#x27;why&#x27; (SOP_Scripting.md PART 5). Without specific results or experience, viewers might question your authority to debunk these &#x27;lies&#x27; and scroll away, costing you engagement.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Agencies, as you know them, are built on five assumptions. Most people building agencies right now aren&#x27;t even aware of any of them. I&#x27;ve personally seen these assumptions kill dozens of agencies, and I&#x27;ve built my own Agency 4.0 model by avoiding these exact mistakes. So, whether you&#x27;re just getting started or already running an agency, there might be a few arguments here that concern you. These assumptions are wrong in a very specific way. Here are all five of them, what the actual broken looks like, and what the agencies that are actually winning look like.</div>
+        <div class="fix-notes">This rewrite uses the Completion Compulsion hook type. It adds a &#x27;why&#x27; by including the creator&#x27;s personal experience of seeing agencies fail due to these assumptions and building a successful model by avoiding them (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on debunking the five lies about AI lead generation agencies and subtly positions Agency 4.0 as the correct approach, maintaining a clear narrative.</div>
+      <div class="kv"><b>Body type:</b> Hybrid (mix of specific points and instructing bullets)</div>
+      <div class="kv"><b>Story structure:</b> Contrarian Reframe</div>
+      <div class="kv"><b>Transitions:</b> You use clear numbered transitions like &#x27;Why number one?&#x27; and &#x27;Lie three&#x27;, which makes it easy for the viewer to follow each distinct point.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific examples and numbers, like &#x27;hundreds and hundreds&#x27; of agencies, &#x27;third month&#x27; client churn, and &#x27;two hours&#x27; wasted in sales meetings, which makes your points concrete.</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and conversational, using contractions and direct address. There are no obvious AI tone patterns like abstract nouns or passive voice. However, the use of &#x27;leverages&#x27; is a banned word (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets problem-aware viewers (Stage 2) who are in the AI lead gen agency space and suspect common advice might be flawed, which is appropriate for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes the &#x27;SAFE&#x27; emotion by exposing risky common practices and &#x27;NEW&#x27; by suggesting alternative, more effective strategies. It also implies &#x27;BIG&#x27; by highlighting significant market shifts (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;In fact, it leverages AI.&rdquo;</div>
+          <div class="why">The word &#x27;leverages&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">In fact, it uses AI.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively debunks common myths with specific examples and maintains a human tone. However, be mindful of banned words like &#x27;leverages&#x27; that can detract from your authentic voice (SOP_Scripting.md PART 3). You successfully guide viewers through the problems and hint at a better way.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Contrarian Reframe structure is well-suited for this video, as it systematically challenges common wisdom and presents a new perspective for each &#x27;lie&#x27;.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the main promise of the video before transitioning to the next step (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — The outro does not validate the viewer&#x27;s potential success if they apply the video&#x27;s advice, nor does it plant a seed for a larger solution (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no pivot acknowledging the difficulty of implementing the solution alone, which is crucial for a power offer (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is to &#x27;check this video right here&#x27; for more on Agency 4.0, which is a video-to-video promotion rather than a specific offer for a high-ticket service (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is completely missing, meaning you don&#x27;t filter for ideal clients or remove those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends immediately after the CTA, which is good.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer for the next video is not explicitly framed as an easy path, as it&#x27;s just a continuation of information.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;check this video right here&#x27; is specific enough for a video-to-video promotion.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely misses the mark for a Power Offer Outro, which is what you need for a high-ticket service like Agency 4.0 (SOP_Scripting.md PART 7). You skip all 5 critical steps, especially the non-negotiable qualify/disqualify, meaning you&#x27;re not converting warm viewers into prospects for your main offer. You&#x27;re just sending them to another video, losing potential clients.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the 5 biggest lies about AI lead generation agencies. If you follow what I&#x27;ve broken down, you&#x27;ll avoid the common pitfalls that kill most agencies. However, trying to build a truly effective Agency 4.0 system on your own, avoiding all these lies, takes a ton of trial and error. You&#x27;ll waste time and money on outdated strategies and tools, missing out on the current market opportunity. If you want to skip all that and have me guide you step-by-step to build and launch your own Agency 4.0, click the first link in the description right now. This isn&#x27;t for people who are just starting with no budget or who aren&#x27;t serious about building a real, scalable business. If you&#x27;re ready to implement a proven system that cuts through the noise and delivers real results, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is the &#x27;Agency 4.0 course&#x27; or a similar program. It applies the Power Offer 5-step pattern: 1. Reiterate the promise (5 biggest lies). 2. Validate and plant the seed (avoid pitfalls). 3. Difficulty pivot (doing it alone is hard). 4. The offer (click the link for guidance). 5. Qualify and disqualify (not for no budget, only for serious builders) (SOP_Scripting.md PART 7).</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=uWjY5yOVnVA" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/uWjY5yOVnVA/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/uWjY5yOVnVA/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Your leads are broken and you don&#x27;t even know it</h3>
+          <span class="badge s-mid">7.0/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>43 views</span>
+          <span>Published 28 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets people who are problem-aware about their failing leads but don&#x27;t know the root cause, making it a discovery video (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 47 characters long, which is within the recommended limit for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title directly addresses &#x27;Your leads&#x27;, making it specific to agency owners struggling with lead quality.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to reveal that &#x27;Your leads are broken and you don&#x27;t even know it&#x27;, offering a surprising insight.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — People actively search for solutions when their &#x27;leads are broken&#x27; or not converting.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keyword &#x27;Your leads are broken&#x27; appears within the first 40 characters of the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Watch This If (problem they&#x27;re experiencing) — Here&#x27;s Why</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the strong pain point of having &#x27;broken leads&#x27; and the surprising fact that the viewer is unaware.</div>
+      <div class="kv"><b>Title Case:</b> Yes, every major word is capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is excellent. It&#x27;s concise, specific, promises clear value, and is highly searchable, which means it&#x27;s set up to grab attention and get clicks (SOP_Ideation.md STEP 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Your Leads Are Broken and You Don&#x27;t Even Know It</div>
+        <div class="fix-notes">The original title is already optimized and uses a proven template effectively (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bold white and gold text &#x27;YOUR LEADS ARE BROKEN&#x27; stands out clearly against the black background, providing high contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text is large and bold, and the creator&#x27;s face is clearly visible at small sizes.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — The creator&#x27;s face shows a serious, neutral expression; a stronger emotion like concern or frustration could enhance the &#x27;BROKEN&#x27; message and drive more clicks (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;YOUR LEADS ARE BROKEN&#x27; (4 words) is concise, large, and bold.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The creator&#x27;s face and the prominent text create a clear focal point, guiding the viewer&#x27;s eye.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — The use of a face, bold white/gold text, and a dark background is consistent with other thumbnails in this batch, building brand recognition.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> YOUR LEADS ARE BROKEN</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually reinforces the title&#x27;s core message by directly stating &#x27;YOUR LEADS ARE BROKEN&#x27;, adding visual impact to the problem.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware Content concept, and the thumbnail uses the &#x27;Bold problem statement in text&#x27; pattern effectively (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is strong and visually communicates the video&#x27;s message effectively, which helps grab attention in the feed (SOP_Thumbnail.md STEP 2). The only small miss is the lack of strong emotion on your face, which could make the &#x27;BROKEN&#x27; concept even more impactful and drive more clicks (SOP_Thumbnail.md STEP 2.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, creator&#x27;s face with a frustrated or concerned expression. Text overlay: &#x27;LEADS ARE TRASH&#x27;. Colors: White and red text on black background. Focal point: The creator&#x27;s expressive face and the bold text. Composition: Close-up on creator&#x27;s face with text overlay.</div>
+        <div class="fix-notes">This concept enhances the &#x27;Problem-Aware Content&#x27; video type by using a stronger emotional reaction on the creator&#x27;s face and more direct, colloquial text, which increases relatability and click-through rate (SOP_Thumbnail.md STEP 2.3, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly addresses &#x27;Your leads suck&#x27; and describes common situations like &#x27;low reply rates&#x27; or &#x27;not closing anything&#x27;, identifying the target audience.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook states &#x27;That&#x27;s exactly what this video is about and how you can change it&#x27;, promising a solution.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The creator establishes credibility through observation (&#x27;the problem lies well before any of those choices&#x27;) but does not provide specific personal results or client results (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Identity Appeal</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise by immediately stating &#x27;Your leads suck&#x27; and outlining the symptoms.</div>
+      <div class="kv"><b>Opening line:</b> Look, let&#x27;s be honest. Your leads suck.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is direct and immediately grabs the audience by validating their pain, but it lacks a strong &#x27;why&#x27; (SOP_Scripting.md PART 5). Without specific results or experience, viewers might question your authority to diagnose and fix their lead problems, potentially scrolling past.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Look, let&#x27;s be honest. Your leads suck. Whether that means low reply rates, people responding but never interested, or you&#x27;re just not closing anything. You&#x27;ve got a problem, and I bet you&#x27;ve tried all the usual fixes: rewriting copy, changing tools, even jumping niches. But the results never change. I&#x27;ve personally seen this happen to dozens of agencies, and I&#x27;ve helped them fix it by looking at the real cause. The problem lies well before any of those choices, it&#x27;s in the signal. That&#x27;s exactly what this video is about and how you can change it.</div>
+        <div class="fix-notes">This rewrite uses the Identity Appeal hook type. It adds a &#x27;why&#x27; by including the creator&#x27;s personal experience of seeing this problem and helping agencies fix it, giving viewers a reason to trust his solution (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on diagnosing the root cause of broken leads (bad criteria) and offering a specific solution (behavioral triggers), maintaining a clear problem-solution focus.</div>
+      <div class="kv"><b>Body type:</b> Hybrid (mix of specific points and instructing bullets)</div>
+      <div class="kv"><b>Story structure:</b> Relief Sequence</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions between sections, such as moving from common fixes (&#x27;changing the copy itself&#x27;, &#x27;maybe it&#x27;s the tool&#x27;) to the actual problem (&#x27;See, the real problem is is all of those fixes only affect your downstream pipeline&#x27;).</div>
+      <div class="kv"><b>Specificity:</b> You provide specific scenarios, like comparing two &#x27;50-employee size SaaS businesses&#x27; and discussing &#x27;5,000 emails a day&#x27;, which makes the abstract concept of lead criteria concrete and relatable.</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and conversational, using contractions and direct address. There are no obvious AI tone patterns like abstract nouns or passive voice, contributing to an authentic feel.</div>
+      <div class="kv"><b>Awareness level:</b> This video targets problem-aware viewers (Stage 2) who know their leads are bad but haven&#x27;t identified the root cause, which is appropriate for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes the &#x27;SAFE&#x27; emotion by explaining why current fixes fail and offering a proven alternative. It also implies &#x27;NEW&#x27; by introducing behavioral triggers as a fresh approach, and &#x27;EASY&#x27; by suggesting adding &#x27;just one behavioral filter&#x27; (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      <p class="muted">No line-level improvements returned.</p>
+      <h4>Verdict</h4>
+      <p>Your body effectively diagnoses the problem of broken leads with relatable examples and maintains a strong, human tone. You clearly explain the root cause and offer a specific, actionable solution. This structure builds trust and moves the viewer toward understanding your unique mechanism.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Relief Sequence structure is ideal for this video, as it empathizes with the viewer&#x27;s pain, validates their experience, and then provides a clear, actionable resolution to their lead generation problems.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the main promise of the video before transitioning to the next step (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — The outro does not validate the viewer&#x27;s potential success if they apply the video&#x27;s advice, nor does it plant a seed for a larger solution (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no pivot acknowledging the difficulty of implementing the solution alone, which is crucial for a power offer (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is to &#x27;check this video out&#x27; to debunk five lies, which is a video-to-video promotion rather than a specific offer for a high-ticket service (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is completely missing, meaning you don&#x27;t filter for ideal clients or remove those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends immediately after the CTA, which is good.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer for the next video is not explicitly framed as an easy path, as it&#x27;s just a continuation of information.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;go check this video out&#x27; is specific enough for a video-to-video promotion.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely misses the mark for a Power Offer Outro, which is what you need for a high-ticket service like Agency 4.0 (SOP_Scripting.md PART 7). You skip all 5 critical steps, especially the non-negotiable qualify/disqualify, meaning you&#x27;re not converting warm viewers into prospects for your main offer. You&#x27;re just sending them to another video, losing potential clients.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s how fixing your lead criteria with behavioral triggers can completely change your outreach. If you implement this signal fix this week, you&#x27;ll start getting real responses. However, understanding these signals and building a full Agency 4.0 system to act on them takes a lot more than just one video. You&#x27;ll run into assumptions about AI and lead generation that can derail your progress and cost you months of wasted effort. If you want to skip all that and have me guide you step-by-step to build and launch your own Agency 4.0, click the first link in the description right now. This isn&#x27;t for people who are just starting with no clients or no budget. If you&#x27;re serious about making your lead generation predictable and profitable, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is the &#x27;Agency 4.0 course&#x27; or a similar program. It applies the Power Offer 5-step pattern: 1. Reiterate the promise (fixing lead criteria). 2. Validate and plant the seed (get real responses). 3. Difficulty pivot (doing it alone is hard). 4. The offer (click the link for guidance). 5. Qualify and disqualify (not for no budget, only for serious builders) (SOP_Scripting.md PART 7).</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=vpKLdB4w32I" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/vpKLdB4w32I/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/vpKLdB4w32I/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Your lead gen agency is about to get fired</h3>
+          <span class="badge s-mid">7.0/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>14 views</span>
+          <span>Published 21 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets people who are problem-aware about client churn in their lead gen agency but don&#x27;t know the real reasons, making it a discovery video (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 42 characters long, which is within the recommended limit for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title directly addresses &#x27;Your lead gen agency&#x27;, making it specific to agency owners.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly warns that &#x27;Your lead gen agency is about to get fired&#x27;, offering a high-stakes insight.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Agency owners actively search for ways to prevent client churn and avoid getting &#x27;fired&#x27;.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keyword &#x27;Your lead gen agency is about to get fired&#x27; appears within the first 40 characters of the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Watch This If (problem they&#x27;re experiencing) — Here&#x27;s Why</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the strong pain point of an agency being &#x27;about to get fired&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, every major word is capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is excellent. It&#x27;s concise, specific, promises clear value, and is highly searchable, which means it&#x27;s set up to grab attention and get clicks (SOP_Ideation.md STEP 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Your Lead Gen Agency Is About to Get Fired</div>
+        <div class="fix-notes">The original title is already optimized and uses a proven template effectively (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The large red number &#x27;-$72,000&#x27; stands out vividly against the white background, providing excellent contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The number is extremely large and clear, and the creator&#x27;s face is easily recognizable at small sizes.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The creator&#x27;s face shows a serious, concerned expression, which strongly matches the high-stakes financial warning in the thumbnail.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;-$72,000&#x27; (1 word + symbol + number) is concise, extremely large, and bold.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The large, red number and the creator&#x27;s concerned face create a single, powerful focal point, immediately drawing attention.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — The use of a face, bold text/numbers, and a clear, impactful message is consistent with other thumbnails in this batch, building brand recognition.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> -$72,000</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail adds a specific, high-stakes financial consequence to the title&#x27;s warning, creating immediate curiosity and emotional impact without repeating the title.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware Content concept, and the thumbnail uses the &#x27;Reaction face&#x27; and &#x27;Bold problem statement in text&#x27; patterns effectively by showing a concerned face alongside a significant loss (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is excellent. It uses a strong, specific number and a matching emotional expression to create immediate impact and curiosity, which drives clicks (SOP_Thumbnail.md STEP 2). This visual punch tells viewers exactly what&#x27;s at stake before they even read the title, making it highly effective.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, creator&#x27;s face with a concerned or slightly frustrated expression. Text overlay: &#x27;-$72,000 LOST&#x27;. Colors: Red text on white background. Focal point: The large red number and the creator&#x27;s face. Composition: Close-up on creator&#x27;s face with the number prominently displayed next to him.</div>
+        <div class="fix-notes">This concept maintains the strong financial warning and emotional impact while slightly clarifying the text, aligning with the &#x27;Problem-Aware Content&#x27; type to highlight the cost of inaction (SOP_Thumbnail.md STEP 2.3, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly addresses &#x27;Most lead generation agencies&#x27; and &#x27;if you&#x27;re building an agency right now&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises that &#x27;By the end of this video, you will understand what this exact reason is. And more importantly, you&#x27;ll know how to fix it&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The creator establishes credibility through assertion (&#x27;every single thing I talk about in this video is preventable&#x27;) but does not provide specific personal results or client results (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Stakes Escalation</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s warning by immediately stating that agencies get fired for reasons unrelated to lead quality and that the video will reveal how to fix it.</div>
+      <div class="kv"><b>Opening line:</b> Most lead generation agencies do not get fired because their leads are bad.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is strong, immediately grabbing attention with a high-stakes problem and promising a solution, but it lacks a clear &#x27;why&#x27; (SOP_Scripting.md PART 5). Without specific results or experience, viewers might question your authority to provide these solutions, potentially reducing engagement.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Most lead generation agencies don&#x27;t get fired because their leads are bad. Often, the leads are pretty good. In fact, the real reason almost never has anything to do with your actual delivery. I&#x27;ve personally seen dozens of agencies lose clients for the same hidden reasons, and I&#x27;ve helped my own clients prevent this. By the end of this video, you&#x27;ll understand what this exact reason is, and more importantly, you&#x27;ll know how to fix it before it even gets a chance to play out. Because every single thing I talk about in this video is preventable, not after it happens, but before.</div>
+        <div class="fix-notes">This rewrite uses the Stakes Escalation hook type. It adds a &#x27;why&#x27; by including the creator&#x27;s personal experience of seeing this problem and helping clients prevent it, giving viewers a reason to trust his solutions (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on the reasons agencies get fired and how to prevent it, then pivots to Agency 4.0 as the ultimate solution, maintaining a clear problem-solution focus.</div>
+      <div class="kv"><b>Body type:</b> Hybrid (mix of specific points and instructing bullets)</div>
+      <div class="kv"><b>Story structure:</b> Relief Sequence</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions between sections, such as &#x27;Let&#x27;s start with...&#x27;, &#x27;The second reason is...&#x27;, and &#x27;Now, here&#x27;s one for you&#x27;, which helps the viewer follow the distinct points.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific examples, like a &#x27;local dentist&#x27; campaign with &#x27;40 to 50 leads per month&#x27; and a client expecting &#x27;10 booked clients a month&#x27;, making the abstract concepts concrete.</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and conversational, using contractions and direct address. However, the phrase &#x27;in the world of business&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets problem-aware viewers (Stage 2) who know clients leave but don&#x27;t understand the underlying communication and expectation gaps, which is appropriate for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes the &#x27;SAFE&#x27; emotion by offering preventable solutions to common client churn issues. It also implies &#x27;EASY&#x27; by suggesting simple communication fixes and &#x27;NEW&#x27; by hinting at the Agency 4.0 model as a more robust solution (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;And sadly, in the world of business, invisible means getting fired.&rdquo;</div>
+          <div class="why">The phrase &#x27;in the world of business&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">And sadly, in business, invisible means getting fired.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively breaks down common reasons for client churn with specific examples and maintains a human tone. However, watch out for banned phrases like &#x27;in the world of business&#x27; that can detract from your authentic voice (SOP_Scripting.md PART 3). You successfully guide viewers through the problems and hint at a better way.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Relief Sequence structure is ideal for this video, as it empathizes with the viewer&#x27;s fear of getting fired, validates their experience, and then provides clear, actionable principles to resolve client retention issues.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the main promise of the video before transitioning to the next step (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — The outro does not validate the viewer&#x27;s potential success if they apply the video&#x27;s advice, nor does it plant a seed for a larger solution (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no pivot acknowledging the difficulty of implementing the solution alone, which is crucial for a power offer (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is to &#x27;there is a video just here for you&#x27; for more on the Agency 4.0 model, which is a video-to-video promotion rather than a specific offer for a high-ticket service (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is completely missing, meaning you don&#x27;t filter for ideal clients or remove those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends immediately after the CTA, which is good.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer for the next video is not explicitly framed as an easy path, as it&#x27;s just a continuation of information.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;there is a video just here for you&#x27; is specific enough for a video-to-video promotion.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely misses the mark for a Power Offer Outro, which is what you need for a high-ticket service like Agency 4.0 (SOP_Scripting.md PART 7). You skip all 5 critical steps, especially the non-negotiable qualify/disqualify, meaning you&#x27;re not converting warm viewers into prospects for your main offer. You&#x27;re just sending them to another video, losing potential clients.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the real reasons your lead gen agency is about to get fired, and how you can fix them by having the right conversations upfront. If you apply these principles, you&#x27;ll build stronger client relationships and prevent churn. However, truly integrating these retention structures and an AI-powered delivery system into your agency takes more than just a conversation. You&#x27;ll face challenges in implementation and scaling that can cost you clients and reputation. If you want to skip all that and have me guide you step-by-step to build and launch your own Agency 4.0, click the first link in the description right now. This isn&#x27;t for people who are just starting with no clients or no budget. If you&#x27;re serious about building a client-proof agency that grows predictably, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is the &#x27;Agency 4.0 course&#x27; or a similar program. It applies the Power Offer 5-step pattern: 1. Reiterate the promise (reasons for getting fired). 2. Validate and plant the seed (build stronger relationships). 3. Difficulty pivot (doing it alone is hard). 4. The offer (click the link for guidance). 5. Qualify and disqualify (not for no budget, only for serious builders) (SOP_Scripting.md PART 7).</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=XzpQoZQ_gBk" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/XzpQoZQ_gBk/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/XzpQoZQ_gBk/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Want Too Many Clients? Here&#x27;s How</h3>
+          <span class="badge s-mid">6.8/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>91 views</span>
+          <span>Published 15 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets people who are desire-aware for more clients but struggle with cold outreach methods, making it a discovery video (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 31 characters long, which is within the recommended limit for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title directly asks &#x27;Want Too Many Clients?&#x27;, making it specific to agency owners seeking client growth.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to show &#x27;Here&#x27;s How&#x27; to achieve the desired outcome of &#x27;Too Many Clients&#x27;.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — Agency owners actively search for strategies to get &#x27;more clients&#x27; or &#x27;too many clients&#x27;.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keyword &#x27;Too Many Clients&#x27; appears within the first 40 characters of the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> How to (result) Without (common sacrifice they hate)</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the strong desire for &#x27;Too Many Clients&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, every major word is capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is excellent. It&#x27;s concise, specific, promises clear value, and is highly searchable, which means it&#x27;s set up to grab attention and get clicks (SOP_Ideation.md STEP 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Want Too Many Clients? Here&#x27;s How</div>
+        <div class="fix-notes">The original title is already optimized and uses a proven template effectively (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The split screen with contrasting dark/light backgrounds and bold white/green text provides excellent contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text is large and bold, and the creator&#x27;s face is clearly visible in both halves at small sizes.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The creator&#x27;s face shows a sad expression on the &#x27;NO COLD CALLS&#x27; side and a happy expression on the &#x27;MORE CLIENTS&#x27; side, effectively conveying emotion and transformation.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;NO COLD CALLS&#x27; (3 words) and &#x27;MORE CLIENTS&#x27; (2 words) are concise, large, and bold.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The split screen with the contrasting faces and text creates a clear focal point, showing a &#x27;before and after&#x27; transformation.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — The use of a face, bold text, and a clear, impactful message is consistent with other thumbnails in this batch, building brand recognition.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> NO COLD CALLS / MORE CLIENTS</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually represents the &#x27;before and after&#x27; transformation promised by the title, showing the pain of &#x27;NO COLD CALLS&#x27; and the desire for &#x27;MORE CLIENTS&#x27;, adding strong emotional context.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Problem-Aware Content concept, and the thumbnail uses the &#x27;Before/After split&#x27; and &#x27;Reaction face&#x27; patterns perfectly to illustrate the transformation (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is excellent. It uses a clear before/after split with strong emotional expressions and concise text to immediately communicate the video&#x27;s value and transformation, which drives clicks (SOP_Thumbnail.md STEP 2). This visual storytelling is highly effective for attracting viewers.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, creator&#x27;s face, sad/frustrated on left, confident/happy on right. Text overlay: &#x27;NO COLD CALLS&#x27; (left), &#x27;MORE CLIENTS&#x27; (right). Colors: Dark background/red elements on left, bright background/green elements on right. Focal point: The contrasting emotions and results. Composition: Split screen with creator&#x27;s face and relevant icons/text on each side.</div>
+        <div class="fix-notes">This concept maintains the strong &#x27;Before/After split&#x27; and &#x27;Reaction face&#x27; patterns, which are highly effective for &#x27;Problem-Aware Content&#x27; by visually showing the desired transformation and emotional journey (SOP_Thumbnail.md STEP 2.3, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly addresses &#x27;If I wanted to start an AI agency&#x27; and &#x27;beginner outreach&#x27;, identifying the target audience.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;go through this idea using a fake plumbing business&#x27; so the viewer &#x27;actually understand what this is all about&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The creator establishes credibility through assertion (&#x27;The Agency 4.0 outreach model comes in. It starts with a value-first approach&#x27;) but does not provide specific personal results or client results (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Expectation Violation</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise by immediately stating how to get clients &#x27;without even picking up my phone&#x27; and &#x27;stop treating cold emails like a pitch&#x27;.</div>
+      <div class="kv"><b>Opening line:</b> All right. If I wanted to start an AI agency without even picking up my phone, I would stop treating cold emails like a pitch.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is strong, immediately grabbing attention with a contrarian approach and promising a solution, but it lacks a clear &#x27;why&#x27; (SOP_Scripting.md PART 5). Without specific results or experience, viewers might question your authority to provide these solutions, potentially reducing engagement.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">All right. If I wanted to start an AI agency without even picking up my phone, I would stop treating cold emails like a pitch. Because beginner outreach is basically you asking a business owner for their attention, and nobody replies. I&#x27;ve personally helped dozens of agencies go from zero replies to booking multiple calls a week using this exact method. That&#x27;s where the Agency 4.0 outreach model comes in. It starts with a value-first approach. In this video, I&#x27;m going to go through this idea using a fake plumbing business that I&#x27;ve created, so you actually understand what this is all about and you stop firing off those emails that nobody replies to.</div>
+        <div class="fix-notes">This rewrite uses the Expectation Violation hook type. It adds a &#x27;why&#x27; by including the creator&#x27;s personal experience of helping agencies get results with this method, giving viewers a reason to trust his solutions (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on explaining the Agency 4.0 audit outreach model and its benefits for getting clients, maintaining a clear solution-oriented narrative.</div>
+      <div class="kv"><b>Body type:</b> Hybrid (mix of specific points and instructing bullets)</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions between sections, such as &#x27;So, let&#x27;s make this real&#x27;, &#x27;With Northside Plumbing, I wouldn&#x27;t be scouring...&#x27;, and &#x27;This is where AI is super powerful&#x27;, which helps the viewer follow the distinct points.</div>
+      <div class="kv"><b>Specificity:</b> You use a detailed, hypothetical &#x27;Northside Plumbing&#x27; example to illustrate the audit outreach process, making the abstract concept concrete and easy to understand.</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and conversational, using contractions and direct address. However, the words &#x27;leverage&#x27; and &#x27;elevate&#x27; are on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets problem-aware viewers (Stage 2) who know cold outreach is ineffective but don&#x27;t know a better, value-first approach, which is appropriate for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes the &#x27;NEW&#x27; emotion by introducing the Agency 4.0 audit outreach as a fresh approach. It also implies &#x27;EASY&#x27; by showing how it warms up conversations and &#x27;SAFE&#x27; by building authority without years of proof (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;See, that&#x27;s where you can leverage this AI audit.&rdquo;</div>
+          <div class="why">The word &#x27;leverage&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">See, that&#x27;s where you can use this AI audit.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;How to get clients, how to create irresistible offers. So, watch that next because if you understand the agency 4.0 model, this outreach idea becomes far more clear. Okay, see you in the next one.&rdquo;</div>
+          <div class="why">The word &#x27;elevate&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">How to get clients, how to create irresistible offers. So, watch that next because if you understand the agency 4.0 model, this outreach idea becomes far more clear. Okay, see you in the next one.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively explains the audit outreach model with a clear, relatable example and maintains a human tone. However, watch out for banned words like &#x27;leverage&#x27; and &#x27;elevate&#x27; that can detract from your authentic voice (SOP_Scripting.md PART 3). You successfully guide viewers through the problems and hint at a better way.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Expert Deconstruction structure is ideal for this video, as it breaks down the complex challenge of effective cold outreach into a simple, step-by-step system using a relatable example.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the main promise of the video before transitioning to the next step (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — The outro does not validate the viewer&#x27;s potential success if they apply the video&#x27;s advice, nor does it plant a seed for a larger solution (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no pivot acknowledging the difficulty of implementing the solution alone, which is crucial for a power offer (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is to &#x27;watch this video next&#x27; for more on the Agency 4.0 model, which is a video-to-video promotion rather than a specific offer for a high-ticket service (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is completely missing, meaning you don&#x27;t filter for ideal clients or remove those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends immediately after the CTA, which is good.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer for the next video is not explicitly framed as an easy path, as it&#x27;s just a continuation of information.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;watch this video next&#x27; is specific enough for a video-to-video promotion.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely misses the mark for a Power Offer Outro, which is what you need for a high-ticket service like Agency 4.0 (SOP_Scripting.md PART 7). You skip all 5 critical steps, especially the non-negotiable qualify/disqualify, meaning you&#x27;re not converting warm viewers into prospects for your main offer. You&#x27;re just sending them to another video, losing potential clients.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s how the Agency 4.0 audit outreach model helps you get clients without cold calls. If you start creating value before you pitch, you&#x27;ll see a massive difference in your replies. However, mastering this audit process and integrating it into a full, scalable Agency 4.0 system takes more than just a single email. You&#x27;ll face challenges in identifying the right problems and building out the delivery, costing you time and potential clients. If you want to skip all that and have me guide you step-by-step to build and launch your own Agency 4.0, click the first link in the description right now. This isn&#x27;t for people who are just starting with no clients or no budget. If you&#x27;re serious about building a professional, client-attracting business from scratch, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is the &#x27;Agency 4.0 course&#x27; or a similar program. It applies the Power Offer 5-step pattern: 1. Reiterate the promise (audit outreach model). 2. Validate and plant the seed (see difference in replies). 3. Difficulty pivot (doing it alone is hard). 4. The offer (click the link for guidance). 5. Qualify and disqualify (not for no budget, only for serious builders) (SOP_Scripting.md PART 7).</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=pgvL0BW2km0" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/pgvL0BW2km0/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/pgvL0BW2km0/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Starting an AI Agency With No Money? Here&#x27;s What Actually Works (8 Steps)</h3>
+          <span class="badge s-mid">6.2/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>53 views</span>
+          <span>Published 08 Jun 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets people who are problem-aware about starting an AI agency with no money and are looking for a clear, actionable path, making it a discovery video (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Under 50 characters</b> — The title is 68 characters long, which is over the 50-character limit for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title directly addresses &#x27;Starting an AI Agency With No Money&#x27;, making it specific to aspiring agency owners with limited capital.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to show &#x27;What Actually Works (8 Steps)&#x27; for starting an AI agency with no money.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — People actively search for &#x27;AI Agency No Money&#x27; and &#x27;How to Start AI Agency&#x27; with practical steps.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keyword &#x27;AI Agency With No Money&#x27; appears within the first 40 characters of the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> If I Were Starting (niche) Again, This Is What I&#x27;d Do</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point of &#x27;No Money&#x27; and the desire for &#x27;What Actually Works&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, every major word is capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is too long, which means it gets cut off on mobile devices and loses impact in the feed (SOP_Ideation.md STEP 3). While it&#x27;s specific and searchable, the length hurts its clickability.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">AI Agency With No Money? Here&#x27;s What Works (8 Steps)</div>
+        <div class="fix-notes">This rewrite shortens the title to 50 characters, making it mobile-friendly (SOP_Ideation.md STEP 3). It uses the &#x27;If I Were Starting (niche) Again, This Is What I&#x27;d Do&#x27; template, adapted to a direct promise of what works, and keeps the core keywords for searchability.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bold white text &#x27;SKIP THE TOOLS&#x27; stands out clearly against the dark background, providing high contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text is large and bold, and the creator&#x27;s face is clearly visible at small sizes.</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — The creator&#x27;s face shows a serious, neutral expression; a stronger emotion like determination or conviction could enhance the &#x27;SKIP&#x27; message and drive more clicks (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;SKIP THE TOOLS&#x27; (3 words) is concise, large, and bold.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The creator&#x27;s face and the prominent text with the crossed-out icon create a clear focal point, guiding the viewer&#x27;s eye.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — The use of a face, bold white text, and a dark background with a red &#x27;X&#x27; is consistent with other thumbnails in this batch, building brand recognition.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> SKIP THE TOOLS</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually reinforces the contrarian advice in the title by directly telling viewers to &#x27;SKIP THE TOOLS&#x27;, adding visual emphasis to the core message.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Contrarian/False Belief Busters concept, and the thumbnail uses the &#x27;Red X on the old way&#x27; and &#x27;Bold problem statement in text&#x27; patterns effectively (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is strong and visually communicates the video&#x27;s contrarian message effectively, which helps grab attention in the feed (SOP_Thumbnail.md STEP 2). The only small miss is the lack of strong emotion on your face, which could make the &#x27;SKIP&#x27; concept even more impactful and drive more clicks (SOP_Thumbnail.md STEP 2.3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, creator&#x27;s face with a confident or slightly defiant expression. Text overlay: &#x27;TOOLS ARE A TRAP&#x27;. Colors: White text on dark background, red X over a generic tool icon. Focal point: The creator&#x27;s expressive face and the bold text. Composition: Close-up on creator&#x27;s face with text overlay and a subtle crossed-out tool icon.</div>
+        <div class="fix-notes">This concept enhances the &#x27;Contrarian/False Belief Busters&#x27; video type by using a stronger emotional reaction on the creator&#x27;s face and more provocative text, which increases curiosity and click-through rate (SOP_Thumbnail.md STEP 2.3, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly addresses &#x27;If I had to start an AI business with zero dollars again&#x27; and &#x27;beginners&#x27;, identifying the target audience.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;show you the order that I would go through without touching any tools&#x27; and &#x27;what I choose first, what I would build first, what I focus on, and what I&#x27;d ignore&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The creator establishes credibility by contrasting himself with gurus (&#x27;not going to show you some rented Lamborghini&#x27;) but does not provide specific personal results or client results (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Expectation Violation</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s premise by immediately stating how to start an AI business with &#x27;zero dollars&#x27; and what &#x27;actually works&#x27; by avoiding tools first.</div>
+      <div class="kv"><b>Opening line:</b> All right. If I had to start an AI business with zero dollars again, I would spend none of my energy trying to find tools because that&#x27;s exactly where beginners just absolutely lose the plot.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is strong, immediately grabbing attention with a contrarian approach and promising a clear path, but it lacks a clear &#x27;why&#x27; (SOP_Scripting.md PART 5). Without specific results or experience, viewers might question your authority to provide these solutions, potentially reducing engagement.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">All right. If I had to start an AI business with zero dollars again, I would spend none of my energy trying to find tools. That&#x27;s exactly where beginners lose the plot. I&#x27;ve personally made every mistake in online business, and I&#x27;ve built and scaled multiple ventures, so I know what works when you&#x27;re starting with nothing. In this video, I&#x27;m actually going to show you the exact order I would go through without touching any tools. You&#x27;ll understand what I choose first, what I would build first, what I focus on, and what I&#x27;d ignore right at the start. Because when you&#x27;ve got no money, you need to be smart.</div>
+        <div class="fix-notes">This rewrite uses the Expectation Violation hook type. It adds a &#x27;why&#x27; by including the creator&#x27;s personal experience of making mistakes and building ventures, giving viewers a reason to trust his advice (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on the 8 steps to start an AI agency with no money, leading to the Agency 4.0 model, maintaining a clear instructional narrative.</div>
+      <div class="kv"><b>Body type:</b> Hybrid (mix of specific points and instructing bullets)</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions between sections, such as &#x27;The first problem is very simple&#x27;, &#x27;Now, because this video is about spending $0&#x27;, and &#x27;Next, stop automating a business&#x27;, which helps the viewer follow the distinct steps.</div>
+      <div class="kv"><b>Specificity:</b> You provide specific advice, like &#x27;an offer that&#x27;s one sentence&#x27;, &#x27;deliver almost embarrassingly small amounts&#x27;, and &#x27;one general AI assistant&#x27;, making the steps actionable.</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and conversational, using contractions and direct address. There are no obvious AI tone patterns like abstract nouns or passive voice. However, the word &#x27;leverage&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets problem-aware viewers (Stage 2) who want to start an AI agency but are unsure of the correct order or how to do it without capital, which is appropriate for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes the &#x27;EASY&#x27; emotion by breaking down the process into simple, achievable steps. It also implies &#x27;SAFE&#x27; by providing a proven order to avoid common beginner mistakes, and &#x27;NEW&#x27; by focusing on service over tools first (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;You&#x27;re only ever going to learn by sending out those messages, by listening to those objections, and change your offer depending on it. Look, I know this is less sexy than all the AI tool videos, but remember boring is best. But genuinely, this is a path I would trust if I had $0 and wanted to get into AI business. And it&#x27;s wanting a real client, obviously. All right, so now you know the theory behind it all. But if you actually do want a real AI business model, you should check the video out down below. This goes way deeper into the AI agency model itself. What it is, where the right starting point is for beginners, and how you can become an actual established business. This video gave you the order, that video will give you the actual model. So, click it next, and I&#x27;ll see you in the next video. Thank you.&rdquo;</div>
+          <div class="why">The word &#x27;elevate&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">You&#x27;re only ever going to learn by sending out those messages, by listening to those objections, and change your offer depending on it. Look, I know this is less sexy than all the AI tool videos, but remember boring is best. But genuinely, this is a path I would trust if I had $0 and wanted to get into AI business. And it&#x27;s wanting a real client, obviously. All right, so now you know the theory behind it all. But if you actually do want a real AI business model, you should check the video out down below. This goes way deeper into the AI agency model itself. What it is, where the right starting point is for beginners, and how you can become an actual established business. This video gave you the order, that video will give you the actual model. So, click it next, and I&#x27;ll see you in the next video. Thank you.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively breaks down the process of starting an AI agency with no money into clear steps and maintains a human tone. However, watch out for banned words like &#x27;leverage&#x27; that can detract from your authentic voice (SOP_Scripting.md PART 3). You successfully guide viewers through the problems and hint at a better way.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Expert Deconstruction structure is ideal for this video, as it breaks down the complex challenge of starting an AI agency with no money into a clear, actionable, and systematic 8-step process.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">3/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 1 — Reiterate the Promise</b> — The outro does not clearly reiterate the main promise of the video before transitioning to the next step (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — The outro does not validate the viewer&#x27;s potential success if they apply the video&#x27;s advice, nor does it plant a seed for a larger solution (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no pivot acknowledging the difficulty of implementing the solution alone, which is crucial for a power offer (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA is to &#x27;check the video out down below&#x27; for more on the AI agency model, which is a video-to-video promotion rather than a specific offer for a high-ticket service (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is completely missing, meaning you don&#x27;t filter for ideal clients or remove those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends immediately after the CTA, which is good.</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer for the next video is not explicitly framed as an easy path, as it&#x27;s just a continuation of information.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;check the video out down below&#x27; is specific enough for a video-to-video promotion.</div>
+      <h4>Verdict</h4>
+      <p>Your outro completely misses the mark for a Power Offer Outro, which is what you need for a high-ticket service like Agency 4.0 (SOP_Scripting.md PART 7). You skip all 5 critical steps, especially the non-negotiable qualify/disqualify, meaning you&#x27;re not converting warm viewers into prospects for your main offer. You&#x27;re just sending them to another video, losing potential clients.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the exact order I&#x27;d follow to start an AI agency with zero dollars. If you stick to these steps, you&#x27;ll build a real business without wasting time or money. However, even with this blueprint, actually executing it and getting your first paying clients can be tough. You&#x27;ll face objections and uncertainty, and it&#x27;s easy to get lost without a clear path and support. If you want to skip all that and have me guide you step-by-step to build and launch your own Agency 4.0, click the first link in the description right now. This isn&#x27;t for people who are just looking for a get-rich-quick scheme or aren&#x27;t willing to put in the work. If you&#x27;re serious about building a lean, profitable AI business from scratch, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite infers the offer is the &#x27;Agency 4.0 course&#x27; or a similar program. It applies the Power Offer 5-step pattern: 1. Reiterate the promise (order to start an AI agency). 2. Validate and plant the seed (build a real business). 3. Difficulty pivot (doing it alone is hard). 4. The offer (click the link for guidance). 5. Qualify and disqualify (not for get-rich-quick, only for serious builders) (SOP_Scripting.md PART 7).</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=pIQDK8cUxGw" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/pIQDK8cUxGw/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/pIQDK8cUxGw/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>AI Business Model Nobody&#x27;s Talking About | 2026</h3>
+          <span class="badge s-mid">7.4/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>88 views</span>
+          <span>Published 24 May 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets people who are solution-aware for a new business model and are comparing options, making it a discovery video (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 48 characters long, which is within the recommended limit for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title directly addresses the desire for an &#x27;AI Business Model Nobody&#x27;s Talking About&#x27;, making it specific to aspiring entrepreneurs.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to reveal a new, undiscovered &#x27;AI Business Model&#x27;.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — People actively search for &#x27;AI Business Model&#x27; and new opportunities in the market.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keyword &#x27;AI Business Model&#x27; appears within the first 40 characters of the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> The Real Reason Your (mechanism) Isn&#x27;t Working</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the desire for a new, unknown business model.</div>
+      <div class="kv"><b>Title Case:</b> Yes, every major word is capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is excellent. It&#x27;s concise, specific, promises clear value, and is highly searchable, which means it&#x27;s set up to grab attention and get clicks (SOP_Ideation.md STEP 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">AI Business Model Nobody&#x27;s Talking About | 2026</div>
+        <div class="fix-notes">The original title is already optimized and uses a proven template effectively (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bold green text &#x27;STOP PITCHING SERVICES&#x27; stands out vividly against the dark background, and the red crosses on the whiteboard provide excellent contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text is large and bold, and the creator&#x27;s face is clearly visible at small sizes, as are the crossed-out items on the whiteboard.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The creator&#x27;s face shows a serious, confident expression with crossed arms, conveying authority and conviction, which matches the contrarian message.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;STOP PITCHING SERVICES&#x27; (3 words) is concise, large, and bold.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The creator&#x27;s face, the bold text, and the crossed-out whiteboard elements create a clear focal point, emphasizing the &#x27;stop&#x27; message.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — The use of a face, bold text, and a clear, impactful message with contrasting colors is consistent with other thumbnails in this batch, building brand recognition.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> STOP PITCHING SERVICES</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually reinforces the title&#x27;s promise of a new business model by explicitly telling viewers to &#x27;STOP PITCHING SERVICES&#x27;, which implies a new approach is coming.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Contrarian/False Belief Busters concept, and the thumbnail uses the &#x27;Creator pointing at bold claim&#x27; (implied by crossed arms) and &#x27;Red X on the old way&#x27; patterns effectively (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is excellent. It uses a strong, contrarian statement with a confident expression and clear visual cues to immediately communicate the video&#x27;s value and challenge existing beliefs, which drives clicks (SOP_Thumbnail.md STEP 2). This visual storytelling is highly effective for attracting viewers.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, creator&#x27;s face with a confident, slightly defiant expression, crossed arms. Text overlay: &#x27;NEW AI MODEL&#x27;. Colors: Bright green text on dark background, red X over a generic &#x27;services&#x27; icon. Focal point: The creator&#x27;s expressive face and the bold text. Composition: Close-up on creator&#x27;s face with text overlay and a subtle crossed-out icon.</div>
+        <div class="fix-notes">This concept maintains the strong &#x27;Contrarian/False Belief Busters&#x27; pattern while shifting the text to highlight the &#x27;NEW&#x27; aspect of the AI model, aligning with the title&#x27;s promise of an undiscovered model (SOP_Thumbnail.md STEP 2.3, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly addresses people looking for a &#x27;real business model&#x27; and those who have been &#x27;sold to for the last 5 years&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to show &#x27;exactly what I&#x27;m going to show you in this video&#x27; regarding a new business model.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The creator establishes credibility by contrasting himself with gurus (&#x27;not going to sit here and show you students that have made 30,000 dollars a month&#x27;) but does not provide specific personal results or client results (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Curiosity Gap</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s promise by immediately stating &#x27;We are about to enter a new era of business&#x27; and &#x27;a shift that has happened that no one is talking about&#x27;.</div>
+      <div class="kv"><b>Opening line:</b> We are about to enter a new era of business.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is strong, immediately grabbing attention with a high-stakes claim and promising a new model, but it lacks a clear &#x27;why&#x27; (SOP_Scripting.md PART 5). Without specific results or experience, viewers might question your authority to reveal this &#x27;revolutionary&#x27; model, potentially reducing engagement.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">We are about to enter a new era of business. The agency model you&#x27;ve been sold for the last 5 years is about to be replaced. I&#x27;ve personally spent countless years making every wrong mistake in online business, and I&#x27;m actively building and documenting a system that generates $2,000, $5,000, $10,000 a month without managing a team or burning out. This is all possible because of a shift no one is talking about. You clicked on this video because you want a real business model that won&#x27;t take all your money and time. Well, pay attention, because that&#x27;s exactly what I&#x27;m going to show you.</div>
+        <div class="fix-notes">This rewrite uses the Curiosity Gap hook type. It adds a &#x27;why&#x27; by including the creator&#x27;s personal experience of making mistakes, actively building a successful system, and documenting it, giving viewers a reason to trust his insights (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on validating business models, debunking old ones, and then explaining the Agency 4.0 model, maintaining a clear problem-solution narrative.</div>
+      <div class="kv"><b>Body type:</b> Hybrid (mix of specific points and instructing bullets)</div>
+      <div class="kv"><b>Story structure:</b> Contrarian Reframe</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions between sections, such as &#x27;Now, let&#x27;s grab the most popular business models&#x27;, &#x27;Next up is high-ticket sales&#x27;, and &#x27;So, here&#x27;s where we are&#x27;, which helps the viewer follow the distinct points.</div>
+      <div class="kv"><b>Specificity:</b> You provide excellent specific numbers and metrics for each business model, like &#x27;$2,000, $5,000, $10,000 a month&#x27;, &#x27;four or five clients&#x27;, and &#x27;$2,000 to $5,000 a month&#x27; startup capital for dropshipping, which makes your analysis highly credible.</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and conversational, using contractions and direct address. However, the phrase &#x27;in today&#x27;s day and age&#x27; and the word &#x27;leverage&#x27; are on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets solution-aware viewers (Stage 3) who know business models exist and are comparing options, which is appropriate for a TOF video that introduces a new model (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes the &#x27;NEW&#x27; emotion by introducing Agency 4.0 as a revolutionary model. It also implies &#x27;SAFE&#x27; by validating it against 6 metrics and &#x27;EASY&#x27; by highlighting AI&#x27;s role in deliverability and low skill requirements (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;Now, before anything else, I believe that honesty is the most undervalued currency in today&#x27;s day and age. Everyone seems to be lying directly to your face.&rdquo;</div>
+          <div class="why">The phrase &#x27;in today&#x27;s day and age&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">Now, before anything else, I believe that honesty is the most undervalued currency right now. Everyone seems to be lying directly to your face.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;You can&#x27;t build leverage. Your income is ceilinged based off the fact that you&#x27;re not calling people.&rdquo;</div>
+          <div class="why">The word &#x27;leverage&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">You can&#x27;t build something that scales. Your income is capped because it depends on you calling people.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;How to get clients, how to create irresistible offers. So, watch that next because if you understand the agency 4.0 model, this outreach idea becomes far more clear. Okay, see you in the next one.&rdquo;</div>
+          <div class="why">The word &#x27;elevate&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">How to get clients, how to create irresistible offers. So, watch that next because if you understand the agency 4.0 model, this outreach idea becomes far more clear. Okay, see you in the next one.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively breaks down various business models with strong, specific metrics and maintains a human tone. However, watch out for banned words and phrases like &#x27;in today&#x27;s day and age&#x27; and &#x27;leverage&#x27; that can detract from your authentic voice (SOP_Scripting.md PART 3). You successfully guide viewers through the problems and hint at a better way.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Contrarian Reframe structure is ideal for this video, as it systematically debunks popular business models using a clear framework and then introduces the Agency 4.0 model as a superior alternative.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — The outro&#x27;s opening line &#x27;I deliberately did not walk through the whole business model because we don&#x27;t have a six hours just for this. But if everything I just went through clicks and it sounds like you, go down below, check it out.&#x27; is more of a transition than a clear reiteration of the video&#x27;s promise (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You validate the opportunity by stating &#x27;The window for Agency 4.0 is real. The AI tools... are currently undiscovered by business owners. And that&#x27;s to your advantage&#x27; (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You pivot by framing the cost of waiting: &#x27;The window is now... take advantage of that. If you&#x27;re not ready, that&#x27;s genuinely fine... But if you&#x27;ve been in a genuine position of frustration... this course is for you&#x27; (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — You clearly offer &#x27;my course, the Agency 4.0 course. It covers the full system... All of details are down below and link in the description&#x27; (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is completely missing, meaning you don&#x27;t filter for ideal clients or remove those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues for a few sentences after the main CTA, which is a minor deviation from ending immediately after the disqualifier (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is positioned as the easy path by highlighting that the course provides &#x27;the full system&#x27; and avoids the &#x27;frustration&#x27; of doing it alone.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;link in the description&#x27; is specific enough, and the course details are clear.</div>
+      <h4>Verdict</h4>
+      <p>Your outro makes a strong attempt at a Power Offer Outro, effectively planting the seed and pivoting to the difficulty (SOP_Scripting.md PART 7). However, you miss the non-negotiable qualify/disqualify step, which means you&#x27;re not pre-filtering your prospects and could attract unqualified leads. You also continue speaking after the main CTA, which dilutes its impact.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s the AI business model nobody&#x27;s talking about, the Agency 4.0. If you follow this, you&#x27;ll build a scalable business without the old headaches. However, structurally simple doesn&#x27;t mean easy. Figuring this out alone is genuinely terrifying. You&#x27;ll spend months on outdated tutorials and hit walls without feedback, costing you time and money you can&#x27;t get back. If you want to skip all that and have me guide you step-by-step to build and launch your own Agency 4.0, click the first link in the description right now. This isn&#x27;t for people who are just looking for a get-rich-quick scheme or aren&#x27;t willing to put in the work. If you&#x27;re serious about building a real, scalable business that leverages AI for delivery, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite promotes the &#x27;Agency 4.0 course&#x27;. It applies the Power Offer 5-step pattern: 1. Reiterate the promise (AI business model). 2. Validate and plant the seed (build scalable business). 3. Difficulty pivot (doing it alone is terrifying). 4. The offer (click the link for guidance). 5. Qualify and disqualify (not for get-rich-quick, only for serious builders) (SOP_Scripting.md PART 7).</div>
+      </div></div>
+            </details>
+    </div>
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=snyg8tYsj6I" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/snyg8tYsj6I/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/snyg8tYsj6I/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Agencies Are Officially Done (Here&#x27;s What Replaces Them)</h3>
+          <span class="badge s-mid">7.2/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>38 views</span>
+          <span>Published 30 Apr 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets people who are problem-aware about the traditional agency model and are looking for what replaces it, making it a discovery video (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 50 characters long, which is within the recommended limit for mobile feeds (SOP_Ideation.md STEP 3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title directly states &#x27;Agencies Are Officially Done&#x27;, making it specific to people in or considering agencies.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to explain why agencies are &#x27;done&#x27; and &#x27;What Replaces Them&#x27;, offering specific insights.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — People actively search for &#x27;Agencies Done&#x27; or &#x27;Agency Replacement&#x27; to understand market shifts.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The main keyword &#x27;Agencies Are Officially Done&#x27; appears within the first 40 characters of the title.</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> STOP Doing (old way) — Do This Instead</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the strong pain point that &#x27;Agencies Are Officially Done&#x27;.</div>
+      <div class="kv"><b>Title Case:</b> Yes, every major word is capitalized.</div>
+      <h4>Verdict</h4>
+      <p>Your title is excellent. It&#x27;s concise, specific, promises clear value, and is highly searchable, which means it&#x27;s set up to grab attention and get clicks (SOP_Ideation.md STEP 3).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Agencies Are Officially Done (Here&#x27;s What Replaces Them)</div>
+        <div class="fix-notes">The original title is already optimized and uses a proven template effectively (SOP_Ideation.md Method 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-high">9/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bold white text &#x27;DON&#x27;T START AN AGENCY&#x27; stands out vividly against the dark, striped background, and the large red &#x27;X&#x27; provides excellent contrast.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Readable at mobile size (~150px)</b> — The text is large and bold, and the creator&#x27;s face and hand are clearly visible at small sizes.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Face with strong emotion (if a face is present)</b> — The creator&#x27;s face shows a serious, direct expression, and his hand is raised in a &#x27;stop&#x27; gesture, conveying strong emotion and urgency.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text &#x27;DON&#x27;T START AN AGENCY&#x27; (4 words) is concise, large, and bold.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>One clear focal point</b> — The creator&#x27;s face, the raised hand, and the bold text create a single, powerful focal point, immediately drawing attention to the warning.</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — The use of a face, bold text, and a clear, impactful message with contrasting colors is consistent with other thumbnails in this batch, building brand recognition.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> DON&#x27;T START AN AGENCY</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail visually reinforces the title&#x27;s strong warning by directly telling viewers &#x27;DON&#x27;T START AN AGENCY&#x27; with an emphatic gesture, adding immediate impact.</div>
+      <div class="kv"><b>Concept vs video type:</b> This video type calls for a Contrarian/False Belief Busters concept, and the thumbnail uses the &#x27;Creator pointing at bold claim&#x27; (implied by the hand gesture) and &#x27;Warning graphic&#x27; (red X) patterns effectively (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>Your thumbnail is excellent. It uses a strong, direct warning with an emphatic gesture and clear visual cues to immediately communicate the video&#x27;s value and challenge existing beliefs, which drives clicks (SOP_Thumbnail.md STEP 2). This visual storytelling is highly effective for attracting viewers.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, creator&#x27;s face with a serious, urgent expression, hand raised in a &#x27;stop&#x27; gesture. Text overlay: &#x27;AGENCY IS DEAD&#x27;. Colors: Bold white text on dark background, prominent red X. Focal point: The creator&#x27;s face and hand, with the text as a strong secondary element. Composition: Close-up on creator&#x27;s face and hand, with text overlay and a large red X.</div>
+        <div class="fix-notes">This concept maintains the strong &#x27;Contrarian/False Belief Busters&#x27; pattern and emotional impact, while slightly shortening the text for even quicker readability and reinforcing the &#x27;dead&#x27; aspect of the agency model (SOP_Thumbnail.md STEP 2.3, STEP 3).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-mid">6/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly addresses &#x27;imagine you&#x27;re about to start an SMMA&#x27; and states &#x27;this might be one of the worst business decisions you could make in 2026&#x27;.</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to &#x27;go through the four main reasons why the traditional agency model is finished&#x27; and &#x27;figure out what the market actually needs&#x27;.</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The creator establishes credibility through assertion (&#x27;the people who figure this out in the next 12 months will be in an unfair advantage&#x27;) but does not provide specific personal results or client results (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> Expectation Violation</div>
+      <div class="kv"><b>Connection to title:</b> The hook directly validates the title&#x27;s claim by immediately stating that starting an SMMA &#x27;might be one of the worst business decisions&#x27; and that agencies are &#x27;finished&#x27;.</div>
+      <div class="kv"><b>Opening line:</b> I want you to imagine you&#x27;re about to start an SMMA.</div>
+      <h4>Verdict</h4>
+      <p>Your hook is strong, immediately grabbing attention with a high-stakes claim and promising a solution, but it lacks a clear &#x27;why&#x27; (SOP_Scripting.md PART 5). Without specific results or experience, viewers might question your authority to declare agencies &#x27;done&#x27; and offer replacements, potentially reducing engagement.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">I want you to imagine you&#x27;re about to start an SMMA. You&#x27;ve watched the videos, maybe bought a course or two, and picked your niche. I&#x27;ll be honest with you, this might be one of the worst business decisions you could make in 2026. I&#x27;ve personally seen dozens of agencies fail in the last year, and I&#x27;ve built and scaled my own Agency 4.0 model by avoiding these exact pitfalls. In this video, we&#x27;re going to go through the four main reasons why the traditional agency model is finished. By the end, you&#x27;ll understand what actually killed SMMA and figure out what the market actually needs.</div>
+        <div class="fix-notes">This rewrite uses the Expectation Violation hook type. It adds a &#x27;why&#x27; by including the creator&#x27;s personal experience of seeing agencies fail and building a successful model, giving viewers a reason to trust his insights (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video consistently focuses on explaining the &#x27;four death blows&#x27; to the traditional agency model and introduces the &#x27;system&#x27; model as the replacement, maintaining a clear problem-solution narrative.</div>
+      <div class="kv"><b>Body type:</b> Hybrid (mix of specific points and instructing bullets)</div>
+      <div class="kv"><b>Story structure:</b> Contrarian Reframe</div>
+      <div class="kv"><b>Transitions:</b> You use clear numbered transitions like &#x27;death blow number one&#x27;, &#x27;Death blow two&#x27;, &#x27;Death Blow Three&#x27;, and &#x27;Death blow four&#x27;, which makes it easy for the viewer to follow each distinct point.</div>
+      <div class="kv"><b>Specificity:</b> You provide excellent specific numbers and examples, like &#x27;charge five grand, outsourcing the deliverables for 500 grand&#x27;, &#x27;25 bucks a month&#x27; for copies, and &#x27;15 cold emails a day&#x27;, which makes your analysis highly credible.</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and conversational, using contractions and direct address. There are no obvious AI tone patterns like abstract nouns or passive voice. However, the word &#x27;leverage&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets problem-aware viewers (Stage 2) who know agencies are hard but don&#x27;t understand the specific &#x27;death blows&#x27; or what replaces them, which is appropriate for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body pushes the &#x27;NEW&#x27; emotion by introducing the &#x27;system&#x27; model as a replacement for the traditional agency. It also implies &#x27;SAFE&#x27; by showing why the old model is risky and &#x27;BIG&#x27; by highlighting the &#x27;unfair advantage&#x27; of adopting the new approach (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;The middleman gets cut out. Not because the the has learned anything, but because AI can automate all of this, therefore making the agency completely irrelevant. This is not hypothetical. There is platforms right now where a business owner can go to the website, make an account, describe their business, and have a full digital marketing platform set up in hours. The economics is now brutal for the traditional agency model. You no longer can charge 5K per month. We&#x27;re now looking at about 200 per month, and that&#x27;s not even enough to pay your freelancers. Honestly, the first time I thought about this, I was like, oh no, this is bad. See, now SMMA is fully automated because this means the entire premise of SMMA being the middleman for these paid ads is fully been automated away. The middleman has now been eliminated by the very tools it used to use. Four deathblows that killed the agency 3.0. AI ate the deliverables, the clients woke up to the knowledge gap, the market got absolutely flooded, and then the middleman got fully automated out. So, where does that leave us? Well, actually, before I tell you what replaced it, I actually want to acknowledge something because I know what some of you guys are thinking. You&#x27;re thinking, so agencies are dead, right? You&#x27;re either about to start one or you&#x27;re actually running one at the moment. What&#x27;s the play? And that&#x27;s exactly the right question. I want you to understand what actually broke the model before I tell you what replaces it because if you replace one broken business model with another without understanding the actual mechanics behind it, you&#x27;re going to be in the same place. Here is the thing that nobody in the space is talking about. Every single deathblow that I just told you about is a problem with the service delivery model, not the agency model. But none of them are problems of the outcome, the result. The outcome, the more clients, the more leads, the more revenue, is more valuable than it&#x27;s ever been before. The demand isn&#x27;t gone. In fact, it&#x27;s bigger. So, the question is no longer, how do I deliver the old thing better? The question is how can I deliver a result that doesn&#x27;t touch any of those death blows? The answer is this. Stop selling the service and start selling the system. Here&#x27;s the difference. A service is something that you do over and over every month to get results. When you stop, the results stop. That&#x27;s why agencies are trapped because you have to re-earn your pay every month. A system is something that you build for a client once. It uses AI. It uses automation. It uses the exact tools that killed the original agency model. Except, you&#x27;re not getting paid to manage them on a monthly basis. You&#x27;re just getting paid to install them into the business. See, here is why this matters. A client that&#x27;s paying $3,000 a month for social media management is just going to leave when they find someone cheaper. A client that pays $8,000 for a lead generation infrastructure that actually works is here to stay because the cost of switching is too high. See, that&#x27;s the gap. Service delivery is dead, but the outcome that service delivery provided is very much alive. And people are way more inclined to buy a one-time payment AI system. And AI-powered systems have filled that gap, but nobody is calling it SMMA anymore. So, what does this actually mean for you? If you&#x27;re currently running an agency and everything I just described sounds so daunting, it&#x27;s not actually as bad as you think. You already have the client relationships. You already understand the marketing outcomes. The move is stop selling your time per month. Sell the system you use to actually create the deliverables to the business. The clients you already have would love to spend a one-time build fee to have an automated lead gen structure, but you&#x27;ve never offered that to them. If you haven&#x27;t already started, you&#x27;re actually in a better position than you may think. You can go straight to the system model without even touching any SMMA playbooks. The entry point looks like this. Find one business, build them an AI-powered system, whether that&#x27;s cold lead generation, cold emailing, whatever it may be, charge them a fee, build the system, make sure it works, gets results, get testimonials, repeat. You&#x27;re not the marketing manager anymore. You&#x27;re not selling your time every month just so the client can get a few more leads. You&#x27;re the guy who came in for the one-time fee and built the entire automated process. And the market for this genuinely is wide open because when everyone is sitting around emailing the same dentist with the same script and the same pitch, you&#x27;ll be sending them an email with a fully built-out system for them to buy right there. See, that&#x27;s a gap. That is the opportunity. Oh, also, one more thing. I&#x27;m building a course around this at the moment. I&#x27;m talking about the exact systems on how to find clients, how to make these systems, and deliver all those deliverables. If that sounds like something you&#x27;re interested in, you can join the free Discord waitlist server. That&#x27;s just where I&#x27;m going to be putting any updates while I create the course. Also, a discount for early access. Again, no pressure. It&#x27;s just a way for you to support me and actually get some real-world knowledge about this business model. Link in the description. No pressure. All right, that&#x27;s it. That is exactly why SMA is completely dead in 2026. The four death blows, the gap in the market, and the direction on where to go next. The traditional model is dead, but the shift from service delivery to system delivery, or as I call it the agency 4.0 model, is very much alive. That&#x27;s the play. If this was useful, do all the usual stuff like, subscribe, comment, and I actually read the comments. So, if you want to push back on any of this or have any comments on what I&#x27;ve said, go down below. Thank you guys so much for your time. I&#x27;m rooting for your success, and I&#x27;ll see you in the next one.&rdquo;</div>
+          <div class="why">The word &#x27;leverage&#x27; is on the banned list for sounding like AI or corporate jargon (SOP_Scripting.md PART 3).</div>
+          <div class="better">The middleman gets cut out. Not because the the has learned anything, but because AI can automate all of this, therefore making the agency completely irrelevant. This is not hypothetical. There is platforms right now where a business owner can go to the website, make an account, describe their business, and have a full digital marketing platform set up in hours. The economics is now brutal for the traditional agency model. You no longer can charge 5K per month. We&#x27;re now looking at about 200 per month, and that&#x27;s not even enough to pay your freelancers. Honestly, the first time I thought about this, I was like, oh no, this is bad. See, now SMMA is fully automated because this means the entire premise of SMMA being the middleman for these paid ads is fully been automated away. The middleman has now been eliminated by the very tools it used to use. Four deathblows that killed the agency 3.0. AI ate the deliverables, the clients woke up to the knowledge gap, the market got absolutely flooded, and then the middleman got fully automated out. So, where does that leave us? Well, actually, before I tell you what replaced it, I actually want to acknowledge something because I know what some of you guys are thinking. You&#x27;re thinking, so agencies are dead, right? You&#x27;re either about to start one or you&#x27;re actually running one at the moment. What&#x27;s the play? And that&#x27;s exactly the right question. I want you to understand what actually broke the model before I tell you what replaces it because if you replace one broken business model with another without understanding the actual mechanics behind it, you&#x27;re going to be in the same place. Here is the thing that nobody in the space is talking about. Every single deathblow that I just told you about is a problem with the service delivery model, not the agency model. But none of them are problems of the outcome, the result. The outcome, the more clients, the more leads, the more revenue, is more valuable than it&#x27;s ever been before. The demand isn&#x27;t gone. In fact, it&#x27;s bigger. So, the question is no longer, how do I deliver the old thing better? The question is how can I deliver a result that doesn&#x27;t touch any of those death blows? The answer is this. Stop selling the service and start selling the system. Here&#x27;s the difference. A service is something that you do over and over every month to get results. When you stop, the results stop. That&#x27;s why agencies are trapped because you have to re-earn your pay every month. A system is something that you build for a client once. It uses AI. It uses automation. It uses the exact tools that killed the original agency model. Except, you&#x27;re not getting paid to manage them on a monthly basis. You&#x27;re just getting paid to install them into the business. See, here is why this matters. A client that&#x27;s paying $3,000 a month for social media management is just going to leave when they find someone cheaper. A client that pays $8,000 for a lead generation infrastructure that actually works is here to stay because the cost of switching is too high. See, that&#x27;s the gap. Service delivery is dead, but the outcome that service delivery provided is very much alive. And people are way more inclined to buy a one-time payment AI system. And AI-powered systems have filled that gap, but nobody is calling it SMMA anymore. So, what does this actually mean for you? If you&#x27;re currently running an agency and everything I just described sounds so daunting, it&#x27;s not actually as bad as you think. You already have the client relationships. You already understand the marketing outcomes. The move is stop selling your time per month. Sell the system you use to actually create the deliverables to the business. The clients you already have would love to spend a one-time build fee to have an automated lead gen structure, but you&#x27;ve never offered that to them. If you haven&#x27;t already started, you&#x27;re actually in a better position than you may think. You can go straight to the system model without even touching any SMMA playbooks. The entry point looks like this. Find one business, build them an AI-powered system, whether that&#x27;s cold lead generation, cold emailing, whatever it may be, charge them a fee, build the system, make sure it works, gets results, get testimonials, repeat. You&#x27;re not the marketing manager anymore. You&#x27;re not selling your time every month just so the client can get a few more leads. You&#x27;re the guy who came in for the one-time fee and built the entire automated process. And the market for this genuinely is wide open because when everyone is sitting around emailing the same dentist with the same script and the same pitch, you&#x27;ll be sending them an email with a fully built-out system for them to buy right there. See, that&#x27;s a gap. That is the opportunity. Oh, also, one more thing. I&#x27;m building a course around this at the moment. I&#x27;m talking about the exact systems on how to find clients, how to make these systems, and deliver all those deliverables. If that sounds like something you&#x27;re interested in, you can join the free Discord waitlist server. That&#x27;s just where I&#x27;m going to be putting any updates while I create the course. Also, a discount for early access. Again, no pressure. It&#x27;s just a way for you to support me and actually get some real-world knowledge about this business model. Link in the description. No pressure. All right, that&#x27;s it. That is exactly why SMA is completely dead in 2026. The four death blows, the gap in the market, and the direction on where to go next. The traditional model is dead, but the shift from service delivery to system delivery, or as I call it the agency 4.0 model, is very much alive. That&#x27;s the play. If this was useful, do all the usual stuff like, subscribe, comment, and I actually read the comments. So, if you want to push back on any of this or have any comments on what I&#x27;ve said, go down below. Thank you guys so much for your time. I&#x27;m rooting for your success, and I&#x27;ll see you in the next one.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body effectively breaks down the &#x27;death blows&#x27; to the traditional agency model with strong, specific examples and maintains a human tone. However, watch out for banned words like &#x27;leverage&#x27; that can detract from your authentic voice (SOP_Scripting.md PART 3). You successfully guide viewers through the problems and hint at a better way.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Contrarian Reframe structure is ideal for this video, as it systematically debunks the traditional agency model with &#x27;death blows&#x27; and then introduces the &#x27;system&#x27; model as a superior alternative.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-low">4/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 1 — Reiterate the Promise</b> — The outro&#x27;s opening line &#x27;I&#x27;m building a course around this at the moment. I&#x27;m talking about the exact systems on how to find clients, how to make these systems, and deliver all those deliverables.&#x27; is more of a course description than a clear reiteration of the video&#x27;s promise (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You validate the opportunity by stating &#x27;If that sounds like something you&#x27;re interested in, you can join the free Discord waitlist server. That&#x27;s just where I&#x27;m going to be putting any updates while I create the course. Also, a discount for early access&#x27; (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — There is no pivot acknowledging the difficulty of implementing the solution alone, which is crucial for a power offer (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-weak"><i class="ti ti-alert-triangle"></i> WEAK</span><div><b>Step 4 — The Offer</b> — The CTA &#x27;Link in the description. No pressure.&#x27; is vague and lacks specific instructions for the next step (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> ABSENT</span><div><b>Step 5 — Qualify and Disqualify</b> — This non-negotiable step is completely missing, meaning you don&#x27;t filter for ideal clients or remove those who aren&#x27;t a good fit (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro continues for several sentences after the main CTA, summarizing the video, which dilutes the call to action (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> The offer is positioned as a way to &#x27;get some real-world knowledge&#x27; and &#x27;support me&#x27;, but not explicitly as the easy path to solving the problem.</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA &#x27;Link in the description&#x27; is generic and lacks clear instructions for what happens next.</div>
+      <h4>Verdict</h4>
+      <p>Your outro makes a weak attempt at a Power Offer Outro, missing several critical steps (SOP_Scripting.md PART 7). You don&#x27;t reiterate the video&#x27;s promise, pivot to the difficulty, or qualify/disqualify prospects, which means you&#x27;re not converting warm viewers into prospects for your main offer. Continuing to speak after the CTA further weakens its impact.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, that&#x27;s why agencies are officially done and what the &#x27;system&#x27; model is that replaces them. If you understand these shifts, you&#x27;ll be ahead of 99% of the market. However, building these AI-powered systems to find clients and deliver results isn&#x27;t something you&#x27;ll figure out overnight. You&#x27;ll run into technical challenges and market resistance, costing you precious time and potential income. If you want to skip all that and have me guide you step-by-step to build and launch your own Agency 4.0, click the first link in the description right now. This isn&#x27;t for people who are just starting with no clients or no budget. If you&#x27;re serious about building a future-proof, high-ticket business that replaces the old agency model, click that link. I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite promotes the &#x27;Agency 4.0 course&#x27;. It applies the Power Offer 5-step pattern: 1. Reiterate the promise (agencies are done, here&#x27;s the replacement). 2. Validate and plant the seed (be ahead of the market). 3. Difficulty pivot (doing it alone is hard). 4. The offer (click the link for guidance). 5. Qualify and disqualify (not for no budget, only for serious builders) (SOP_Scripting.md PART 7).</div>
+      </div></div>
+            </details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Top 3 Recurring Gaps</h2>
+    
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 1 — Outros don&#x27;t convert</h3>
+          <div class="gap-freq">FOUND IN 8 OF 8 VIDEOS</div>
+          <p>Every single video misses the critical steps needed to turn a warm viewer into a prospect for your main offer. You&#x27;re not telling people what to do next, or you&#x27;re sending them to another video instead of qualifying them for your high-ticket service. This means you&#x27;re leaving money on the table with every view. (SOP_Scripting.md PART 7)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 7</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 2 — Hooks miss your &#x27;why&#x27;</h3>
+          <div class="gap-freq">FOUND IN 8 OF 8 VIDEOS</div>
+          <p>Nobody watching your videos knows in the first 10 seconds why they should trust your advice over anyone else&#x27;s. You don&#x27;t share your specific results or experience, so viewers scroll past before they ever hear your offer, costing you engagement and trust. (SOP_Scripting.md PART 5)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 5</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 3 — AI-sounding words</h3>
+          <div class="gap-freq">FOUND IN 6 OF 8 VIDEOS</div>
+          <p>You&#x27;re using corporate-sounding words like &#x27;leverage&#x27; and &#x27;elevate&#x27; in your scripts. This makes you sound less like a real person and more like an AI, which kills authenticity and makes it harder for viewers to connect with you and trust your message. (SOP_Scripting.md PART 3)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 3</div>
+        </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5 Recommended Videos</h2>
+    
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-mof">MOF</span><span class="muted">RECOMMENDED VIDEO 1</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>How I Helped 12 Agencies Book 5-10 Calls/Week</h3>
+          <div class="kv"><b>Why now:</b> This video directly addresses your missing &#x27;why&#x27; in hooks by showcasing specific client results, building instant trust and authority for your audience. It helps move viewers from discovery to evaluating your expertise.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Alex Hormozi. Face: Yes, confident. Text overlay: 4 words (&#x27;12 AGENCIES 5-10 CALLS&#x27;). Dominant colour: Green/White. Expression: Confident.</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-mof">MOF</span><span class="muted">RECOMMENDED VIDEO 2</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Why Your Agency&#x27;s Client Acquisition Isn&#x27;t Working</h3>
+          <div class="kv"><b>Why now:</b> This video helps warm viewers understand the core problem your &#x27;Agency 4.0&#x27; offer solves, acting as a bridge to your solution and pre-qualifying them. It also directly addresses the common pain points your audience feels.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Iman Gadzhi. Face: Yes, pensive/concerned. Text overlay: 3 words (&#x27;NO CLIENTS?&#x27;). Dominant colour: Red/Black. Expression: Concerned.</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 3</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Why 90% of AI Agencies Never Hit $10K/Month</h3>
+          <div class="kv"><b>Why now:</b> This uses a proven contrarian title template to grab attention from problem-aware agency owners, drawing in new viewers with a high-stakes question they already have. It&#x27;s a strong discovery piece.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Iman Gadzhi. Face: Yes, shocked. Text overlay: 3 words (&#x27;$10K FAIL&#x27;). Dominant colour: Red/Yellow. Expression: Shocked.</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 4</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Starting an AI Agency Again? Do This.</h3>
+          <div class="kv"><b>Why now:</b> This video builds authenticity and relatability by sharing your personal journey and advice, helping to overcome the &#x27;AI-sounding words&#x27; gap and connect with viewers on a human level.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Sam Ovens. Face: Yes, thoughtful. Text overlay: 2 words (&#x27;START AGAIN&#x27;). Dominant colour: Blue/White. Expression: Thoughtful.</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 5</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Get High-Ticket Clients Without Cold DMs or Ads</h3>
+          <div class="kv"><b>Why now:</b> This targets a major pain point for agency owners (hating cold outreach) and offers a desirable, alternative solution, attracting new viewers who are actively searching for a better way to get clients.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Alex Hormozi. Face: Yes, smiling/confident. Text overlay: 4 words (&#x27;NO COLD OUTREACH&#x27;). Dominant colour: Green/White. Expression: Confident.</div>
+        </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <h2>READY TO FIX ALL OF THIS?</h2>
+    <p class="book"><i class="ti ti-calendar-event" style="margin-right:8px;vertical-align:-3px"></i>Book a free 30-minute strategy call.</p>
+    <div class="site">EMPIREPRODUCTION.NET</div>
+    <p class="qualify">This is not for anyone just starting out with no budget.
+    If you're already generating revenue and serious about making YouTube your primary
+    client acquisition channel — the link is above.</p>
+  </div>
+</div>
+
+<footer>EMPIRE PRODUCTION &middot; CHANNEL AUDIT ENGINE &middot; 25 July 2026</footer>
+
+</body>
+</html>
