@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Empire Production — Channel Audit — Aurelian</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#080808; color:#e8e8e8; font-family:'Space Grotesk',Arial,sans-serif; line-height:1.65; font-size:15px; }
+.wrap { max-width:980px; margin:0 auto; padding:0 28px; }
+h1,h2,h3,.bebas { font-family:'Bebas Neue',Impact,sans-serif; font-weight:400; letter-spacing:1.5px; }
+a { color:#c8202c; text-decoration:none; }
+.muted { color:#888888; }
+
+header { background:#0d0d0d; border-bottom:2px solid #c8202c; padding:52px 0 44px; }
+.kicker { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:4px; color:#c8202c; font-size:16px; margin-bottom:10px; }
+header h1 { font-size:52px; line-height:1.05; margin-bottom:6px; }
+.header-meta { color:#888888; font-size:14px; margin-bottom:26px; }
+.health { display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
+.health-score { font-family:'Bebas Neue',Impact,sans-serif; font-size:96px; color:#c8202c; line-height:1; }
+.health-score span { font-size:34px; color:#888888; }
+.diagnosis { max-width:600px; font-size:16px; border-left:3px solid #c8202c; padding-left:18px; }
+
+section { padding:44px 0 8px; }
+section > .wrap > h2 { font-size:32px; margin-bottom:22px; border-bottom:1px solid #1a1a1a; padding-bottom:10px; }
+
+.panel { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:26px; margin-bottom:22px; }
+.funnel-row { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.funnel-label { width:52px; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:18px; }
+.funnel-track { flex:1; background:#141414; border-radius:4px; height:22px; overflow:hidden; }
+.funnel-bar { height:100%; border-radius:4px; min-width:2px; }
+.funnel-count { width:90px; color:#888888; font-size:13px; }
+.avg-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:14px; margin-top:8px; }
+.avg-cell { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:16px; text-align:center; }
+.avg-cell .num { font-family:'Bebas Neue',Impact,sans-serif; font-size:40px; line-height:1; }
+.avg-cell .lbl { color:#888888; font-size:12px; letter-spacing:2px; text-transform:uppercase; margin-top:6px; }
+
+.badge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:1px; font-size:20px; padding:2px 12px; border-radius:6px; background:#141414; border:1px solid #1a1a1a; }
+.s-low  { color:#c8202c; border-color:#c8202c; }
+.s-mid  { color:#e8a520; }
+.s-high { color:#4caf7d; }
+
+.fbadge { display:inline-block; font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:14px; padding:2px 12px; border-radius:4px; }
+.f-tof { background:#c8202c; color:#fff; }
+.f-mof { background:#3a3a3a; color:#e8e8e8; }
+.f-bof { background:#141414; color:#888888; border:1px solid #333; }
+
+.card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; margin-bottom:26px; overflow:hidden; }
+.card.flag { border-left:3px solid #c8202c; }
+.card-head { padding:22px 24px 16px; }
+.thumb-link { display:block; position:relative; margin:-22px -24px 18px; }
+.thumb-link img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; background:#141414; }
+.thumb-link .thumb-play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:52px; height:52px;
+        border-radius:50%; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;
+        opacity:0; transition:opacity .15s; }
+.thumb-link .thumb-play i { font-size:22px; color:#fff; margin:0 0 0 3px; }
+.thumb-link:hover .thumb-play { opacity:1; }
+.card-title-row { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+.card-title-row h3 { font-size:26px; line-height:1.15; }
+.card-meta { color:#888888; font-size:13px; margin-top:8px; display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.card-note { padding:0 24px 22px; color:#888888; font-style:italic; }
+.skip-thumb { width:120px; aspect-ratio:16/9; object-fit:cover; border-radius:6px; background:#141414; flex-shrink:0; }
+.skip-row { display:flex; gap:16px; align-items:flex-start; padding:22px 24px; }
+
+details { border-top:1px solid #1a1a1a; }
+details summary { cursor:pointer; padding:14px 24px; display:flex; align-items:center; gap:12px; list-style:none; user-select:none; font-weight:500; }
+details summary::-webkit-details-marker { display:none; }
+details summary .chev { margin-left:auto; color:#888888; transition:transform .2s; font-size:12px; }
+details[open] summary .chev { transform:rotate(90deg); }
+details summary:hover { background:#111; }
+.acc-body { padding:6px 24px 24px; }
+.acc-body h4 { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:2px; font-size:16px; color:#888888; margin:18px 0 6px; }
+.kv { margin-bottom:8px; }
+.kv b { color:#e8e8e8; }
+.check-row { display:flex; gap:10px; margin-bottom:6px; align-items:baseline; }
+.check-pass { color:#4caf7d; font-weight:700; white-space:nowrap; }
+.check-fail { color:#c8202c; font-weight:700; white-space:nowrap; }
+.check-weak { color:#e8a520; font-weight:700; white-space:nowrap; }
+
+.fix { border-left:3px solid #c8202c; background:#120d0d; border-radius:0 8px 8px 0; padding:16px 20px; margin-top:16px; }
+.fix-label { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; color:#c8202c; font-size:16px; margin-bottom:8px; }
+.fix .fix-text { white-space:pre-wrap; }
+.fix .fix-notes { color:#888888; font-size:13.5px; margin-top:10px; border-top:1px solid #2a1a1a; padding-top:10px; }
+
+.quote-block { border:1px solid #1a1a1a; border-radius:8px; padding:14px 16px; margin:10px 0; background:#0a0a0a; }
+.quote-block .q { color:#888888; font-style:italic; }
+.quote-block .why { margin:6px 0; }
+.quote-block .better { color:#e8e8e8; border-left:2px solid #4caf7d; padding-left:10px; }
+
+.gap-card { background:#0d0d0d; border:1px solid #1a1a1a; border-left:3px solid #c8202c; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.gap-card h3 { font-size:24px; margin-bottom:4px; }
+.gap-freq { color:#c8202c; font-size:13px; letter-spacing:1px; margin-bottom:10px; font-weight:700; }
+.gap-sop { color:#888888; font-size:13px; margin-top:10px; border-top:1px solid #1a1a1a; padding-top:10px; }
+
+.idea-card { background:#0d0d0d; border:1px solid #1a1a1a; border-radius:10px; padding:22px 24px; margin-bottom:18px; }
+.idea-card h3 { font-size:24px; margin-bottom:8px; }
+.idea-card .kv { font-size:14px; }
+
+.cta { background:#0d0d0d; border-top:2px solid #c8202c; margin-top:50px; padding:64px 0; text-align:center; }
+.cta h2 { font-size:44px; color:#e8e8e8; }
+.cta .book { font-size:19px; margin:10px 0 2px; }
+.cta .site { font-family:'Bebas Neue',Impact,sans-serif; letter-spacing:3px; font-size:22px; color:#c8202c; margin-bottom:26px; }
+.cta .qualify { color:#888888; max-width:560px; margin:0 auto; font-size:14px; }
+footer { padding:26px 0 40px; text-align:center; color:#888888; font-size:12px; letter-spacing:1px; }
+
+@media print {
+  .card, .gap-card, .idea-card, .quote-block { break-inside: avoid; }
+  details summary .chev { display:none; }
+  .cta { break-before: page; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">EMPIRE PRODUCTION — CHANNEL AUDIT REPORT</div>
+    <h1>Aurelian</h1>
+    <div class="header-meta"> &nbsp;&middot;&nbsp; https://www.youtube.com/watch?v=SAnw8_H2Zvc &nbsp;&middot;&nbsp; Generated 27 July 2026</div>
+    <div class="header-meta">avg 160 views (this sample)</div>
+    <div class="health">
+      <div class="health-score">6.6<span>/10</span></div>
+      <div class="diagnosis">The biggest thing holding your channel back is that your video packaging (your titles and thumbnails) and opening hook aren&#x27;t grabbing enough attention. Your thumbnails are cluttered and your hooks don&#x27;t quickly tell viewers why they should trust you, so people scroll past before they hear your valuable advice.</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Channel Overview</h2>
+    <div class="panel">
+      <h3 style="font-size:22px;margin-bottom:14px">Funnel Distribution (1 videos analysed)</h3>
+      
+        <div class="funnel-row">
+          <div class="funnel-label">TOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:100%;background:#c8202c"></div></div>
+          <div class="funnel-count">1 video (100%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">MOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:0%;background:#555555"></div></div>
+          <div class="funnel-count">0 videos (0%)</div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">BOF</div>
+          <div class="funnel-track"><div class="funnel-bar" style="width:0%;background:#2a2a2a"></div></div>
+          <div class="funnel-count">0 videos (0%)</div>
+        </div>
+      <p class="muted" style="margin-top:14px">We only have one video to look at, which is a good top-of-funnel (TOF) video (meaning it&#x27;s for people who haven&#x27;t heard of you yet). Without seeing more of your content, we can&#x27;t tell if your channel has the right mix of TOF, MOF (for building authority), and BOF (for converting clients) videos. If you don&#x27;t have enough videos for people who already know you, you&#x27;re missing out on converting warm leads into paying clients. (SOP_Ideation.md STEP 4)</p>
+    </div>
+    <div class="avg-grid">
+        <div class="avg-cell">
+          <div class="num s-high">8.0</div>
+          <div class="lbl">Title</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">5.0</div>
+          <div class="lbl">Thumbnail</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-low">5.0</div>
+          <div class="lbl">Hook</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">7.0</div>
+          <div class="lbl">Body</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-high">8.0</div>
+          <div class="lbl">Outro</div>
+        </div>
+        <div class="avg-cell">
+          <div class="num s-mid">6.6</div>
+          <div class="lbl">Overall</div>
+        </div></div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Video-by-Video Audit</h2>
+    
+    <div class="card ">
+      <div class="card-head">
+        <a class="thumb-link" href="https://www.youtube.com/watch?v=SAnw8_H2Zvc" target="_blank" rel="noopener">
+          <img src="https://i.ytimg.com/vi/SAnw8_H2Zvc/maxresdefault.jpg" loading="lazy" alt=""
+               onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/SAnw8_H2Zvc/hqdefault.jpg'">
+          <span class="thumb-play"><i class="ti ti-player-play-filled"></i></span>
+        </a>
+        <div class="card-title-row">
+          <h3><i class="ti ti-video" style="color:#888888;font-size:20px;margin-right:8px;vertical-align:-2px"></i>Why Most Coaches Can&#x27;t Get Clients With YouTube</h3>
+          <span class="badge s-mid">6.6/10</span>
+        </div>
+        <div class="card-meta">
+          <span class="fbadge f-tof">TOF</span>
+          <span>160 views</span>
+          <span>Published 19 Jul 2026</span>
+        </div>
+        <p style="margin-top:10px" class="muted">This video targets coaches who are aware they have a problem (not getting clients with YouTube) but don&#x27;t know the specific solutions or mechanisms, making it suitable for top-of-funnel discovery (SOP_Ideation.md STEP 4).</p>
+      </div>
+      <details>
+              <summary><i class="ti ti-typography"></i> Title Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>5-Point Title Filter (SOP_Ideation.md — Step 3)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Under 50 characters</b> — The title is 42 characters, which is well within the 50-character limit for mobile readability (SOP_Ideation.md STEP 3.1).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Specific person, not everyone</b> — The title specifically addresses &#x27;Most Coaches,&#x27; making it clear who the target audience is (SOP_Ideation.md STEP 3.2).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Clear promise or insight</b> — The title clearly promises to explain &#x27;Why Most Coaches Can&#x27;t Get Clients With YouTube,&#x27; offering a specific insight into a problem (SOP_Ideation.md STEP 3.3).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Searchable / matches real demand</b> — The phrase &#x27;Coaches Can&#x27;t Get Clients With YouTube&#x27; is a problem-aware search query that likely has real demand (SOP_Ideation.md STEP 3.4).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Keyword in first 40 characters</b> — The core keywords &#x27;Coaches Can&#x27;t Get Clients With YouTube&#x27; are all within the first 40 characters, which helps YouTube&#x27;s indexing (SOP_Ideation.md STEP 3.5).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Template match:</b> Why 90% of (niche) Never (result) — and How to Fix It</div>
+      <div class="kv"><b>Pain/desire first:</b> Yes, it leads with the pain point of coaches not being able to get clients with YouTube, which directly addresses what the ICP wants to fix (SOP_Ideation.md STEP 6).</div>
+      <div class="kv"><b>Title Case:</b> Yes + Every major word is capitalized, following Title Case convention.</div>
+      <h4>Verdict</h4>
+      <p>This title is strong because it&#x27;s short, specific, and clearly states a common pain point for coaches. However, it misses the &#x27;how to fix it&#x27; element, which would make the promise even clearer and more compelling for a problem-aware audience (SOP_Ideation.md STEP 6).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX</div>
+        <div class="fix-text">Why Most Coaches Fail on YouTube (And How to Fix It)</div>
+        <div class="fix-notes">This rewrite uses the &#x27;Why 90% of (niche) Never (result) — and How to Fix It&#x27; template from SOP_Ideation.md Method 3. It sharpens the &#x27;Can&#x27;t Get Clients&#x27; to &#x27;Fail&#x27; for stronger emotional impact and adds the crucial &#x27;And How to Fix It&#x27; to clearly promise a solution, making it more clickable for someone looking to solve this problem.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-photo"></i> Thumbnail Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Design Non-Negotiables (SOP_Thumbnail.md — Step 2)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>High contrast — stands out in the feed</b> — The bright white and orange text on a dark background creates good contrast, making it stand out (SOP_Thumbnail.md STEP 2.1).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Readable at mobile size (~150px)</b> — While the main text &#x27;Get clients with YouTube&#x27; is readable, the &#x27;Calendly Someone booked a call&#x27; notifications and the &#x27;TOF MOF BOF&#x27; labels are too small to read clearly on a mobile screen (SOP_Thumbnail.md STEP 2.2).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Face with strong emotion (if a face is present)</b> — Your face is present but has a neutral expression. For problem-aware content, a more concerned or surprised expression would better match the video&#x27;s energy and grab attention (SOP_Thumbnail.md STEP 2.3).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>Text overlay 3-4 words max, large and bold</b> — The text overlay &#x27;Get clients with YouTube&#x27; is 5 words, exceeding the 3-4 word maximum. This makes it slightly harder to quickly process (SOP_Thumbnail.md STEP 2.4).</div></div><div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> FAIL</span><div><b>One clear focal point</b> — The thumbnail has multiple competing elements: your face, the large text, the Calendly notifications, and the funnel graphic. This makes it hard for the viewer&#x27;s eye to know where to go first (SOP_Thumbnail.md STEP 2.5).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PASS</span><div><b>Consistent with the channel&#x27;s other thumbnails</b> — As this is the only video in the batch, consistency cannot be fully judged, but the use of your face and a dark background could be a developing brand style.</div></div>
+      <h4>Packaging Checks</h4>
+      <div class="kv"><b>Text overlay:</b> Get clients with YouTube</div>
+      <div class="kv"><b>Works with the title:</b> The thumbnail text &#x27;Get clients with YouTube&#x27; largely repeats the core message of the title, rather than adding curiosity or a strong emotional hook (SOP_Thumbnail.md STEP 2.4).</div>
+      <div class="kv"><b>Concept vs video type:</b> This video is problem-aware content. The thumbnail attempts to use elements like a &#x27;Before/After split&#x27; (Calendly notifications implying &#x27;after&#x27;) and a &#x27;Reaction face&#x27; (your face), but neither is fully executed to match the problem-aware goal (SOP_Thumbnail.md STEP 3).</div>
+      <h4>Verdict</h4>
+      <p>This thumbnail has too many competing elements and its text is too long, making it cluttered and hard to read quickly on mobile. Your neutral expression doesn&#x27;t fully convey the problem-aware nature of the video, which means it&#x27;s missing an opportunity to grab attention and make viewers feel seen in their pain (SOP_Thumbnail.md STEP 2.5, 2.3). This costs you clicks, even with a good title.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — NEW THUMBNAIL CONCEPT</div>
+        <div class="fix-text">Face: Yes, concerned/frustrated expression. Text overlay: &#x27;NOT WORKING?&#x27; Colors: Bright red text on a dark background. Focal point: Your face and the bold text. Composition: Your face on the right, text on the left, with a subtle, blurred red &#x27;X&#x27; graphic behind the text.</div>
+        <div class="fix-notes">This concept fits problem-aware content by using a strong, relatable emotion (concerned/frustrated face) and a short, curiosity-generating text overlay (&#x27;NOT WORKING?&#x27;) that directly speaks to the viewer&#x27;s pain. The red &#x27;X&#x27; visually reinforces the idea of something being wrong, creating intellectual tension. This design prioritizes a single focal point and high contrast for mobile readability, per SOP_Thumbnail.md STEP 2 and 3.</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-fish-hook"></i> Hook Analysis <span class="badge s-low">5/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>The 3 Non-Negotiables (SOP_Scripting.md — Part 5)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHO</b> — The hook clearly identifies the target audience with &#x27;If you&#x27;re a coach and you started a YouTube channel or you&#x27;re thinking about it&#x27; (SOP_Scripting.md PART 5).</div></div>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> YES</span><div><b>WHAT</b> — The hook promises to reveal &#x27;this truth that nobody tells you about&#x27; and &#x27;three main reasons why coaches cannot get clients through YouTube&#x27; (SOP_Scripting.md PART 5).</div></div>
+      <div class="check-row"><span class="check-fail"><i class="ti ti-x"></i> NO</span><div><b>WHY</b> — The hook lacks specific credibility from the creator, such as their own results or client results with numbers and timeframes (SOP_Scripting.md PART 5).</div></div>
+      <h4>Structure</h4>
+      <div class="kv"><b>Hook type:</b> None — no recognisable hook structure used</div>
+      <div class="kv"><b>Connection to title:</b> The hook connects to the title by immediately addressing coaches who struggle to get clients with YouTube, validating the title&#x27;s promise (SOP_Scripting.md PART 5).</div>
+      <div class="kv"><b>Opening line:</b> If you&#x27;re a coach and you started a YouTube channel or you&#x27;re thinking about it and you want to make a successful channel that nurtures your audience and books calls on autopilot, then you have to know this truth that nobody tells you about. - This opening line is too long and tries to do too much at once, delaying the core hook (SOP_Scripting.md PART 5).</div>
+      <h4>Verdict</h4>
+      <p>Your hook starts strong by identifying the audience, but it&#x27;s too long and tries to combine multiple hook types (Identity Appeal, Contrarian Position, Completion Compulsion) without fully developing any. Crucially, it misses establishing your credibility (the &#x27;WHY&#x27;) early on, which makes viewers question why they should trust your advice (SOP_Scripting.md PART 5).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN HOOK (FIRST 60 SECONDS)</div>
+        <div class="fix-text">Hey, if you&#x27;re a coach trying to get clients from YouTube, but it feels like you&#x27;re just spinning your wheels, you&#x27;re not alone. Everyone&#x27;s telling you to post more, be consistent, but that&#x27;s not the real problem. I&#x27;ve helped dozens of coaches, just like you, go from zero inbound calls to a full calendar using YouTube. And the truth is, most coaches miss these three critical reasons why their channel isn&#x27;t working. The third one? That&#x27;s the one nobody talks about. Let&#x27;s get into it.</div>
+        <div class="fix-notes">This rewrite uses a combination of Identity Appeal and Completion Compulsion. It immediately addresses the target audience&#x27;s pain (Identity Appeal), then quickly establishes credibility by stating specific results (&#x27;helped dozens of coaches... from zero inbound calls to a full calendar&#x27;). It then uses a Completion Compulsion hook (&#x27;three critical reasons... the third one nobody talks about&#x27;) to build curiosity and keep them watching, while being much more concise and direct (SOP_Scripting.md PART 5).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-file-text"></i> Body Analysis <span class="badge s-mid">7/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Framework Checks (SOP_Scripting.md — Parts 2, 3, 4, 6)</h4>
+      <div class="kv"><b>One Sale Rule:</b> The video stays focused on one core problem (coaches not getting clients from YouTube) and offers one main solution (fixing the 3 reasons), maintaining a clear promise throughout (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Body type:</b> Hybrid (SOP_Scripting.md PART 6)</div>
+      <div class="kv"><b>Story structure:</b> Expert Deconstruction</div>
+      <div class="kv"><b>Transitions:</b> You use clear transitions between each of the three reasons, like &#x27;Reason number one is...&#x27; and &#x27;Reason number two is actually...&#x27; which helps viewers follow the logical flow (SOP_Scripting.md PART 6).</div>
+      <div class="kv"><b>Specificity:</b> You provide specific examples like the &#x27;30-second test&#x27; for titles and concrete stats on Instagram reach and cold email replies, which makes your advice actionable and credible (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Tone:</b> Your tone is human and direct, using contractions and addressing the viewer directly with &#x27;you.&#x27; You avoid AI-tone patterns like abstract nouns or corporate jargon (SOP_Scripting.md PART 3).</div>
+      <div class="kv"><b>Awareness level:</b> This video targets problem-aware viewers (Stage 2) who know they have a problem (not getting clients from YouTube) but don&#x27;t know the solutions. This is correctly matched for a TOF video (SOP_Scripting.md PART 4).</div>
+      <div class="kv"><b>Persuasion mechanics:</b> The body primarily pushes the &#x27;SAFE&#x27; emotion by offering a predictable system (&#x27;a system that could predict results&#x27;) and the &#x27;NEW&#x27; emotion by revealing &#x27;truth that nobody tells you about&#x27; and &#x27;reason that nobody talks about.&#x27; It could also push &#x27;EASY&#x27; more by emphasizing how your system simplifies complex tasks (SOP_Scripting.md PART 2).</div>
+      <h4>Line-Level Improvements</h4>
+      
+        <div class="quote-block">
+          <div class="q">&ldquo;So now content becomes a guessing game. Now they trying to follow trends, follow other people in the space. They copy ideas without knowing who to speak to.&rdquo;</div>
+          <div class="why">This section could be more specific by adding a micro-story or a specific example of a coach who failed by guessing, making it more relatable and impactful (SOP_Scripting.md PART 2.6).</div>
+          <div class="better">So now content becomes a guessing game. You&#x27;re just throwing spaghetti at the wall, trying to follow trends or copy other people. But without knowing who you&#x27;re actually talking to, it&#x27;s all just wasted effort.</div>
+        </div>
+        <div class="quote-block">
+          <div class="q">&ldquo;To keep it simple, imagine a funnel that has three layers. Top of the funnel, the middle of the funnel, and the bottom of the funnel. The top of the funnel is made for discovery and it consists of short clips and reels on Instagram and LinkedIn and long- form videos that addresses broad topics.&rdquo;</div>
+          <div class="why">While clear, this explanation could be more engaging by framing it as a &#x27;Transformation Path&#x27; or &#x27;Expert Deconstruction&#x27; that directly relates to the viewer&#x27;s journey, rather than just describing the funnel (SOP_Scripting.md PART 6.7).</div>
+          <div class="better">To keep it simple, think of it like this: your channel needs a clear path, a funnel with three layers. The top layer? That&#x27;s for discovery. It&#x27;s where someone who&#x27;s never heard of you finds you through broad, problem-aware videos.</div>
+        </div>
+      <h4>Verdict</h4>
+      <p>Your body content is solid, clearly breaking down the problems coaches face with YouTube. You use good specificity and maintain a human tone. To make it even stronger, you could integrate more emotional persuasion, especially the &#x27;EASY&#x27; emotion, and use micro-stories to make your points more vivid and memorable (SOP_Scripting.md PART 2).</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — STORY STRUCTURE</div>
+        <div class="fix-text">The Expert Deconstruction structure would serve this video best. You&#x27;re already breaking down a complex challenge (getting clients on YouTube) into core principles (the 3 reasons) and explaining a system (the funnel). Leaning into this structure more explicitly would make the viewer feel even more capable and clear about the solution (SOP_Scripting.md PART 6.7).</div>
+      </div></div>
+            </details><details>
+              <summary><i class="ti ti-target-arrow"></i> Outro Analysis <span class="badge s-high">8/10</span><span class="chev"><i class="ti ti-chevron-right"></i></span></summary>
+              <div class="acc-body">
+      <h4>Power Offer Outro — 5-Step Pattern (SOP_Scripting.md — Part 7)</h4>
+      <div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 1 — Reiterate the Promise</b> — You reiterate the promise by summarizing the &#x27;three reasons&#x27; and the &#x27;different kind of lead&#x27; they&#x27;ll get (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 2 — Validate and Plant the Seed</b> — You validate by saying &#x27;If you follow everything I&#x27;ve broken down here, there&#x27;s no doubt you&#x27;ll start seeing a different kind of lead&#x27; (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 3 — The Difficulty Pivot (&#x27;However...&#x27;)</b> — You use &#x27;However, building this system on your own takes months&#x27; to pivot to the difficulty of DIY implementation (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 4 — The Offer</b> — The CTA is specific: &#x27;book a call, the first link in the description&#x27; (SOP_Scripting.md PART 7).</div></div><div class="check-row"><span class="check-pass"><i class="ti ti-check"></i> PRESENT</span><div><b>Step 5 — Qualify and Disqualify</b> — You clearly disqualify &#x27;coaches who are just starting with no clients and no budget&#x27; and qualify those &#x27;already generating some revenue and... serious&#x27; (SOP_Scripting.md PART 7).</div></div>
+      <h4>Additional Checks</h4>
+      <div class="kv"><b>Length after CTA:</b> The outro ends immediately after the CTA and disqualifier, which is exactly what you want (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>Positioned as the easy path:</b> Yes, the offer is framed as the easy path by promising to &#x27;skip all of that&#x27; and have &#x27;a team that builds this system for you&#x27; (SOP_Scripting.md PART 7).</div>
+      <div class="kv"><b>CTA specificity:</b> The CTA is actionable and specific: &#x27;book a call, the first link in the description&#x27; (SOP_Scripting.md PART 7).</div>
+      <h4>Verdict</h4>
+      <p>Your outro is very strong, hitting all five steps of the Power Offer Outro (SOP_Scripting.md PART 7). You effectively reiterate the promise, pivot to the difficulty of DIY, position your service as the easy solution, and clearly qualify/disqualify. This structure is designed to convert warm viewers into booked calls.</p>
+      <div class="fix">
+        <div class="fix-label"><i class="ti ti-bulb"></i> RECOMMENDED FIX — REWRITTEN OUTRO</div>
+        <div class="fix-text">So, those are the three big things holding your coaching business back from consistent inbound clients from YouTube. If you apply everything I&#x27;ve shown you here, you&#x27;ll definitely start seeing leads who already trust you before they even book a call.
+
+But let&#x27;s be real: building this whole system yourself takes months. From the audience research to the scripts, the thumbnails, the SEO, and staying consistent – it&#x27;s a full-time job on top of running your coaching business. And by the time you figure it out, you&#x27;ve lost months of compounding growth you&#x27;ll never get back.
+
+If you want to skip all that struggle and have my team build and run this entire system for you – where all you do is record 1 to 2 hours a week – then click the first link in the description right now.
+
+This isn&#x27;t for coaches just starting out with no clients or budget. This is for you if you&#x27;re already making some revenue and you&#x27;re serious about making YouTube your main client acquisition channel. Click that link, and I&#x27;ll see you on the other side.</div>
+        <div class="fix-notes">This rewrite uses the Power Offer 5-step pattern from SOP_Scripting.md PART 7, adapting it to the inferred offer of a done-for-you YouTube system for coaches. Step 1 reiterates the promise of inbound clients. Step 2 validates the potential results. Step 3 pivots by emphasizing the time and effort of DIY. Step 4 presents the offer as the easy path (&#x27;have my team build and run this entire system&#x27;). Step 5 clearly qualifies and disqualifies, ending immediately after the call to action.</div>
+      </div></div>
+            </details>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Top 3 Recurring Gaps</h2>
+    
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 1 — Unclear Thumbnails</h3>
+          <div class="gap-freq">FOUND IN 1 OF 1 VIDEOS</div>
+          <p>Your thumbnails are too busy and hard to read on a phone, and your expression doesn&#x27;t grab attention. This means people don&#x27;t click your videos, even if the topic is perfect for them, so you lose potential clients right at the start. (SOP_Thumbnail.md STEP 2.5, 2.3)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Thumbnail.md STEP 2.5, 2.3</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 2 — Missing Credibility in Hooks</h3>
+          <div class="gap-freq">FOUND IN 1 OF 1 VIDEOS</div>
+          <p>Your video intros are too long and don&#x27;t quickly tell viewers why they should trust your advice. People will scroll away if they don&#x27;t immediately see your authority, meaning you lose them before they hear your solution. (SOP_Scripting.md PART 5)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Scripting.md PART 5</div>
+        </div>
+        <div class="gap-card">
+          <h3><i class="ti ti-alert-circle" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>GAP 3 — Incomplete Title Promises</h3>
+          <div class="gap-freq">FOUND IN 1 OF 1 VIDEOS</div>
+          <p>Your titles are good, but they don&#x27;t always fully promise the &#x27;how to fix it&#x27; part of the problem. This makes your videos slightly less compelling than they could be, so fewer people click to find the solution you offer. (SOP_Ideation.md STEP 6)</p>
+          <div class="gap-sop"><b>SOP rule violated:</b> SOP_Ideation.md STEP 6</div>
+        </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>5 Recommended Videos</h2>
+    
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 1</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>Why 90% of Coaches Never Hit $10K/Month (And How to Fix It)</h3>
+          <div class="kv"><b>Why now:</b> This directly addresses the incomplete promise in your existing video&#x27;s title and offers a clear solution to a major pain point, drawing in problem-aware coaches.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Alex Hormozi (high contrast, bold text). Face: Yes. Text overlay: 4 words (&#x27;$10K/MONTH FIX&#x27;). Dominant colour: Red/Black. Expression: Determined</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-mof">MOF</span><span class="muted">RECOMMENDED VIDEO 2</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>How I Helped a Coach Go From 0 to 3 Inbound Calls/Week in 60 Days</h3>
+          <div class="kv"><b>Why now:</b> This builds your authority and shows specific results, directly addressing the missing credibility in your hooks and giving viewers a reason to trust you.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Grant Cardone (client photo + big number). Face: Yes (client). Text overlay: 3 words (&#x27;0 TO 3 CALLS&#x27;). Dominant colour: Green/White. Expression: Happy/Confident</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 3</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>STOP Doing Cold DMs — Do This Instead for Clients</h3>
+          <div class="kv"><b>Why now:</b> This targets a common, frustrating method coaches use, offering a new, easier path to clients and challenging false beliefs.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Iman Gadzhi (red X over old method). Face: Yes. Text overlay: 3 words (&#x27;COLD DMs DEAD&#x27;). Dominant colour: Red/Grey. Expression: Disgusted/Warning</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 4</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>The Real Reason Your YouTube Strategy Isn&#x27;t Working</h3>
+          <div class="kv"><b>Why now:</b> This speaks directly to the frustration coaches feel when their efforts fail, promising a deeper insight into their perceived micro-problems.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Ryan Serhant (confused/frustrated face). Face: Yes. Text overlay: 4 words (&#x27;YOUTUBE NOT WORKING?&#x27;). Dominant colour: Blue/Yellow. Expression: Concerned/Confused</div>
+        </div>
+        <div class="idea-card">
+          <div class="card-meta" style="margin-bottom:6px"><span class="fbadge f-tof">TOF</span><span class="muted">RECOMMENDED VIDEO 5</span></div>
+          <h3><i class="ti ti-bulb" style="color:#c8202c;margin-right:8px;vertical-align:-2px"></i>How to Get Coaching Clients Without Posting Every Day</h3>
+          <div class="kv"><b>Why now:</b> Many coaches feel overwhelmed by content demands; this offers an &#x27;easy&#x27; path to clients, tapping into a strong desire point.</div>
+          <div class="kv"><b>Thumbnail concept:</b> Stolen from: Ali Abdaal (simple, clear text, relaxed pose). Face: Yes. Text overlay: 4 words (&#x27;NO DAILY POSTS&#x27;). Dominant colour: Light Blue/White. Expression: Relaxed/Confident</div>
+        </div>
+  </div>
+</section>
+
+<div class="cta">
+  <div class="wrap">
+    <h2>READY TO FIX ALL OF THIS?</h2>
+    <p class="book"><i class="ti ti-calendar-event" style="margin-right:8px;vertical-align:-3px"></i>Book a free 30-minute strategy call.</p>
+    <div class="site">EMPIREPRODUCTION.NET</div>
+    <p class="qualify">This is not for anyone just starting out with no budget.
+    If you're already generating revenue and serious about making YouTube your primary
+    client acquisition channel — the link is above.</p>
+  </div>
+</div>
+
+<footer>EMPIRE PRODUCTION &middot; CHANNEL AUDIT ENGINE &middot; 27 July 2026</footer>
+
+</body>
+</html>
