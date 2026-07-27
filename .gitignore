@@ -11,3 +11,7 @@ audit.py
 
 # Local dated reports - the deploy step publishes tokenized copies instead
 *_Audit_*.html
+
+# Transcript extracts and cache - internal material, never published
+*_Transcripts.md
+transcript_cache/
